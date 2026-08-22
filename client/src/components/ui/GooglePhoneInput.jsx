@@ -184,6 +184,54 @@ const COUNTRIES = [
   { code: '+263', iso: 'zw', flag: '🇿🇼', name: 'Zimbabwe', placeholder: '071 234 5678' }
 ];
 
+// Smart Phone Number Formatter that automatically skips / inserts spaces as you type
+function formatPhoneNumber(raw, countryCode) {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+
+  // Netherlands (+31) format: 06 12 34 56 78
+  if (countryCode === '+31') {
+    if (digits.startsWith('06')) {
+      const p1 = digits.slice(0, 2);
+      const p2 = digits.slice(2, 4);
+      const p3 = digits.slice(4, 6);
+      const p4 = digits.slice(6, 8);
+      const p5 = digits.slice(8, 10);
+      return [p1, p2, p3, p4, p5].filter(Boolean).join(' ');
+    } else if (digits.startsWith('6')) {
+      const p1 = digits.slice(0, 1);
+      const p2 = digits.slice(1, 3);
+      const p3 = digits.slice(3, 5);
+      const p4 = digits.slice(5, 7);
+      const p5 = digits.slice(7, 9);
+      return [p1, p2, p3, p4, p5].filter(Boolean).join(' ');
+    }
+  }
+
+  // Belgium (+32) format: 0470 12 34 56
+  if (countryCode === '+32') {
+    const p1 = digits.slice(0, 4);
+    const p2 = digits.slice(4, 6);
+    const p3 = digits.slice(6, 8);
+    const p4 = digits.slice(8, 10);
+    return [p1, p2, p3, p4].filter(Boolean).join(' ');
+  }
+
+  // US / Canada (+1) format: (123) 456-7890
+  if (countryCode === '+1') {
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  }
+
+  // Germany (+49), France (+33), UK (+44), etc. (auto-spaced in chunks of 2-3)
+  const chunks = [];
+  for (let i = 0; i < digits.length; i += (digits.length > 8 ? 3 : 2)) {
+    chunks.push(digits.slice(i, i + (digits.length > 8 ? 3 : 2)));
+  }
+  return chunks.join(' ');
+}
+
 const GooglePhoneInput = ({ value, onChange, onCountryChange, selectedCountryCode = '+31' }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -200,6 +248,11 @@ const GooglePhoneInput = ({ value, onChange, onCountryChange, selectedCountryCod
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleInputChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value, selectedCountryCode);
+    onChange(formatted);
+  };
 
   const filteredCountries = COUNTRIES.filter(c => 
     c.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -225,17 +278,17 @@ const GooglePhoneInput = ({ value, onChange, onCountryChange, selectedCountryCod
           <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180 text-blue-400' : ''}`} />
         </button>
 
-        {/* Number Input Field */}
+        {/* Number Input Field with live auto-spacing */}
         <div className="relative flex-1 flex items-center">
           <input
             type="tel"
             required
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleInputChange}
             placeholder={selectedCountry.placeholder}
             className="w-full bg-transparent px-4 py-3.5 text-sm text-white placeholder-slate-500 font-mono tracking-wider focus:outline-none"
           />
-          {value && value.length >= 6 && (
+          {value && value.replace(/\D/g, '').length >= 7 && (
             <div className="pr-4 flex items-center text-emerald-400 gap-1 text-[11px] font-bold select-none">
               <Check className="w-3.5 h-3.5" />
             </div>
