@@ -1,39 +1,58 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, Download, Sparkles, ArrowRight } from 'lucide-react';
 
 const PluginCard = ({ plugin }) => {
+  const isFree = parseFloat(plugin.price || 0) === 0 || plugin.price === '0.00';
+  const imgUrl = plugin.coverImageUrl || plugin.imageUrl || '/images/plugins/minecraft_economy_gui.jpg';
+
   return (
-    <Link to={`/plugins/${plugin.id}`} className="block group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-      <div className="aspect-[16/9] w-full bg-gray-200 relative overflow-hidden">
-        {plugin.imageUrl ? (
-          <img src={plugin.imageUrl} alt={plugin.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-            <span className="text-gray-400 font-medium">No Image</span>
-          </div>
-        )}
-        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-[#1A1A2E] shadow-sm">
-          {plugin.gameName}
+    <Link 
+      to={`/plugins/${plugin.id}`} 
+      className="block group bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 hover:border-blue-500/50 overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 flex flex-col justify-between cursor-pointer"
+    >
+      <div className="aspect-[16/9] w-full bg-slate-950 relative overflow-hidden">
+        <img 
+          src={imgUrl} 
+          alt={plugin.title} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+
+        <div className="absolute top-3 left-3">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 backdrop-blur-md text-[11px] font-extrabold text-blue-300 border border-white/10 shadow-lg">
+            {plugin.gameName || plugin.game || 'Plugin'}
+          </span>
+        </div>
+
+        <div className="absolute bottom-3 right-3">
+          <span className="px-3 py-1 rounded-xl bg-slate-900/90 backdrop-blur-md text-sm font-black text-emerald-400 border border-emerald-500/30 shadow-lg">
+            {isFree ? 'Free' : `$${plugin.price}`}
+          </span>
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-lg text-[#1A1A2E] line-clamp-1 group-hover:text-[#2196F3] transition-colors">{plugin.title}</h3>
-          <span className="font-bold text-[#FF9800] ml-2 shrink-0">
-            {plugin.price === 0 || plugin.price === '0.00' ? 'Free' : `$${plugin.price}`}
-          </span>
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+        <div>
+          <h3 className="font-extrabold text-white text-base line-clamp-1 group-hover:text-blue-400 transition-colors">
+            {plugin.title}
+          </h3>
+          <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+            {plugin.summary || 'High-performance plugin with instant installation and active developer updates.'}
+          </p>
         </div>
         
-        <p className="text-sm text-[#6B7280] mb-3">by <span className="font-medium text-[#1A1A2E] hover:underline">{plugin.authorName}</span></p>
-        
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-[#FF9800] text-[#FF9800]" />
-            <span className="text-sm font-medium text-[#1A1A2E]">{plugin.rating || 'New'}</span>
+        <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs text-slate-300">
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span className="font-bold text-white">{plugin.rating || '5.0'}</span>
+            <span className="text-slate-500">({plugin.downloads || 120} dls)</span>
           </div>
-          <span className="text-xs text-[#6B7280]">{plugin.downloads || 0} downloads</span>
+
+          <div className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:text-blue-300">
+            <span>Open</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       </div>
     </Link>

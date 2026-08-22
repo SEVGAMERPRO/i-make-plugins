@@ -1,27 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Download, ShieldCheck, Megaphone, ArrowUpRight, Sparkles } from 'lucide-react';
-import MinoShieldBadge from '../security/MinoShieldBadge';
+import { Star, Megaphone, ArrowRight } from 'lucide-react';
 
 const SponsoredPluginCard = ({ plugin }) => {
   const isFree = parseFloat(plugin.price || 0) === 0 || plugin.price === '0.00';
 
   return (
-    <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 shadow-xl hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-300 overflow-hidden flex flex-col group">
-      
+    <Link 
+      to={`/plugins/${plugin.id}`}
+      className="block relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 shadow-xl hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer"
+    >
       {/* Top Promoted Banner */}
       <div className="px-4 py-1.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-transparent border-b border-amber-500/30 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-amber-300 font-extrabold text-[11px] uppercase tracking-wider">
           <Megaphone className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
           <span>Sponsored Listing</span>
         </div>
-        <span className="text-[10px] text-slate-400 font-medium">Promoted by Creator</span>
+        <span className="text-[10px] text-slate-400 font-medium">Promoted</span>
       </div>
 
       {/* Media Image */}
       <div className="aspect-[16/9] w-full bg-slate-950 relative overflow-hidden">
         <img 
-          src={plugin.coverImageUrl || '/images/categories/minecraft.png'} 
+          src={plugin.coverImageUrl || '/images/plugins/minecraft_economy_gui.jpg'} 
           alt={plugin.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90"
         />
@@ -58,17 +59,14 @@ const SponsoredPluginCard = ({ plugin }) => {
             <span className="text-slate-400">({plugin.reviewsCount || 48})</span>
           </div>
 
-          <Link
-            to={`/plugins/${plugin.id}`}
-            className="inline-flex items-center gap-1 text-xs font-bold text-amber-300 hover:text-amber-200 group/btn"
-          >
-            <span>View Plugin</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-          </Link>
+          <div className="inline-flex items-center gap-1 text-xs font-bold text-amber-300 group-hover:text-amber-200">
+            <span className="group-hover:translate-x-0.5 transition-transform">Open</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       </div>
 
-    </div>
+    </Link>
   );
 };
 
