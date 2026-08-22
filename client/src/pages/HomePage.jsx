@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
-import PluginCard from '../components/ui/PluginCard';
-import { ChevronRight } from 'lucide-react';
 
 const GAMES = [
   { slug: 'minecraft', name: 'Minecraft', colorClass: 'from-green-500 to-emerald-700' },
@@ -16,13 +14,6 @@ const GAMES = [
   { slug: 'discord', name: 'Discord', colorClass: 'from-indigo-500 to-purple-700' },
 ];
 
-const MOCK_FEATURED = [
-  { id: '1', title: 'EssentialsX Pro', authorName: 'DevTeam', gameName: 'Minecraft', price: '9.99', rating: '4.9', downloads: 1250, imageUrl: '' },
-  { id: '2', title: 'Vehicle Spawner', authorName: 'FiveMods', gameName: 'FiveM', price: '14.99', rating: '4.7', downloads: 840, imageUrl: '' },
-  { id: '3', title: 'Admin Tools GUI', authorName: 'BloxDev', gameName: 'Roblox', price: '0.00', rating: '4.8', downloads: 5000, imageUrl: '' },
-  { id: '4', title: 'Economy Core', authorName: 'EconomyPlus', gameName: 'Minecraft', price: '4.99', rating: '4.5', downloads: 320, imageUrl: '' },
-  { id: '5', title: 'Custom NPCs', authorName: 'ModderX', gameName: 'Garry\'s Mod', price: '2.99', rating: '4.6', downloads: 610, imageUrl: '' },
-];
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -100,39 +91,6 @@ const HomePage = () => {
 
       {/* Spacer for overlapping cards */}
       <div className="h-32 bg-[#F5F7FA]"></div>
-
-      {/* Featured Plugins Section */}
-      <section className="py-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A2E] mb-2">Featured Plugins</h2>
-            <p className="text-gray-500">Hand-picked premium resources for your servers.</p>
-          </div>
-          <button 
-            onClick={() => navigate('/plugins')}
-            className="hidden md:flex items-center gap-1 text-[#2196F3] hover:text-[#1976D2] font-medium transition-colors"
-          >
-            View all <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar">
-          {MOCK_FEATURED.map((plugin) => (
-            <div key={plugin.id} className="min-w-[280px] md:min-w-[320px] snap-start">
-              <PluginCard plugin={plugin} />
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-4 text-center md:hidden">
-          <button 
-            onClick={() => navigate('/plugins')}
-            className="inline-flex items-center gap-1 text-[#2196F3] font-medium"
-          >
-            View all plugins <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
 
       {/* Call to action */}
       <section className="bg-white py-20 border-t border-gray-100">

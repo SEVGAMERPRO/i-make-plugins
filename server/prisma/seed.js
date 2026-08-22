@@ -42,113 +42,9 @@ async function main() {
     });
   }
 
+
   console.log('Games seeded.');
 
-  const minecraft = await prisma.game.findUnique({ where: { slug: 'minecraft' } });
-  const roblox = await prisma.game.findUnique({ where: { slug: 'roblox' } });
-  const fivem = await prisma.game.findUnique({ where: { slug: 'fivem' } });
-  const theisle = await prisma.game.findUnique({ where: { slug: 'the-isle-evrima' } });
-
-  // Seed sample plugins
-  const pluginsData = [
-    {
-      title: 'Advanced Economy',
-      summary: 'A complete economy system with banks, shops, and trading.',
-      description: '## Advanced Economy\n\nA full-featured economy plugin for Minecraft servers.\n\n### Features\n- Physical currency items\n- Player-to-player trading\n- Admin-configurable shops\n- Bank system with interest\n- Vault integration\n- PlaceholderAPI support\n\n### Commands\n- `/balance` - Check your balance\n- `/pay <player> <amount>` - Send money\n- `/shop` - Open the shop GUI\n\nHighly configurable with YAML configuration files.',
-      version: '1.2.0',
-      tags: ['economy', 'shops', 'trading', 'vault', 'minecraft'],
-      coverImageUrl: 'https://placehold.co/600x300/4CAF50/FFFFFF?text=Advanced+Economy',
-      price: 9.99,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: minecraft.id,
-      rating: 4.8,
-      ratingCount: 24,
-      downloads: 830
-    },
-    {
-      title: 'DuelSystem Pro',
-      summary: 'Competitive 1v1 dueling plugin with arenas, kits, and ELO ranking.',
-      description: '## DuelSystem Pro\n\nThe ultimate competitive dueling plugin for Minecraft.\n\n### Features\n- Multiple arena support\n- Custom kit system\n- ELO-based ranking\n- Spectator mode\n- Duel requests and queue system\n- Post-match statistics\n- Leaderboard with GUI\n\nPerfect for PvP servers and competitive communities.',
-      version: '3.0.1',
-      tags: ['pvp', 'duels', 'competitive', 'arenas', 'minecraft'],
-      coverImageUrl: 'https://placehold.co/600x300/F44336/FFFFFF?text=DuelSystem+Pro',
-      price: 14.99,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: minecraft.id,
-      rating: 4.6,
-      ratingCount: 15,
-      downloads: 520
-    },
-    {
-      title: 'Police RP Pack',
-      summary: 'Essential tools for police roleplay servers with MDT, vehicles, and more.',
-      description: '## Police RP Pack\n\nEverything you need for a professional police roleplay server.\n\n### Includes\n- Custom police vehicles\n- Mobile Data Terminal (MDT)\n- Speed radar system\n- Handcuff and arrest system\n- Evidence collection\n- Dispatch system\n- Court system integration\n\nFully configurable and optimized for FiveM.',
-      version: '2.1.4',
-      tags: ['police', 'roleplay', 'vehicles', 'fivem'],
-      coverImageUrl: 'https://placehold.co/600x300/FF9800/FFFFFF?text=Police+RP+Pack',
-      price: 24.99,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: fivem.id,
-      rating: 4.5,
-      ratingCount: 18,
-      downloads: 310
-    },
-    {
-      title: 'Admin Toolkit',
-      summary: 'Comprehensive admin tools for Roblox experiences.',
-      description: '## Admin Toolkit\n\nPowerful administration tools for your Roblox game.\n\n### Features\n- Command system with permissions\n- Player management (kick, ban, mute)\n- Anti-cheat detection\n- Server analytics dashboard\n- Moderation logs\n- Custom command creation\n- Role-based permissions\n\nEasy to integrate and customize.',
-      version: '1.5.0',
-      tags: ['admin', 'moderation', 'tools', 'roblox'],
-      coverImageUrl: 'https://placehold.co/600x300/F44336/FFFFFF?text=Admin+Toolkit',
-      price: 0,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: roblox.id,
-      rating: 4.9,
-      ratingCount: 42,
-      downloads: 1250
-    },
-    {
-      title: 'Dino Tracker',
-      summary: 'Track and manage dinosaur spawns, nests, and migrations.',
-      description: '## Dino Tracker\n\nA mod for The Isle: Evrima servers to manage dinosaur populations.\n\n### Features\n- Real-time dinosaur tracking map\n- Nest location monitoring\n- Population statistics\n- Migration pattern analysis\n- Admin spawn controls\n- Growth stage tracking\n\nDesigned for server admins who want detailed control over their ecosystem.',
-      version: '1.0.0',
-      tags: ['dinosaurs', 'tracking', 'admin', 'the-isle'],
-      coverImageUrl: 'https://placehold.co/600x300/2E7D32/FFFFFF?text=Dino+Tracker',
-      price: 7.99,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: theisle.id,
-      rating: 4.3,
-      ratingCount: 6,
-      downloads: 85
-    },
-    {
-      title: 'SMP Essentials',
-      summary: 'All-in-one essentials plugin for survival multiplayer servers.',
-      description: '## SMP Essentials\n\nThe only essentials plugin you need for your SMP server.\n\n### Features\n- Home and warp system\n- TPA (teleport requests)\n- Chat formatting and channels\n- Custom join/leave messages\n- AFK detection\n- Spawn management\n- Kit system\n- Economy basics\n\nLightweight and performance-optimized.',
-      version: '4.2.0',
-      tags: ['essentials', 'smp', 'teleport', 'chat', 'minecraft'],
-      coverImageUrl: 'https://placehold.co/600x300/2196F3/FFFFFF?text=SMP+Essentials',
-      price: 0,
-      status: 'APPROVED',
-      authorId: admin.id,
-      gameId: minecraft.id,
-      rating: 4.7,
-      ratingCount: 56,
-      downloads: 2100
-    }
-  ];
-
-  for (const pluginData of pluginsData) {
-    await prisma.plugin.create({
-      data: pluginData
-    });
-  }
-  
   // Seed subscription tiers
   const subscriptionsData = [
     {
@@ -184,7 +80,6 @@ async function main() {
   }
 
   console.log('Subscriptions seeded.');
-  console.log('Sample plugins seeded.');
   console.log('MinoForge database seeding completed successfully!');
 }
 
