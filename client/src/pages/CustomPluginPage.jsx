@@ -24,35 +24,36 @@ const CustomPluginPage = () => {
     setNotification(null);
 
     try {
-      // 24/7 Cloud Email Gateway (Sends to minoforge.requests@gmail.com + automated confirmation to client with zero personal info exposed!)
-      await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: `🚀 New Custom Plugin Order from colasmp.net [${game}]`,
-          email: email,
-          client_email: email,
-          target_platform: game,
-          budget_range: budget,
-          plugin_specifications: requestDetails,
-          submission_time: new Date().toLocaleString(),
-          _template: 'table',
-          _captcha: 'false',
-          _replyto: email,
-          _autoresponse: `Thank you for contacting MinoForge Development!
+      // 24/7 Cloud Email Gateway
+      // 1. Sends full request ALWAYS to minoforge.requests@gmail.com
+      // 2. Sends automated confirmation receipt to the user's email filled in the form
+      // 3. Completely hides all personal Google accounts and profile pictures
+      const formData = new FormData();
+      formData.append('_subject', `🚀 New Custom Plugin Order from colasmp.net [${game}]`);
+      formData.append('email', email); // Requester email for automatic confirmation
+      formData.append('Client Email', email);
+      formData.append('Platform / Game', game);
+      formData.append('Estimated Budget', budget);
+      formData.append('Specifications & Details', requestDetails);
+      formData.append('Order Timestamp', new Date().toLocaleString());
+      formData.append('_template', 'table');
+      formData.append('_captcha', 'false');
+      formData.append('_replyto', email);
+      formData.append('_autoresponse', `Thank you for contacting MinoForge Development!
 
-We have successfully received your custom plugin request for ${game}.
-Our engineering team is currently reviewing your project scope and specifications.
-
-A lead developer will contact you at this email address with an estimate and timeline within 24 hours.
+We have received your custom plugin order for ${game}.
+Our engineering team is reviewing your project requirements and will contact you directly at ${email} within 24 hours.
 
 Best regards,
 MinoForge Engineering Team
-Marketplace: colasmp.net`
-        })
+Official Marketplace: colasmp.net`);
+
+      await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: formData
       });
 
       // Also trigger local backend if running
@@ -67,7 +68,7 @@ Marketplace: colasmp.net`
 
       setNotification({
         type: 'success',
-        message: `Your custom plugin request has been sent to minoforge.requests@gmail.com! Our dev team will email you at ${email} within 24 hours.`
+        message: `Your custom plugin request has been sent to minoforge.requests@gmail.com! A confirmation receipt has been sent to ${email}.`
       });
 
       setRequestDetails('');
