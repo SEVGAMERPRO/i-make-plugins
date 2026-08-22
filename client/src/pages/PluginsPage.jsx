@@ -26,7 +26,7 @@ const SPONSORED_PLUGINS = [
     rating: '4.9',
     reviewsCount: 142,
     downloads: 4820,
-    coverImageUrl: '/images/categories/minecraft.png',
+    coverImageUrl: '/images/plugins/economy_showcase.svg',
     summary: 'Multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.'
   },
   {
@@ -37,7 +37,7 @@ const SPONSORED_PLUGINS = [
     rating: '5.0',
     reviewsCount: 310,
     downloads: 8940,
-    coverImageUrl: '/images/categories/minecraft.png',
+    coverImageUrl: '/images/plugins/anarchy_utility_showcase.svg',
     summary: 'Optimized 2b2t anarchy utility addon with auto-totem, GrimAC bypasses, Baritone highway digger, and stash locator.'
   },
   {
@@ -48,7 +48,7 @@ const SPONSORED_PLUGINS = [
     rating: '4.8',
     reviewsCount: 88,
     downloads: 2150,
-    coverImageUrl: '/images/categories/fivem.png',
+    coverImageUrl: '/images/plugins/fivem_fuel_showcase.svg',
     summary: 'Realistic gas stations, EV chargers, jerry cans, and smooth 60fps UI for QBCore & ESX.'
   }
 ];

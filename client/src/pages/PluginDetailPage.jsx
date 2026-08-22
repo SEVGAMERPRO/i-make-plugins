@@ -18,7 +18,11 @@ const SAMPLE_PLUGINS_DATABASE = {
     version: 'v2.4.0',
     lastUpdated: '2 days ago',
     category: 'Economy & Vault',
-    coverImageUrl: '/images/categories/minecraft.png',
+    coverImageUrl: '/images/plugins/economy_showcase.svg',
+    screenshots: [
+      '/images/plugins/economy_showcase.svg',
+      '/images/plugins/anarchy_utility_showcase.svg'
+    ],
     downloadUrl: '/downloads/UltimateEconomy-v2.4.0.zip',
     summary: 'High-performance multi-currency vault system with GUI ATMs, pin codes, and transaction logs.',
     overview: `
@@ -85,7 +89,10 @@ banking:
     version: 'v1.1.2',
     lastUpdated: '1 week ago',
     category: 'Vehicles & Mechanics',
-    coverImageUrl: '/images/categories/fivem.png',
+    coverImageUrl: '/images/plugins/fivem_fuel_showcase.svg',
+    screenshots: [
+      '/images/plugins/fivem_fuel_showcase.svg'
+    ],
     downloadUrl: '/downloads/advanced_fuel-v1.1.2.zip',
     summary: 'Realistic gas stations, EV charging stations, Jerry cans, and smooth 60fps UI for QBCore and ESX.',
     overview: `
@@ -147,7 +154,10 @@ Config.RefuelSpeed = 1.5
     version: 'v1.0.0',
     lastUpdated: '3 weeks ago',
     category: 'Community & Moderation',
-    coverImageUrl: '/images/categories/discord.png',
+    coverImageUrl: '/images/plugins/discord_bot_showcase.svg',
+    screenshots: [
+      '/images/plugins/discord_bot_showcase.svg'
+    ],
     downloadUrl: '/downloads/DiscordTicketBot-v1.0.0.zip',
     summary: 'Automated ticket buttons, transcript HTML archiving, and staff rating system for Discord servers.',
     overview: `
@@ -205,8 +215,10 @@ Config.RefuelSpeed = 1.5
     version: 'v3.2.0-Fabric',
     lastUpdated: 'Yesterday',
     category: '2b2t Hacked Clients & Addons',
-    coverImageUrl: '/images/categories/minecraft.png',
-    downloadUrl: '/downloads/2b2t_Anarchy_Utility_v3.2.0.zip',
+    coverImageUrl: '/images/plugins/anarchy_utility_showcase.svg',
+    screenshots: [
+      '/images/plugins/anarchy_utility_showcase.svg'
+    ],
     summary: 'High-speed Baritone Nether highway builder, Auto-Totem, GrimAC bypasses, PacketFly, and terrain stash finder for 2b2t.org.',
     overview: `
       <h3>2b2t Anarchy Utility Suite (Fabric 1.20 - 1.21)</h3>
@@ -373,6 +385,7 @@ const PluginDetailPage = () => {
               <div className="flex flex-wrap gap-2 pb-6 border-b border-white/10">
                 {[
                   { id: 'overview', label: 'Overview' },
+                  { id: 'screenshots', label: '📸 In-Game Screenshots' },
                   { id: 'install', label: 'Installation' },
                   { id: 'commands', label: 'Commands & Perms' },
                   { id: 'config', label: 'Sample Config' },
@@ -394,6 +407,28 @@ const PluginDetailPage = () => {
                     className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: plugin.overview || plugin.summary }}
                   />
+                )}
+
+                {activeTab === 'screenshots' && (
+                  <div className="space-y-4">
+                    <p className="text-xs text-slate-400">
+                      Real in-game GUI screenshots and feature showcases uploaded by the author:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(plugin.screenshots || [plugin.coverImageUrl]).map((img, idx) => (
+                        <div key={idx} className="group relative rounded-2xl overflow-hidden border border-white/10 bg-slate-950 shadow-xl">
+                          <img 
+                            src={img} 
+                            alt={`${plugin.title} preview ${idx + 1}`} 
+                            className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                            <span className="text-[11px] font-bold text-white">Feature Showcase #{idx + 1}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {activeTab === 'install' && (

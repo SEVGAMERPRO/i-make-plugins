@@ -25,8 +25,37 @@ const UploadPluginPage = () => {
   const [summary, setSummary] = useState('');
   const [version, setVersion] = useState('v1.0.0');
   const [tags, setTags] = useState('');
+  // Cover & Screenshots State
   const [coverUrl, setCoverUrl] = useState('');
+  const [screenshots, setScreenshots] = useState([]);
   const [fileUrl, setFileUrl] = useState('');
+
+  // Handle local screenshot image file uploads with Base64 preview
+  const handleScreenshotUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setScreenshots(prev => [...prev, event.target.result].slice(0, 5));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleCoverUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCoverUrl(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeScreenshot = (index) => {
+    setScreenshots(prev => prev.filter((_, idx) => idx !== index));
+  };
   
   // Multi-tab description
   const [overviewDoc, setOverviewDoc] = useState('');
@@ -190,7 +219,23 @@ const UploadPluginPage = () => {
         {/* Tab 2: Files & Media */}
         {currentTab === 'files' && (
           <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl space-y-6 animate-fade-in">
-            <h2 className="text-xl font-bold text-white mb-4">Step 2: Files & Media Assets</h2>
+            <div>
+              <h2 className="text-xl font-bold text-white">Step 2: Files & Plugin Screenshots</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Upload your compiled plugin file and real in-game screenshots showing your GUI menus, HUDs, and features.
+              </p>
+            </div>
+
+            {/* Plugin specific imagery guidance alert */}
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-300 space-y-1">
+                <p className="font-bold text-white">Showcase your plugin in action:</p>
+                <p className="text-slate-400">
+                  Instead of generic game category logos, upload real in-game screenshots and UI previews of your plugin so buyers can see exactly what they're getting.
+                </p>
+              </div>
+            </div>
             
             {/* Binary File Upload Area */}
             <div>
@@ -216,19 +261,99 @@ const UploadPluginPage = () => {
               </div>
             </div>
 
-            {/* Cover Image */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Cover Image URL / Banner (Optional)
+            {/* Custom Plugin Cover Banner */}
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                Custom Plugin Cover Banner
               </label>
-              <div className="flex gap-3">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <div className="border border-white/10 rounded-2xl p-4 bg-slate-950/50 space-y-3">
+                  <p className="text-xs text-slate-400">Upload a custom banner for your plugin:</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="cover-upload"
+                    className="hidden"
+                    onChange={handleCoverUpload}
+                  />
+                  <label
+                    htmlFor="cover-upload"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    <Image className="w-3.5 h-3.5" />
+                    <span>Upload Banner Image</span>
+                  </label>
+                  
+                  <div className="pt-1">
+                    <input
+                      type="text"
+                      placeholder="Or paste image URL (https://...)"
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={coverUrl}
+                      onChange={(e) => setCoverUrl(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div className="h-36 rounded-2xl border border-white/10 bg-slate-950 overflow-hidden relative flex items-center justify-center">
+                  {coverUrl ? (
+                    <img src={coverUrl} alt="Cover preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center text-slate-500 text-xs p-4">
+                      <Image className="w-8 h-8 mx-auto mb-1 opacity-50" />
+                      <span>Cover image preview will appear here</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* In-Game Screenshots / Showcase Gallery */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                  In-Game Plugin Screenshots ({screenshots.length}/5)
+                </label>
+                <span className="text-[11px] text-slate-500">GUI menus, in-game commands, HUDs</span>
+              </div>
+
+              <div className="border border-white/10 rounded-2xl p-4 bg-slate-950/50 space-y-4">
                 <input
-                  type="text"
-                  placeholder="https://example.com/cover.png"
-                  className="flex-1 bg-slate-800/80 border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={coverUrl}
-                  onChange={(e) => setCoverUrl(e.target.value)}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  id="screenshots-upload"
+                  className="hidden"
+                  onChange={handleScreenshotUpload}
                 />
+                <label
+                  htmlFor="screenshots-upload"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add In-Game Screenshots</span>
+                </label>
+
+                {screenshots.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
+                    {screenshots.map((src, idx) => (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-white/10 h-24 bg-slate-900">
+                        <img src={src} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeScreenshot(idx)}
+                          className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-500 text-white rounded-md text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">No screenshots added yet. Add up to 5 in-game feature screenshots.</p>
+                )}
               </div>
             </div>
 
