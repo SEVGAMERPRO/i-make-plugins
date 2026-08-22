@@ -91,8 +91,6 @@ const CustomPluginPage = () => {
     }
   };
 
-  const selectedCountry = COUNTRY_CODES.find(c => c.code === countryCode) || COUNTRY_CODES[0];
-
   return (
     <div className="bg-[#0b0f19] min-h-screen text-white py-14 px-4 sm:px-6 lg:px-8 relative">
       {/* Ambient background glow */}
