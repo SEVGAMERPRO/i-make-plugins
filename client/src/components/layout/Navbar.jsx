@@ -58,6 +58,13 @@ const Navbar = ({ onMenuClick }) => {
             <span>AI Config</span>
           </Link>
           <Link
+            to="/upgrade"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/upgrade') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-amber-400 hover:text-amber-300 hover:bg-white/5'}`}
+          >
+            <Crown className="w-3.5 h-3.5 text-amber-400" />
+            <span>Ultimate</span>
+          </Link>
+          <Link
             to="/dashboard"
             className={`px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/dashboard') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
           >
