@@ -41,16 +41,17 @@ router.post('/custom', async (req, res) => {
     });
   }
 
-  const cleanEmail = email.trim();
+  const cleanEmail = email.trim().toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'minoforge.requests@gmail.com').trim().toLowerCase();
   const cleanPhone = phone.trim();
   const timeStr = timestamp || new Date().toLocaleString();
 
-  // 1. Email to Admin / Team (minoforge.requests@gmail.com)
+  // 1. Order details email: SENT ONLY TO ADMIN (minoforge.requests@gmail.com)
   const adminMailOptions = {
     from: `"MinoForgeRequests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
-    to: process.env.ADMIN_EMAIL || 'minoforge.requests@gmail.com',
+    to: adminEmail, // STRICTLY ADMIN ONLY
     replyTo: cleanEmail,
-    subject: `🚀 New Custom Plugin Order: ${game} (${budget || 'Flexible'})`,
+    subject: `🚀 [NEW ORDER] Custom Plugin Request: ${game} (${budget || 'Flexible'})`,
     text: `New Custom Plugin Order from colasmp.net
 
 Client Email: ${cleanEmail}
@@ -89,12 +90,12 @@ ${requestDetails}
     `
   };
 
-  // 2. Automated Confirmation Email to Client / Requester (Clean Anti-Spam Design)
+  // 2. Receipt confirmation email: SENT ONLY TO REQUESTER (cleanEmail)
   const clientConfirmationOptions = {
     from: `"MinoForgeRequests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
-    to: cleanEmail,
-    replyTo: process.env.ADMIN_EMAIL || 'minoforge.requests@gmail.com',
-    subject: 'Confirmation: Your MinoForge Custom Plugin Request',
+    to: cleanEmail, // STRICTLY REQUESTER ONLY
+    replyTo: adminEmail,
+    subject: '✅ Order Confirmation: Your MinoForge Custom Plugin Request',
     text: `Hello,
 
 Thank you for contacting MinoForge Development! We have received your custom plugin order.
@@ -105,7 +106,7 @@ Your Order Summary:
 - Platform: ${game}
 - Estimated Budget: ${budget}
 - Contact Phone: ${cleanPhone}
-- Status: Under Review
+- Status: Received & Under Developer Review
 
 Specifications:
 ${requestDetails}
@@ -149,19 +150,25 @@ Official Marketplace: https://colasmp.net`,
   };
 
   try {
-    // Send Email 1 to Admin
+    // 1. Send Order Details strictly to Admin
     const adminRes = await transporter.sendMail(adminMailOptions);
-    console.log(`[MinoForgeRequests] Admin email sent to minoforge.requests@gmail.com: ${adminRes.messageId}`);
+    console.log(`[MinoForgeRequests] Admin order sent to ${adminEmail}: ${adminRes.messageId}`);
 
-    // Send Email 2 to Requester
-    const clientRes = await transporter.sendMail(clientConfirmationOptions);
-    console.log(`[MinoForgeRequests] Requester confirmation sent to ${cleanEmail}: ${clientRes.messageId}`);
+    // 2. Send Confirmation strictly to Requester (only if different from admin email, or to requester)
+    let clientMessageId = null;
+    if (cleanEmail !== adminEmail) {
+      const clientRes = await transporter.sendMail(clientConfirmationOptions);
+      clientMessageId = clientRes.messageId;
+      console.log(`[MinoForgeRequests] Confirmation receipt sent ONLY to requester ${cleanEmail}: ${clientMessageId}`);
+    } else {
+      console.log(`[MinoForgeRequests] Requester is admin (${cleanEmail}). Skipped duplicate confirmation.`);
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Custom plugin request and confirmation dispatched successfully.',
+      message: 'Custom plugin request dispatched. Requester received confirmation only.',
       adminMessageId: adminRes.messageId,
-      clientMessageId: clientRes.messageId
+      clientMessageId
     });
   } catch (error) {
     console.error('[MinoForgeRequests Error]:', error);
