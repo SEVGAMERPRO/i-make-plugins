@@ -15,8 +15,30 @@ const transporter = nodemailer.createTransport({
 router.post('/custom', async (req, res) => {
   const { email, phone, game, budget, requestDetails, timestamp } = req.body;
 
-  if (!email || !requestDetails) {
-    return res.status(400).json({ message: 'Email and request details are required.' });
+  // 1. Validate Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email.trim())) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please provide a valid email address (e.g. user@gmail.com).' 
+    });
+  }
+
+  // 2. Validate Phone Number (must have valid international digits)
+  const phoneDigits = (phone || '').replace(/\D/g, '');
+  if (!phone || phoneDigits.length < 7) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please provide a valid phone number with country code (minimum 7 digits).' 
+    });
+  }
+
+  // 3. Validate Request Details
+  if (!requestDetails || requestDetails.trim().length < 5) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please provide detailed specifications for your plugin request.' 
+    });
   }
 
   // 1. Email to Admin / Team (minoforge.requests@gmail.com)

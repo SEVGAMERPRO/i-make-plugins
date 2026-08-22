@@ -40,10 +40,32 @@ const CustomPluginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !phoneNumber.trim() || !requestDetails.trim()) {
+
+    // 1. Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim() || !emailRegex.test(email.trim())) {
       setNotification({
         type: 'error',
-        message: 'Please fill in all required fields (Email, Phone Number, and Specifications).'
+        message: 'Please provide a valid email address (e.g., yourname@domain.com).'
+      });
+      return;
+    }
+
+    // 2. Phone number validation (at least 7 digits)
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
+    if (!phoneNumber.trim() || digitsOnly.length < 7) {
+      setNotification({
+        type: 'error',
+        message: 'Please enter a valid phone number (minimum 7 digits).'
+      });
+      return;
+    }
+
+    // 3. Specifications validation
+    if (!requestDetails.trim() || requestDetails.trim().length < 5) {
+      setNotification({
+        type: 'error',
+        message: 'Please provide detailed specifications for your plugin request.'
       });
       return;
     }
