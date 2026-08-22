@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Clock, Download, FileCode, ArrowRight, Eye, User } from 'lucide-react';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 
+import { useNotifications } from '../context/NotificationContext';
+
 const PENDING_QUEUE = [
   {
     id: 'rev-101',
@@ -32,13 +34,23 @@ const PENDING_QUEUE = [
 ];
 
 const StaffReviewPage = () => {
+  const { addNotification } = useNotifications();
   const [queue, setQueue] = useState(PENDING_QUEUE);
   const [selectedPlugin, setSelectedPlugin] = useState(PENDING_QUEUE[0] || null);
   const [denialReason, setDenialReason] = useState('');
   const [showDenyModal, setShowDenyModal] = useState(false);
 
   const handleApprove = (id) => {
-    alert('Plugin approved! It is now live on the public MinoForge marketplace.');
+    const plugin = queue.find(p => p.id === id);
+    const pluginTitle = plugin ? plugin.title : 'Plugin';
+    
+    addNotification({
+      title: `Plugin Approved! 🎉`,
+      message: `Your plugin "${pluginTitle}" has been verified by staff and is now LIVE on the marketplace!`,
+      type: 'approved',
+      link: '/plugins'
+    });
+
     const remaining = queue.filter(p => p.id !== id);
     setQueue(remaining);
     setSelectedPlugin(remaining[0] || null);
@@ -46,7 +58,15 @@ const StaffReviewPage = () => {
 
   const handleDeny = () => {
     if (!denialReason.trim()) return;
-    alert(`Plugin denied. Feedback sent to author: "${denialReason}"`);
+    const pluginTitle = selectedPlugin ? selectedPlugin.title : 'Plugin';
+    
+    addNotification({
+      title: `Plugin Denied: Changes Required`,
+      message: `"${pluginTitle}" was reviewed. Staff reason: "${denialReason}"`,
+      type: 'denied',
+      link: '/dashboard'
+    });
+
     const remaining = queue.filter(p => p.id !== selectedPlugin.id);
     setQueue(remaining);
     setSelectedPlugin(remaining[0] || null);

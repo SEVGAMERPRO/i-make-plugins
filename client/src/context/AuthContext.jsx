@@ -58,13 +58,21 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const verifyLoginCode = async (email, code, username) => {
+    const res = await api.verifyCode(email, code, username);
+    const { token, user: userData } = res.data;
+    localStorage.setItem('token', token);
+    setUser(userData);
+    return userData;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, verifyLoginCode, logout }}>
       {children}
     </AuthContext.Provider>
   );

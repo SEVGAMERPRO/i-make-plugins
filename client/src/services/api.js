@@ -32,6 +32,8 @@ api.interceptors.response.use(
 export const login = (email, password) => api.post('/auth/login', { email, password });
 export const register = (username, email, password) => api.post('/auth/register', { username, email, password });
 export const googleLogin = (credential) => api.post('/auth/google', { credential });
+export const verifyCode = (email, code, username) => api.post('/auth/verify-code', { email, code, username });
+export const sendVerificationCode = (email) => api.post('/auth/send-verification-code', { email });
 export const getMe = () => api.get('/auth/me');
 
 export const getGames = () => api.get('/games');

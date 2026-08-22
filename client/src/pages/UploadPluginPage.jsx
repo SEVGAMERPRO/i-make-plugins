@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen } from 'lucide-react';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 
+import { useNotifications } from '../context/NotificationContext';
+
 const TABS = [
   { id: 'general', label: '1. General Info' },
   { id: 'files', label: '2. Files & Media' },
@@ -13,6 +15,7 @@ const TABS = [
 
 const UploadPluginPage = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [currentTab, setCurrentTab] = useState('general');
   const [loading, setLoading] = useState(false);
 
@@ -41,12 +44,26 @@ const UploadPluginPage = () => {
   const handleSubmit = (status) => {
     setLoading(true);
     setTimeout(() => {
-      alert(status === 'PENDING' 
-        ? 'Your plugin has been submitted to MinoForge staff for review! You can track its status in your dashboard.' 
-        : 'Plugin saved as Draft in your Creator Dashboard!');
+      const pluginTitle = title || 'Custom Game Plugin';
+      if (status === 'PENDING') {
+        addNotification({
+          title: `Upload Submitted: "${pluginTitle}"`,
+          message: `Your plugin was submitted to MinoForge staff for verification. We will notify you once approved!`,
+          type: 'pending',
+          link: '/dashboard'
+        });
+      } else {
+        addNotification({
+          title: `Draft Saved: "${pluginTitle}"`,
+          message: `Your plugin draft is saved in your Creator Hub.`,
+          type: 'info',
+          link: '/dashboard'
+        });
+      }
+
       setLoading(false);
       navigate('/dashboard');
-    }, 1000);
+    }, 800);
   };
 
   return (

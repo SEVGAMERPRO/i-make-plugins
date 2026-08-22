@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../ui/NotificationBell';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -74,7 +75,11 @@ const Navbar = ({ onMenuClick }) => {
       </div>
 
       {/* Right User Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        
+        {/* Notification Bell (Left of Upload Plugin) */}
+        <NotificationBell />
+
         <Link
           to="/upload"
           className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 hover:text-white rounded-xl text-xs font-bold border border-blue-500/30 transition-all shadow-sm"
