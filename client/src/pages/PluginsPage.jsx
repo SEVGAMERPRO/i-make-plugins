@@ -11,10 +11,10 @@ const GAMES = ['All Categories', 'Minecraft', 'Roblox', 'FiveM', 'Discord', 'Web
 
 const SPONSORED_PLUGINS = [
   {
-    id: 'sp-1',
+    id: 'p-mine-1',
     title: 'Ultimate Economy & Multi-Vault Pro',
     game: 'Minecraft',
-    price: '14.99',
+    price: '4.99',
     rating: '4.9',
     reviewsCount: 142,
     downloads: 4820,
@@ -22,10 +22,10 @@ const SPONSORED_PLUGINS = [
     summary: 'Multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.'
   },
   {
-    id: 'sp-2',
+    id: 'p-fivem-2',
     title: 'Advanced Fuel & Electric Charging System',
     game: 'FiveM',
-    price: '9.99',
+    price: '3.49',
     rating: '4.8',
     reviewsCount: 88,
     downloads: 2150,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2 } from 'lucide-react';
+import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { getPluginById } from '../services/api';
@@ -11,7 +11,7 @@ const SAMPLE_PLUGINS_DATABASE = {
     title: 'Ultimate Economy & Vault System',
     authorName: 'MinoDeveloper',
     gameName: 'Minecraft',
-    price: '14.99',
+    price: '4.99', // Lowered from 14.99!
     rating: '4.9',
     reviewsCount: 142,
     downloads: 4820,
@@ -19,6 +19,7 @@ const SAMPLE_PLUGINS_DATABASE = {
     lastUpdated: '2 days ago',
     category: 'Economy & Vault',
     coverImageUrl: '/images/categories/minecraft.png',
+    downloadUrl: '/downloads/UltimateEconomy-v2.4.0.zip',
     summary: 'High-performance multi-currency vault system with GUI ATMs, pin codes, and transaction logs.',
     overview: `
       <h3>Overview</h3>
@@ -34,10 +35,10 @@ const SAMPLE_PLUGINS_DATABASE = {
     `,
     installation: `
       <ol>
-        <li>Download the <code>.jar</code> file using the download button on this page.</li>
-        <li>Place the file into your server's <code>/plugins</code> directory.</li>
-        <li>Restart your server to generate the default configuration.</li>
-        <li>Configure your database in <code>plugins/Economy/config.yml</code>.</li>
+        <li>Download the <code>.zip</code> package using the download button on this page.</li>
+        <li>Extract and place <code>plugin.yml</code> and config files into your server's <code>/plugins/UltimateEconomy</code> directory.</li>
+        <li>Restart your server to load the database and commands.</li>
+        <li>Configure your database in <code>plugins/UltimateEconomy/config.yml</code>.</li>
       </ol>
     `,
     commands: `
@@ -63,13 +64,13 @@ currency:
   name-singular: "Coin"
   name-plural: "Coins"
   symbol: "$"
-  starting-balance: 500.00
+  starting-balance: 250.00
   allow-negative-balance: false
 
 banking:
   enabled: true
   max-accounts-per-player: 3
-  daily-interest-rate: 0.02 # 2% daily interest
+  daily-interest-rate: 0.015 # 1.5% daily interest
 `
   },
   'p-fivem-2': {
@@ -77,7 +78,7 @@ banking:
     title: 'Advanced Fuel & Electric Charging System',
     authorName: 'FiveMDev_99',
     gameName: 'FiveM',
-    price: '9.99',
+    price: '3.49', // Lowered from 9.99!
     rating: '4.8',
     reviewsCount: 88,
     downloads: 2150,
@@ -85,6 +86,7 @@ banking:
     lastUpdated: '1 week ago',
     category: 'Vehicles & Mechanics',
     coverImageUrl: '/images/categories/fivem.png',
+    downloadUrl: '/downloads/advanced_fuel-v1.1.2.zip',
     summary: 'Realistic gas stations, EV charging stations, Jerry cans, and smooth 60fps UI for QBCore and ESX.',
     overview: `
       <h3>Overview</h3>
@@ -101,7 +103,7 @@ banking:
     `,
     installation: `
       <ol>
-        <li>Extract <code>advanced_fuel</code> into your <code>resources/[standalone]</code> directory.</li>
+        <li>Download and extract <code>advanced_fuel</code> into your <code>resources/[standalone]</code> directory.</li>
         <li>Ensure you have <code>ox_lib</code> and <code>ox_target</code> or <code>qb-target</code> installed.</li>
         <li>Add <code>ensure advanced_fuel</code> in your <code>server.cfg</code>.</li>
         <li>Restart your server or start the resource in console.</li>
@@ -138,7 +140,7 @@ Config.RefuelSpeed = 1.5
     title: 'Discord Ticket & Transcripts Bot',
     authorName: 'BotCrafter',
     gameName: 'Discord',
-    price: '0.00',
+    price: '0.00', // Free!
     rating: '5.0',
     reviewsCount: 210,
     downloads: 3940,
@@ -146,6 +148,7 @@ Config.RefuelSpeed = 1.5
     lastUpdated: '3 weeks ago',
     category: 'Community & Moderation',
     coverImageUrl: '/images/categories/discord.png',
+    downloadUrl: '/downloads/DiscordTicketBot-v1.0.0.zip',
     summary: 'Automated ticket buttons, transcript HTML archiving, and staff rating system for Discord servers.',
     overview: `
       <h3>Overview</h3>
@@ -162,8 +165,8 @@ Config.RefuelSpeed = 1.5
     `,
     installation: `
       <ol>
-        <li>Extract the bot archive and run <code>npm install</code>.</li>
-        <li>Copy your Discord Bot Token into <code>config.json</code>.</li>
+        <li>Download and extract the bot archive, then run <code>npm install</code>.</li>
+        <li>Copy your Discord Bot Token into <code>config.json</code> or <code>.env</code>.</li>
         <li>Run <code>npm start</code> or use PM2 for continuous hosting: <code>pm2 start index.js --name ticket-bot</code>.</li>
         <li>Type <code>/ticket setup</code> in your Discord server to deploy the ticket panel.</li>
       </ol>
@@ -197,6 +200,7 @@ const PluginDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [plugin, setPlugin] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -205,7 +209,6 @@ const PluginDetailPage = () => {
         setPlugin(res.data);
       })
       .catch(() => {
-        // Match specific plugin ID from database or fallback to first
         const found = SAMPLE_PLUGINS_DATABASE[id] || SAMPLE_PLUGINS_DATABASE['p-mine-1'];
         setPlugin(found);
       })
@@ -213,6 +216,19 @@ const PluginDetailPage = () => {
         setLoading(false);
       });
   }, [id]);
+
+  const handleDownload = () => {
+    const url = plugin?.downloadUrl || '/downloads/UltimateEconomy-v2.4.0.zip';
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = url.split('/').pop();
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 3000);
+  };
 
   if (loading) return <LoadingSpinner />;
   if (!plugin) return <div className="text-center py-20 text-xl text-slate-400">Plugin not found</div>;
@@ -361,12 +377,18 @@ const PluginDetailPage = () => {
             {/* Purchase / Download Card */}
             <div className="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl sticky top-24 space-y-5">
               <button 
-                onClick={() => alert(`Starting download for ${plugin.title}...`)}
+                onClick={handleDownload}
                 className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-base"
               >
-                <Download className="w-5 h-5" />
-                <span>{isFree ? 'Download Free' : `Buy Now for $${plugin.price}`}</span>
+                {downloadSuccess ? <Check className="w-5 h-5 text-emerald-300" /> : <Download className="w-5 h-5" />}
+                <span>{downloadSuccess ? 'Downloaded!' : isFree ? 'Download Free Package (.zip)' : `Get Resource for $${plugin.price}`}</span>
               </button>
+
+              {downloadSuccess && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center font-bold animate-fade-in">
+                  Package saved to your Downloads folder!
+                </div>
+              )}
 
               {/* AI Config Banner */}
               <Link
@@ -395,6 +417,10 @@ const PluginDetailPage = () => {
                 <div className="flex justify-between">
                   <span className="text-slate-400">Category</span>
                   <strong className="text-blue-400">{plugin.gameName || plugin.game}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Package Format</span>
+                  <strong className="font-mono text-white">.ZIP Resource</strong>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Security</span>

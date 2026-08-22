@@ -215,7 +215,7 @@ const HomePage = () => {
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                 PROMOTED
               </span>
-              <span className="text-xs font-bold text-emerald-400">$14.99 USD</span>
+              <span className="text-xs font-bold text-emerald-400">$4.99 USD</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
               <img src="/images/categories/minecraft.png" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -234,7 +234,7 @@ const HomePage = () => {
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                 PROMOTED
               </span>
-              <span className="text-xs font-bold text-emerald-400">$9.99 USD</span>
+              <span className="text-xs font-bold text-emerald-400">$3.49 USD</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
               <img src="/images/categories/fivem.png" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
