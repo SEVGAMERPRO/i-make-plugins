@@ -6,7 +6,7 @@ import PluginCard from '../components/ui/PluginCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { getPlugins } from '../services/api';
 
-const GAMES = ['All Games', 'Minecraft', 'Roblox', 'FiveM', 'The Isle: Evrima', 'Garry\'s Mod', 'Rust', 'ARK', 'Discord'];
+const GAMES = ['All Categories', 'Minecraft', 'Roblox', 'FiveM', 'Discord', 'Websites'];
 
 const PluginsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

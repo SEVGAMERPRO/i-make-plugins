@@ -6,14 +6,11 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { PackageOpen, Upload, ArrowLeft } from 'lucide-react';
 
 const GAME_DATA = {
-  'minecraft': { name: 'Minecraft', image: '/images/games/minecraft.jpg', colorClass: 'from-emerald-600 to-green-800', description: 'Server plugins for Paper, Spigot, Purpur, and Velocity.' },
-  'roblox': { name: 'Roblox', image: '/images/games/roblox.jpg', colorClass: 'from-red-600 to-rose-800', description: 'Scripts, frameworks, and UI assets for Roblox Studio.' },
-  'fivem': { name: 'FiveM', image: '/images/games/fivem.jpg', colorClass: 'from-orange-600 to-amber-800', description: 'Custom scripts, vehicles, and MLOs for FiveM servers.' },
-  'the-isle-evrima': { name: 'The Isle: Evrima', image: '/images/games/the-isle.jpg', colorClass: 'from-teal-700 to-emerald-900', description: 'Server tools, bots, and configuration resources.' },
-  'gmod': { name: "Garry's Mod", image: '/images/games/gmod.jpg', colorClass: 'from-blue-600 to-indigo-800', description: 'Gamemodes, weapons, entities, and server addons.' },
-  'rust': { name: 'Rust', image: '/images/games/rust.jpg', colorClass: 'from-amber-700 to-orange-950', description: 'Oxide / uMod plugins and server management systems.' },
-  'ark': { name: 'ARK', image: '/images/games/ark.jpg', colorClass: 'from-green-700 to-emerald-950', description: 'ARK Server API plugins, cross-chat, and custom shop tools.' },
-  'discord': { name: 'Discord', image: '/images/games/discord.jpg', colorClass: 'from-indigo-600 to-purple-900', description: 'Verification bots, ticket systems, and community tools.' },
+  'minecraft': { name: 'Minecraft', image: '/images/categories/minecraft.png', colorClass: 'from-emerald-600 to-green-800', description: 'Server plugins for Paper, Spigot, Purpur, and Velocity.' },
+  'roblox': { name: 'Roblox', image: '/images/categories/roblox.png', colorClass: 'from-red-600 to-rose-800', description: 'Scripts, frameworks, and UI assets for Roblox Studio.' },
+  'fivem': { name: 'FiveM', image: '/images/categories/fivem.png', colorClass: 'from-orange-600 to-amber-800', description: 'Custom scripts, vehicles, and MLOs for FiveM servers.' },
+  'discord': { name: 'Discord', image: '/images/categories/discord.png', colorClass: 'from-indigo-600 to-purple-900', description: 'Verification bots, ticket systems, and community tools.' },
+  'websites': { name: 'Websites', image: '/images/categories/websites.png', colorClass: 'from-cyan-600 to-blue-800', description: 'Custom server websites, store templates, and web portals.' },
 };
 
 const GamePage = () => {
