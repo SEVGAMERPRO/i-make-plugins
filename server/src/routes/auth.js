@@ -123,6 +123,79 @@ router.post(
   }
 );
 
+// @route   POST /api/auth/google
+// @desc    Google OAuth login & registration
+router.post('/google', async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
+    }
+
+    // Verify token with Google's public tokeninfo endpoint
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!response.ok) {
+      return res.status(401).json({ message: 'Invalid or expired Google token' });
+    }
+    
+    const payload = await response.json();
+    const { email, name, picture } = payload;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Google account has no associated email' });
+    }
+
+    // Find or create user
+    let user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      // Generate clean unique username
+      let baseUsername = (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 18);
+      if (baseUsername.length < 3) baseUsername = `user_${Math.floor(Math.random() * 10000)}`;
+      
+      let username = baseUsername;
+      let counter = 1;
+      while (await prisma.user.findUnique({ where: { username } })) {
+        username = `${baseUsername.slice(0, 14)}_${counter++}`;
+      }
+
+      // Generate random password hash
+      const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(randomPassword, salt);
+
+      user = await prisma.user.create({
+        data: {
+          username,
+          email,
+          passwordHash,
+          avatarUrl: picture || null,
+        }
+      });
+    } else if (!user.avatarUrl && picture) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { avatarUrl: picture }
+      });
+    }
+
+    const token = generateToken(user);
+    const userResponse = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      avatarUrl: user.avatarUrl
+    };
+
+    res.json({ token, user: userResponse });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // @route   GET /api/auth/me
 // @desc    Get current user profile
 router.get('/me', auth, async (req, res, next) => {
