@@ -70,15 +70,16 @@ const LoginPage = () => {
 
         {/* Google Sign-In Option */}
         <div className="space-y-4">
-          <div className="flex justify-center w-full">
+          <div className="flex justify-center w-full overflow-hidden rounded-2xl bg-slate-950 p-1 border border-white/10 shadow-lg">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
               theme="filled_black"
-              shape="pill"
+              shape="rectangular"
               size="large"
-              width="100%"
-              text="signin_with"
+              width="360"
+              text="continue_with"
+              locale="en"
             />
           </div>
 
