@@ -5,7 +5,7 @@ import GameCard from '../components/ui/GameCard';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GAMES = [
-  { slug: 'minecraft', name: 'Minecraft', logo: '/images/logos/minecraft.png', accentColor: '#4CAF50' },
+  { slug: 'minecraft', name: 'Minecraft', logo: '/images/logos/minecraft.svg', accentColor: '#4CAF50' },
   { slug: 'roblox', name: 'Roblox', logo: '/images/logos/roblox.svg', accentColor: '#E53935' },
   { slug: 'fivem', name: 'FiveM', logo: '/images/logos/fivem.png', accentColor: '#FF9800' },
   { slug: 'the-isle-evrima', name: 'The Isle', logo: '/images/logos/the-isle.png', accentColor: '#2E7D32' },
