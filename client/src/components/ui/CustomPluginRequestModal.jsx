@@ -26,7 +26,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
     setNotification(null);
 
     try {
-      // 24/7 Cloud Email Gateway (Works even when this device is powered off!)
+      // 24/7 Cloud Email Gateway (Sends to minoforge.requests@gmail.com + automated confirmation to client with zero personal info exposed!)
       const cloudResponse = await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
         method: 'POST',
         headers: {
@@ -35,13 +35,25 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
         },
         body: JSON.stringify({
           _subject: `🚀 New Custom Plugin Order from colasmp.net [${game}]`,
+          email: email, // FormSubmit uses this as recipient for autoresponse
           client_email: email,
           target_platform: game,
           budget_range: budget,
           plugin_specifications: requestDetails,
           submission_time: new Date().toLocaleString(),
           _template: 'table',
-          _captcha: 'false'
+          _captcha: 'false',
+          _replyto: email,
+          _autoresponse: `Thank you for contacting MinoForge Development!
+
+We have successfully received your custom plugin request for ${game}.
+Our engineering team is currently reviewing your project scope and specifications.
+
+A lead developer will contact you at this email address with an estimate and timeline within 24 hours.
+
+Best regards,
+MinoForge Engineering Team
+Marketplace: colasmp.net`
         })
       });
 
