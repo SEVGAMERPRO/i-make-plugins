@@ -29,20 +29,20 @@ const CustomPluginPage = () => {
         game,
         budget,
         requestDetails,
-        recipient: 'minoforge.support@gmail.com',
+        recipient: 'minoforge.requests@gmail.com',
         timestamp: new Date().toISOString()
       }).catch(() => {});
 
       setNotification({
         type: 'success',
-        message: `Your custom plugin request has been sent to minoforge.support@gmail.com! Our dev team will email you at ${email} within 24 hours.`
+        message: `Your custom plugin request has been sent to minoforge.requests@gmail.com! Our dev team will email you at ${email} within 24 hours.`
       });
 
       setRequestDetails('');
     } catch (err) {
       setNotification({
         type: 'error',
-        message: 'Error sending request. Please check your connection or email us directly at minoforge.support@gmail.com'
+        message: 'Error sending request. Please check your connection or email us directly at minoforge.requests@gmail.com'
       });
     } finally {
       setLoading(false);

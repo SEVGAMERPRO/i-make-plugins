@@ -41,7 +41,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
       // Show success notification popup
       setNotification({
         type: 'success',
-        message: `Your custom plugin request has been sent to minoforge.support@gmail.com! Our dev team will email you at ${email} within 24 hours.`
+        message: `Your custom plugin request has been sent to minoforge.requests@gmail.com! Our dev team will email you at ${email} within 24 hours.`
       });
 
       // Clear form
@@ -49,7 +49,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
     } catch (err) {
       setNotification({
         type: 'error',
-        message: 'Error sending request. Please check your connection or email us directly at minoforge.support@gmail.com'
+        message: 'Error sending request. Please check your connection or email us directly at minoforge.requests@gmail.com'
       });
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
 
           <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span>Direct delivery to <strong>minoforge.support@gmail.com</strong> with 100% bug-free guarantee.</span>
+            <span>Direct delivery to <strong>minoforge.requests@gmail.com</strong> with 100% bug-free guarantee.</span>
           </div>
 
           <div className="pt-3 flex justify-end gap-3">
