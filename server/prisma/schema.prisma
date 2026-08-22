@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  CREATOR
+  STAFF
+  ADMIN
+}
+
+enum PluginStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum StaffDecision {
+  APPROVED
+  DENIED
+}
+
+enum SubStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id               String             @id @default(uuid())
+  username         String             @unique
+  email            String             @unique
+  passwordHash     String
+  avatarUrl        String?
+  bio              String?
+  role             Role               @default(USER)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  plugins          Plugin[]           @relation("UserPlugins")
+  purchases        Purchase[]
+  staffReviews     StaffReview[]
+  subscriptions    UserSubscription[]
+  sentMessages     ChatMessage[]      @relation("SentMessages")
+  receivedMessages ChatMessage[]      @relation("ReceivedMessages")
+}
+
+model Game {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  imageUrl     String?
+  bannerUrl    String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  plugins      Plugin[]
+}
+
+model Plugin {
+  id            String        @id @default(uuid())
+  title         String
+  summary       String
+  description   String
+  version       String
+  tags          String[]
+  coverImageUrl String?
+  fileUrl       String?
+  price         Decimal       @default(0.00) @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  status        PluginStatus  @default(DRAFT)
+  denialReason  String?
+  downloads     Int           @default(0)
+  rating        Float         @default(0)
+  ratingCount   Int           @default(0)
+  authorId      String
+  author        User          @relation("UserPlugins", fields: [authorId], references: [id], onDelete: Cascade)
+  gameId        String
+  game          Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  purchases     Purchase[]
+  staffReviews  StaffReview[]
+  chatMessages  ChatMessage[]
+}
+
+model Purchase {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pluginId       String
+  plugin         Plugin   @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+  amount         Decimal  @db.Decimal(10, 2)
+  paymentMethod  String?
+  transactionId  String?
+  createdAt      DateTime @default(now())
+}
+
+model StaffReview {
+  id              String        @id @default(uuid())
+  pluginId        String
+  plugin          Plugin        @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+  staffId         String
+  staff           User          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  decision        StaffDecision
+  feedback        String?
+  requiredChanges String?
+  createdAt       DateTime      @default(now())
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  pluginId   String?
+  plugin     Plugin?  @relation(fields: [pluginId], references: [id], onDelete: SetNull)
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Subscription {
+  id                String             @id @default(uuid())
+  name              String
+  price             Decimal            @db.Decimal(10, 2)
+  features          String[]
+  maxRequests       Int
+  createdAt         DateTime           @default(now())
+  userSubscriptions UserSubscription[]
+}
+
+model UserSubscription {
+  id                   String       @id @default(uuid())
+  userId               String
+  user                 User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId       String
+  subscription         Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  stripeSubscriptionId String?
+  status               SubStatus
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime     @default(now())
+}
