@@ -18,10 +18,10 @@ const SAMPLE_PLUGINS_DATABASE = {
     version: 'v2.4.0',
     lastUpdated: '2 days ago',
     category: 'Economy & Vault',
-    coverImageUrl: '/images/plugins/economy_showcase.svg',
+    coverImageUrl: '/images/plugins/minecraft_economy_gui.jpg',
     screenshots: [
-      '/images/plugins/economy_showcase.svg',
-      '/images/plugins/anarchy_utility_showcase.svg'
+      '/images/plugins/minecraft_economy_gui.jpg',
+      '/images/plugins/economy_showcase.svg'
     ],
     downloadUrl: '/downloads/UltimateEconomy-v2.4.0.zip',
     summary: 'High-performance multi-currency vault system with GUI ATMs, pin codes, and transaction logs.',
@@ -89,8 +89,9 @@ banking:
     version: 'v1.1.2',
     lastUpdated: '1 week ago',
     category: 'Vehicles & Mechanics',
-    coverImageUrl: '/images/plugins/fivem_fuel_showcase.svg',
+    coverImageUrl: '/images/plugins/gta_gas_station.jpg',
     screenshots: [
+      '/images/plugins/gta_gas_station.jpg',
       '/images/plugins/fivem_fuel_showcase.svg'
     ],
     downloadUrl: '/downloads/advanced_fuel-v1.1.2.zip',
@@ -154,8 +155,9 @@ Config.RefuelSpeed = 1.5
     version: 'v1.0.0',
     lastUpdated: '3 weeks ago',
     category: 'Community & Moderation',
-    coverImageUrl: '/images/plugins/discord_bot_showcase.svg',
+    coverImageUrl: '/images/plugins/discord_ticket_panel.jpg',
     screenshots: [
+      '/images/plugins/discord_ticket_panel.jpg',
       '/images/plugins/discord_bot_showcase.svg'
     ],
     downloadUrl: '/downloads/DiscordTicketBot-v1.0.0.zip',
@@ -215,8 +217,9 @@ Config.RefuelSpeed = 1.5
     version: 'v3.2.0-Fabric',
     lastUpdated: 'Yesterday',
     category: '2b2t Hacked Clients & Addons',
-    coverImageUrl: '/images/plugins/anarchy_utility_showcase.svg',
+    coverImageUrl: '/images/plugins/minecraft_anarchy_highway.jpg',
     screenshots: [
+      '/images/plugins/minecraft_anarchy_highway.jpg',
       '/images/plugins/anarchy_utility_showcase.svg'
     ],
     summary: 'High-speed Baritone Nether highway builder, Auto-Totem, GrimAC bypasses, PacketFly, and terrain stash finder for 2b2t.org.',
