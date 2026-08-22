@@ -52,60 +52,37 @@ const CustomPluginPage = () => {
     setNotification(null);
 
     try {
-      // 1. Dispatch via MinoForge Express Mailer (Sends from "MinoForgeRequests" to minoforge.requests@gmail.com and confirmation to customer)
-      let backendSuccess = false;
-      try {
-        const response = await axios.post('/api/requests/custom', {
-          email,
-          phone: fullPhoneNumber,
-          game,
-          budget,
-          requestDetails,
-          recipient: 'minoforge.requests@gmail.com',
-          timestamp: new Date().toLocaleString()
-        });
-        if (response.data && response.data.success) {
-          backendSuccess = true;
-        }
-      } catch (backendErr) {
-        // Fallback to cloud form if backend is offline
-      }
-
-      // 2. Cloud Fallback
-      if (!backendSuccess) {
-        const formData = new FormData();
-        formData.append('_subject', `🚀 New Custom Plugin Order from colasmp.net [${game}]`);
-        formData.append('email', email);
-        formData.append('Client Email', email);
-        formData.append('Phone Number', fullPhoneNumber);
-        formData.append('Platform / Game', game);
-        formData.append('Estimated Budget', budget);
-        formData.append('Specifications & Details', requestDetails);
-        formData.append('Order Timestamp', new Date().toLocaleString());
-        formData.append('_template', 'table');
-        formData.append('_captcha', 'false');
-        formData.append('_replyto', email);
-
-        await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json'
-          },
-          body: formData
-        }).catch(() => {});
-      }
-
-      setNotification({
-        type: 'success',
-        message: `Order submitted! The request was sent to minoforge.requests@gmail.com, and an official confirmation receipt from MinoForgeRequests has been sent to ${email}.`
+      // Dispatch directly via MinoForge Mailer API
+      // 1. Sends full order details to minoforge.requests@gmail.com
+      // 2. Sends official confirmation receipt to the requester's email (${email})
+      // 3. Sender Name is strictly "MinoForgeRequests"
+      const response = await axios.post('/api/requests/custom', {
+        email,
+        phone: fullPhoneNumber,
+        game,
+        budget,
+        requestDetails,
+        recipient: 'minoforge.requests@gmail.com',
+        timestamp: new Date().toLocaleString()
       });
 
-      setRequestDetails('');
-      setPhoneNumber('');
+      if (response.data && response.data.success) {
+        setNotification({
+          type: 'success',
+          message: `Order submitted! The request was sent to minoforge.requests@gmail.com, and an official confirmation receipt from MinoForgeRequests has been sent to ${email}.`
+        });
+
+        // Clear form
+        setRequestDetails('');
+        setPhoneNumber('');
+      } else {
+        throw new Error(response.data?.message || 'Failed to dispatch emails.');
+      }
     } catch (err) {
+      console.error('Submission error:', err);
       setNotification({
         type: 'error',
-        message: 'Error sending request. Please check your connection or email us directly at minoforge.requests@gmail.com'
+        message: 'Error sending request. Please check your connection or try again.'
       });
     } finally {
       setLoading(false);
