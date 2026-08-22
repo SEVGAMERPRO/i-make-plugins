@@ -185,6 +185,87 @@ const HomePage = () => {
       {/* Spacer for overlapping game cards */}
       <div className="h-32 md:h-36 bg-[#0b0f19]" />
 
+      {/* Sponsored & Promoted Plugins Spotlight Section */}
+      <section className="py-12 px-4 max-w-7xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-2.5 w-2.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </span>
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              <span>Featured & Sponsored Spotlight</span>
+            </h2>
+          </div>
+          <button
+            onClick={() => navigate('/ads')}
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1"
+          >
+            <span>Promote Your Plugin</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div 
+            onClick={() => navigate('/plugins/p-mine-1')}
+            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
+                PROMOTED
+              </span>
+              <span className="text-xs font-bold text-emerald-400">$14.99 USD</span>
+            </div>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
+              <img src="/images/categories/minecraft.png" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Ultimate Economy & Vault System</h3>
+              <p className="text-xs text-slate-400 mt-1 line-clamp-2">High performance multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate('/plugins/p-fivem-2')}
+            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
+                PROMOTED
+              </span>
+              <span className="text-xs font-bold text-emerald-400">$9.99 USD</span>
+            </div>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
+              <img src="/images/categories/fivem.png" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Advanced Fuel & Electric Charging</h3>
+              <p className="text-xs text-slate-400 mt-1 line-clamp-2">Realistic gas stations, EV chargers, jerry cans, and smooth 60fps UI for QBCore & ESX.</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate('/plugins/p-bot-3')}
+            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
+                PROMOTED
+              </span>
+              <span className="text-xs font-bold text-emerald-400">Free</span>
+            </div>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
+              <img src="/images/categories/discord.png" alt="Discord Bot" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Discord Ticket & Transcripts Bot</h3>
+              <p className="text-xs text-slate-400 mt-1 line-clamp-2">Automated ticket buttons, transcript html archiving, and staff rating system.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why MinoForge Features Section */}
       <section className="py-20 px-4 bg-slate-900/50 border-t border-b border-white/5">
         <div className="max-w-6xl mx-auto">

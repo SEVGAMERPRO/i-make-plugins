@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSign, Clock, HelpCircle } from 'lucide-react';
+import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSign, Clock, HelpCircle, Rocket, Megaphone, Terminal } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -10,13 +10,14 @@ const TIERS = [
     badge: 'Standard',
     priceMonthly: 0,
     priceYearly: 0,
-    description: 'Essential access for browsing, purchasing, and casual selling on MinoForge.',
+    description: 'Essential access for browsing, purchasing, and standard selling on MinoForge.',
     buttonText: 'Current Plan',
     buttonVariant: 'outline',
     highlighted: false,
     features: [
-      'Browse & download all free resources',
       'Standard marketplace fee: 10%',
+      '200MB maximum file upload size',
+      '5 maximum carousel images',
       'Standard staff review queue (24-48h)',
       '10 AI Config generations per day',
       'Standard MinoShield security scan',
@@ -24,61 +25,84 @@ const TIERS = [
     ]
   },
   {
-    id: 'pro',
-    name: 'Creator Pro',
-    badge: 'Growing Sellers',
-    priceMonthly: 9.99,
-    priceYearly: 89,
-    description: 'For active creators looking to boost sales, speed up reviews, and unlock advanced AI.',
-    buttonText: 'Upgrade to Pro',
-    buttonVariant: 'blue',
-    highlighted: false,
-    features: [
-      'Reduced marketplace fee: 5%',
-      'Priority staff review queue (< 12 hours)',
-      '50 AI Config generations per day',
-      'MinoShield Deep Bytecode Analysis',
-      'Pro Verified badge on profile & listings',
-      'Automated Discord customer role sync',
-      '5x Monthly resource bump credits',
-      'Priority ticket support',
-    ]
-  },
-  {
     id: 'ultimate',
     name: 'MinoForge Ultimate',
-    badge: 'BuiltByBit Style • Most Popular',
+    badge: 'Official BuiltByBit Style • Most Popular',
     priceMonthly: 19.99,
     priceYearly: 179,
-    description: 'The definitive tier for serious creators. Keep 100% of your earnings with top-tier perks.',
+    description: 'The definitive tier for serious creators. Keep 100% of your earnings, get $5/mo free ad credit, and full platform superpowers.',
     buttonText: 'Get Ultimate Access',
     buttonVariant: 'gradient',
     highlighted: true,
     features: [
-      '🔥 0% Marketplace Fee (Keep 100% of earnings)',
-      '⚡ Instant Staff Review Priority (< 2 hours)',
+      '🔥 0% Marketplace Sales Commission (Keep 100%)',
+      '📢 $5.00 Free Monthly Sponsored Ad Credits',
+      '⚡ Priority Instant Staff Approvals (< 2 hours)',
+      '🚀 Boosted Discovery Rankings & Search Visibility',
+      '📦 500MB Max File Upload Size (vs 200MB)',
+      '🖼️ 15 Carousel Images & 10 Addons per Resource',
       '🤖 Unlimited Gemini AI Config & Code Generator',
-      '🛡️ Unlimited MinoShield Deep Security Scans',
-      '👑 Glowing Gold "ULTIMATE" Creator Badge',
-      '🌟 Homepage Featured Carousel Spotlight',
-      '🎨 Custom Animated Profile & Storefront Banner',
-      '🔑 Automated Discord Role Sync & License Keys',
-      '📈 Advanced Real-Time Analytics & Payouts',
+      '🛡️ Priority MinoShield Deep Security Scans',
+      '👑 Glowing Gold "ULTIMATE" Badge & Profile Banner',
+      '🎨 Animated Profile Picture & Custom Theme Accent',
+      '🔑 Automated Discord Customer Role Sync & Keys',
       '💬 Dedicated 1-on-1 Staff Concierge Support',
     ]
   }
 ];
 
-const COMPARISON_ROWS = [
-  { feature: 'Marketplace Sales Commission', free: '10%', pro: '5%', ultimate: '0% (Keep 100%)' },
-  { feature: 'Staff Review Speed', free: '24-48 Hours', pro: '< 12 Hours', ultimate: 'Instant (< 2 Hours)' },
-  { feature: 'MinoForge AI Config Tool', free: '10 / day', pro: '50 / day', ultimate: 'Unlimited' },
-  { feature: 'MinoShield Deep Security Scans', free: 'Standard', pro: 'Enhanced', ultimate: 'Priority Deep Scan' },
-  { feature: 'Homepage Spotlight Carousel', free: false, pro: false, ultimate: true },
-  { feature: 'Automated Discord Role Sync', free: false, pro: true, ultimate: true },
-  { feature: 'Creator Profile Customization', free: 'Standard', pro: 'Banner & Badges', ultimate: 'Animated Storefront' },
-  { feature: 'Monthly Listing Bump Credits', free: '0', pro: '5 / month', ultimate: 'Unlimited' },
-  { feature: 'Priority Staff Concierge', free: false, pro: false, ultimate: true },
+const SECTIONS = [
+  {
+    title: 'Resources & Selling',
+    rows: [
+      { name: 'Marketplace Sales Commission', free: '10%', ultimate: '0% (Keep 100%)' },
+      { name: 'Free Ad Credit per Month', free: 'None', ultimate: '$5.00 / mo' },
+      { name: 'Maximum File Upload Size', free: '200MB', ultimate: '500MB' },
+      { name: 'Maximum Carousel Images', free: '5', ultimate: '15' },
+      { name: 'Maximum Addons per Resource', free: '5', ultimate: '10' },
+      { name: 'Boosted Discovery Rankings', free: false, ultimate: true },
+      { name: 'Create 2 Storefront Pages', free: false, ultimate: true },
+      { name: 'Resource Custom Vanity URLs', free: false, ultimate: true },
+      { name: 'Priority Resource Approvals', free: false, ultimate: true },
+      { name: 'Bypass Peer Review Wait Period', free: false, ultimate: true },
+      { name: 'Full Developer API Access', free: false, ultimate: true },
+    ]
+  },
+  {
+    title: 'MinoForge AI & Security Tools',
+    rows: [
+      { name: 'MinoForge AI Config Generator', free: '10 / day', ultimate: 'Unlimited' },
+      { name: 'MinoShield Deep Bytecode Security Scans', free: 'Standard', ultimate: 'Priority Deep Scan' },
+      { name: 'Automated Discord Role Sync & DRM', free: false, ultimate: true },
+      { name: 'AI Code Optimization Suggestions', free: false, ultimate: true },
+    ]
+  },
+  {
+    title: 'Profile & Customization',
+    rows: [
+      { name: 'Username Color', free: 'Default', ultimate: 'All custom colors' },
+      { name: 'Custom Profile Banner', free: 'None', ultimate: true },
+      { name: 'Ultimate Rocket Profile Icon', free: 'None', ultimate: true },
+      { name: 'Custom User Title & Badge', free: false, ultimate: true },
+      { name: 'Profile Cover Photo', free: false, ultimate: true },
+      { name: 'Animated Profile Picture (GIF)', free: false, ultimate: true },
+      { name: 'Change Username Frequency', free: 'Only once', ultimate: 'Every 14 days' },
+      { name: 'Access to 2-Character Usernames', free: false, ultimate: true },
+      { name: 'Profile Custom Vanity URL', free: false, ultimate: true },
+      { name: 'Change Site Accent Color', free: false, ultimate: true },
+    ]
+  },
+  {
+    title: 'Discord & Community Perks',
+    rows: [
+      { name: 'Discord Point Multiplier', free: '1.0x', ultimate: '1.5x' },
+      { name: 'Free Daily Points with /daily', free: false, ultimate: true },
+      { name: 'Spend Points on Rewards & Raffles', free: false, ultimate: true },
+      { name: 'Access to Exclusive Ultimate-Only Channels', free: false, ultimate: true },
+      { name: 'See Who Has Viewed Your Resource', free: false, ultimate: true },
+      { name: 'Daily Feedback & Reviews Limit', free: '2', ultimate: '5' },
+    ]
+  }
 ];
 
 const PricingPage = () => {
@@ -95,7 +119,7 @@ const PricingPage = () => {
   const processPayment = () => {
     setCheckoutSuccess(true);
     setTimeout(() => {
-      alert(`🎉 Welcome to ${selectedPlan.name}! Your account has been upgraded.`);
+      alert(`🎉 Welcome to MinoForge Ultimate! Your account now has 0% platform fees, $5 free ad credit, and full Ultimate perks.`);
       setSelectedPlan(null);
       setCheckoutSuccess(false);
     }, 1500);
@@ -103,25 +127,25 @@ const PricingPage = () => {
 
   return (
     <div className="bg-[#0b0f19] min-h-screen text-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-16">
+      <div className="max-w-6xl mx-auto space-y-16">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 to-blue-500/20 rounded-full text-xs font-bold text-amber-300 border border-amber-500/30 shadow-lg shadow-amber-500/10">
             <Crown className="w-4 h-4 text-amber-400" />
-            <span>MinoForge Ultimate Creator Membership</span>
+            <span>Official BuiltByBit Style Creator Membership</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight">
             Keep 100% of your earnings.
             <br />
             <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent">
-              Supercharge your creations.
+              Built for Top Creators.
             </span>
           </h1>
 
           <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            Upgrade to Ultimate to eliminate platform fees, skip staff review queues, and unlock unlimited AI & security superpowers.
+            Upgrade to Ultimate to eliminate all platform fees, get $5/mo free ad credit, skip review queues, and unlock full profile & AI perks.
           </p>
 
           {/* Billing Switch */}
@@ -145,7 +169,7 @@ const PricingPage = () => {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch max-w-4xl mx-auto">
           {TIERS.map(tier => {
             const price = annualBilling ? tier.priceYearly : tier.priceMonthly;
             const period = annualBilling ? '/year' : '/month';
@@ -155,25 +179,21 @@ const PricingPage = () => {
                 key={tier.id}
                 className={`relative flex flex-col justify-between rounded-3xl p-8 transition-all duration-300 ${
                   tier.highlighted
-                    ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border-2 border-amber-500/50 shadow-2xl shadow-amber-500/15 scale-105 z-10'
+                    ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border-2 border-amber-500/60 shadow-2xl shadow-amber-500/20 scale-105 z-10'
                     : 'bg-slate-900/70 border border-white/10 shadow-xl hover:border-white/20'
                 }`}
               >
-                {/* Popular Highlight Ribbon */}
+                {/* Popular Ribbon */}
                 {tier.highlighted && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black uppercase tracking-wider rounded-full shadow-lg">
-                    {tier.badge}
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black uppercase tracking-wider rounded-full shadow-lg flex items-center gap-1">
+                    <Rocket className="w-3.5 h-3.5" />
+                    <span>{tier.badge}</span>
                   </div>
                 )}
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-bold text-white">{tier.name}</h3>
-                    {!tier.highlighted && (
-                      <span className="text-[11px] font-semibold text-slate-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5">
-                        {tier.badge}
-                      </span>
-                    )}
+                    <h3 className="text-2xl font-bold text-white">{tier.name}</h3>
                   </div>
 
                   <p className="text-xs text-slate-400 mb-6 leading-relaxed">
@@ -190,14 +210,14 @@ const PricingPage = () => {
                     </span>
                   </div>
 
-                  {/* Feature Checklist */}
+                  {/* Feature List */}
                   <ul className="space-y-3.5 text-xs text-slate-300 mb-8">
                     {tier.features.map((feat, idx) => (
                       <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
                         <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3" />
                         </div>
-                        <span>{feat}</span>
+                        <span className={feat.includes('0%') || feat.includes('Ad Credit') ? 'font-bold text-amber-300' : ''}>{feat}</span>
                       </li>
                     ))}
                   </ul>
@@ -209,8 +229,6 @@ const PricingPage = () => {
                   className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                     tier.highlighted
                       ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/30'
-                      : tier.buttonVariant === 'blue'
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30'
                       : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10'
                   }`}
                 >
@@ -222,46 +240,53 @@ const PricingPage = () => {
           })}
         </div>
 
-        {/* Detailed Comparison Table */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6">
-          <div className="text-center max-w-xl mx-auto mb-8">
-            <h2 className="text-2xl md:text-3xl font-black text-white">Full Feature Comparison</h2>
-            <p className="text-xs text-slate-400 mt-1">See exactly what you unlock with each membership tier</p>
+        {/* Detailed BuiltByBit Comparison Tables */}
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-10">
+          <div className="text-center max-w-xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-black text-white">Compare Features</h2>
+            <p className="text-xs text-slate-400 mt-1">Exact side-by-side feature comparison between Free and Ultimate</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase tracking-wider text-slate-400 border-b border-white/10 bg-slate-950/40">
-                <tr>
-                  <th className="py-4 px-4 font-bold">Feature</th>
-                  <th className="py-4 px-4 font-bold text-center">Free</th>
-                  <th className="py-4 px-4 font-bold text-center">Creator Pro</th>
-                  <th className="py-4 px-4 font-bold text-center text-amber-400">Ultimate</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-medium">
-                {COMPARISON_ROWS.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-4 font-bold text-white">{row.feature}</td>
-                    <td className="py-4 px-4 text-center">
-                      {typeof row.free === 'boolean' ? (
-                        row.free ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <span className="text-slate-600">—</span>
-                      ) : row.free}
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      {typeof row.pro === 'boolean' ? (
-                        row.pro ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <span className="text-slate-600">—</span>
-                      ) : row.pro}
-                    </td>
-                    <td className="py-4 px-4 text-center font-bold text-amber-300">
-                      {typeof row.ultimate === 'boolean' ? (
-                        row.ultimate ? <Check className="w-4 h-4 text-amber-400 mx-auto" /> : <span className="text-slate-600">—</span>
-                      ) : row.ultimate}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-8">
+            {SECTIONS.map((section, sIdx) => (
+              <div key={sIdx} className="overflow-x-auto">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-blue-400 mb-3 flex items-center gap-2">
+                  <span>{section.title}</span>
+                </h3>
+                <table className="w-full text-left text-sm border-t border-white/10">
+                  <thead className="text-xs uppercase tracking-wider text-slate-400 bg-slate-950/60">
+                    <tr>
+                      <th className="py-3.5 px-4 font-bold w-1/2">Feature</th>
+                      <th className="py-3.5 px-4 font-bold text-center w-1/4">Free</th>
+                      <th className="py-3.5 px-4 font-bold text-center w-1/4 text-amber-400">Ultimate</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-medium">
+                    {section.rows.map((row, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-white/5 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-white">{row.name}</td>
+                        <td className="py-3.5 px-4 text-center">
+                          {typeof row.free === 'boolean' ? (
+                            row.free ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-red-400/80 mx-auto" />
+                          ) : (
+                            <span>{row.free}</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-bold text-amber-300">
+                          {typeof row.ultimate === 'boolean' ? (
+                            row.ultimate ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-red-400 mx-auto" />
+                          ) : (
+                            <span className="bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20">
+                              {row.ultimate}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -284,11 +309,15 @@ const PricingPage = () => {
 
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
                 <div className="flex justify-between font-bold text-white">
-                  <span>Plan:</span>
+                  <span>Membership:</span>
                   <span>{selectedPlan.name} ({annualBilling ? 'Annual' : 'Monthly'})</span>
                 </div>
+                <div className="flex justify-between text-slate-300">
+                  <span>Bonus Free Ad Credits:</span>
+                  <span className="font-bold text-emerald-400">+$5.00 Included</span>
+                </div>
                 <div className="flex justify-between font-bold text-amber-300 text-sm pt-2 border-t border-amber-500/20">
-                  <span>Total Due:</span>
+                  <span>Total Due Today:</span>
                   <span>${annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly} USD</span>
                 </div>
               </div>
@@ -312,7 +341,7 @@ const PricingPage = () => {
               </div>
 
               <p className="text-[11px] text-slate-500 text-center">
-                Secure 256-bit encrypted checkout. You can cancel your subscription at any time from your settings.
+                Instant activation. Cancel anytime from your account settings.
               </p>
             </div>
           </div>

@@ -16,6 +16,7 @@ import BountiesPage from './pages/BountiesPage';
 import AiConfigPage from './pages/AiConfigPage';
 import StaffReviewPage from './pages/StaffReviewPage';
 import PricingPage from './pages/PricingPage';
+import AdsManagerPage from './pages/AdsManagerPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/games/:slug" element={<GamePage />} />
         <Route path="/bounties" element={<BountiesPage />} />
         <Route path="/ai-config" element={<AiConfigPage />} />
+        <Route path="/ads" element={<AdsManagerPage />} />
         <Route path="/upgrade" element={<PricingPage />} />
         <Route path="/membership" element={<PricingPage />} />
         <Route path="/pricing" element={<PricingPage />} />

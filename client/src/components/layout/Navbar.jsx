@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown } from 'lucide-react';
+import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = ({ onMenuClick }) => {
@@ -134,11 +134,18 @@ const Navbar = ({ onMenuClick }) => {
                       <Plus className="w-4 h-4 text-emerald-400" /> Upload Plugin
                     </Link>
                     <Link 
+                      to="/ads" 
+                      className="flex items-center gap-2.5 px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <Megaphone className="w-4 h-4 text-amber-400" /> Promote & Ads ($5 Credit)
+                    </Link>
+                    <Link 
                       to="/bounties" 
                       className="flex items-center gap-2.5 px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <Briefcase className="w-4 h-4 text-amber-400" /> Custom Bounties
+                      <Briefcase className="w-4 h-4 text-cyan-400" /> Custom Bounties
                     </Link>
                     <Link 
                       to="/staff/reviews" 
