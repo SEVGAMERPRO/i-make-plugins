@@ -7,7 +7,15 @@ import SponsoredPluginCard from '../components/ui/SponsoredPluginCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { getPlugins } from '../services/api';
 
-const GAMES = ['All Categories', 'Minecraft', 'Roblox', 'FiveM', 'Discord', 'Websites'];
+const GAMES = [
+  'All Categories',
+  'Minecraft',
+  'Minecraft: 2b2t & Anarchy Clients',
+  'Roblox',
+  'FiveM',
+  'Discord',
+  'Websites'
+];
 
 const SPONSORED_PLUGINS = [
   {
@@ -20,6 +28,17 @@ const SPONSORED_PLUGINS = [
     downloads: 4820,
     coverImageUrl: '/images/categories/minecraft.png',
     summary: 'Multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.'
+  },
+  {
+    id: 'p-2b2t-1',
+    title: '2b2t Anarchy Utility & Baritone Auto-Highway Builder',
+    game: 'Minecraft: 2b2t & Anarchy Clients',
+    price: 'Free',
+    rating: '5.0',
+    reviewsCount: 310,
+    downloads: 8940,
+    coverImageUrl: '/images/categories/minecraft.png',
+    summary: 'Optimized 2b2t anarchy utility addon with auto-totem, GrimAC bypasses, Baritone highway digger, and stash locator.'
   },
   {
     id: 'p-fivem-2',

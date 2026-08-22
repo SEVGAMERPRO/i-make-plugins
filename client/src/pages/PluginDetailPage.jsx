@@ -192,6 +192,67 @@ Config.RefuelSpeed = 1.5
   "askFeedbackOnClose": true
 }
 `
+  },
+  'p-2b2t-1': {
+    id: 'p-2b2t-1',
+    title: '2b2t Anarchy Utility & Baritone Auto-Highway Builder',
+    authorName: 'AnarchyDev_2b',
+    gameName: 'Minecraft: 2b2t & Anarchy Clients',
+    price: '0.00', // Free!
+    rating: '5.0',
+    reviewsCount: 310,
+    downloads: 8940,
+    version: 'v3.2.0-Fabric',
+    lastUpdated: 'Yesterday',
+    category: '2b2t Hacked Clients & Addons',
+    coverImageUrl: '/images/categories/minecraft.png',
+    downloadUrl: '/downloads/2b2t_Anarchy_Utility_v3.2.0.zip',
+    summary: 'High-speed Baritone Nether highway builder, Auto-Totem, GrimAC bypasses, PacketFly, and terrain stash finder for 2b2t.org.',
+    overview: `
+      <h3>2b2t Anarchy Utility Suite (Fabric 1.20 - 1.21)</h3>
+      <p>The ultimate anarchy survival and highway construction utility mod for 2b2t.org and anarchy servers. Optimized for GrimAC and NoCheatPlus bypasses.</p>
+      <br/>
+      <h4>Modules Included</h4>
+      <ul>
+        <li><strong>Auto-Highway Builder:</strong> Automated Baritone pathfinder that clears obsidian, bridges lava, and builds 3x3 Nether highways at maximum tick speeds.</li>
+        <li><strong>Offhand Auto-Totem:</strong> Zero-tick inventory refilling and invulnerability swap.</li>
+        <li><strong>2b2t ElytraFly & PacketFly:</strong> Custom pitch/speed bypass tailored for 2b2t patch limits.</li>
+        <li><strong>Stash & Chest ESP:</strong> Scans chunk metadata to highlight dupe stashes and unlooted bases.</li>
+        <li><strong>Anti-Hunger & Auto-Disconnect:</strong> Automatically logs off on low health or nearby hostile players.</li>
+      </ul>
+    `,
+    installation: `
+      <ol>
+        <li>Install Fabric Loader 1.20.4 or 1.21 on your Minecraft launcher.</li>
+        <li>Place <code>2b2t-Anarchy-Utility-3.2.0.jar</code> into your <code>.minecraft/mods</code> folder.</li>
+        <li>Launch Minecraft and press <kbd>RSHIFT</kbd> or type <code>.help</code> in chat to open the ClickGUI.</li>
+      </ol>
+    `,
+    commands: `
+      <ul>
+        <li><code>.highway [x] [z]</code> - Start automated Baritone Nether highway construction</li>
+        <li><code>.stash scan [radius]</code> - Scan loaded chunks for chests and shulkers</li>
+        <li><code>.elytra mode 2b2t</code> - Switch ElytraFly bypass to 2b2t profile</li>
+      </ul>
+    `,
+    configSample: `# 2b2t Anarchy Utility Configuration (JSON/YAML)
+
+modules:
+  auto_totem:
+    enabled: true
+    health_threshold: 14.0
+    strict_mode: true
+  highway_builder:
+    width: 3
+    height: 3
+    clear_blocks: ["NETHERRACK", "BASALT", "BLACKSTONE", "LAVA"]
+    bridge_material: "OBSIDIAN"
+    auto_eat: true
+  bypasses:
+    grim_packet_sync: true
+    anti_velocity_bypass: true
+    fast_break_tick_delay: 0
+`
   }
 };
 
