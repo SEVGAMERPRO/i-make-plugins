@@ -10,7 +10,11 @@ import PluginsPage from './pages/PluginsPage';
 import GamePage from './pages/GamePage';
 import PluginDetailPage from './pages/PluginDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
-import ThreeDTestPage from './pages/ThreeDTestPage';
+import CreatorDashboard from './pages/CreatorDashboard';
+import UploadPluginPage from './pages/UploadPluginPage';
+import BountiesPage from './pages/BountiesPage';
+import AiConfigPage from './pages/AiConfigPage';
+import StaffReviewPage from './pages/StaffReviewPage';
 
 function App() {
   return (
@@ -22,11 +26,16 @@ function App() {
         <Route path="/plugins" element={<PluginsPage />} />
         <Route path="/plugins/:id" element={<PluginDetailPage />} />
         <Route path="/games/:slug" element={<GamePage />} />
+        <Route path="/bounties" element={<BountiesPage />} />
+        <Route path="/ai-config" element={<AiConfigPage />} />
+        <Route path="/dashboard" element={<CreatorDashboard />} />
+        <Route path="/my-plugins" element={<CreatorDashboard />} />
+        <Route path="/upload" element={<UploadPluginPage />} />
+        <Route path="/staff/reviews" element={<StaffReviewPage />} />
         <Route path="/users/:username" element={<UserProfilePage />} />
-        <Route path="/3d-test" element={<ThreeDTestPage />} />
         
-        {/* Fallbacks */}
-        <Route path="*" element={<div className="flex-grow flex items-center justify-center text-2xl font-bold text-gray-400">404 - Page Not Found</div>} />
+        {/* 404 Fallback */}
+        <Route path="*" element={<div className="flex-grow flex items-center justify-center text-2xl font-bold text-slate-400 bg-[#0b0f19]">404 - Page Not Found</div>} />
       </Routes>
     </Layout>
   );
