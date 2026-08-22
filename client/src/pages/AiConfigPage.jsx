@@ -431,6 +431,7 @@ Config.Locales = {
 }
 
 const AiConfigPage = () => {
+  const { user } = useAuth();
   const [selectedGame, setSelectedGame] = useState('Minecraft');
   const [prompt, setPrompt] = useState('');
   const [complexity, setComplexity] = useState('500+'); // '100', '250', '500+'
@@ -438,8 +439,20 @@ const AiConfigPage = () => {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Free member quota: 2 generations per day
+  const [dailyQuota, setDailyQuota] = useState(2);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  const isUltimate = false; // Free member default
+
   const handleGenerate = () => {
     if (!prompt.trim()) return;
+    
+    if (!isUltimate && dailyQuota <= 0) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+
     setLoading(true);
 
     setTimeout(() => {
@@ -503,6 +516,9 @@ const AiConfigPage = () => {
       }
 
       setOutput(generated);
+      if (!isUltimate) {
+        setDailyQuota(prev => Math.max(0, prev - 1));
+      }
       setLoading(false);
     }, 1200);
   };
@@ -551,6 +567,24 @@ const AiConfigPage = () => {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-2xl space-y-5">
               
+              {/* Quota Tracker Banner */}
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Daily AI Generations</span>
+                  <span className="text-xs font-bold text-white">
+                    {isUltimate ? '👑 Unlimited (Ultimate Active)' : `⚡ ${dailyQuota} of 2 Remaining Today`}
+                  </span>
+                </div>
+                {!isUltimate && (
+                  <Link
+                    to="/upgrade"
+                    className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black rounded-lg shadow-md hover:brightness-110 transition-all"
+                  >
+                    Get Unlimited
+                  </Link>
+                )}
+              </div>
+
               {/* Category Selector */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
@@ -711,6 +745,39 @@ const AiConfigPage = () => {
           </div>
 
         </div>
+
+        {/* Daily Quota Reached Modal */}
+        {showUpgradePrompt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-8 shadow-2xl relative text-white space-y-6 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+                <Sparkles className="w-8 h-8" />
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-white">Daily Free Quota Reached</h3>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Free accounts receive <strong className="text-white">2 AI config generations per day</strong>. Upgrade to MinoForge Ultimate for unlimited generations, 500+ lines output, and zero platform fees!
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Link
+                  to="/upgrade"
+                  className="block w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-sm shadow-xl shadow-amber-500/20 hover:brightness-110 transition-all"
+                >
+                  Upgrade to Ultimate (Unlimited AI)
+                </Link>
+                <button
+                  onClick={() => setShowUpgradePrompt(false)}
+                  className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

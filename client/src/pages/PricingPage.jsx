@@ -71,7 +71,7 @@ const SECTIONS = [
   {
     title: 'MinoForge AI & Security Tools',
     rows: [
-      { name: 'MinoForge AI Config Generator', free: '10 / day', ultimate: 'Unlimited' },
+      { name: 'MinoForge AI Config Generator', free: '2 / day', ultimate: 'Unlimited' },
       { name: 'MinoShield Deep Bytecode Security Scans', free: 'Standard', ultimate: 'Priority Deep Scan' },
       { name: 'Automated Discord Role Sync & DRM', free: false, ultimate: true },
       { name: 'AI Code Optimization Suggestions', free: false, ultimate: true },
