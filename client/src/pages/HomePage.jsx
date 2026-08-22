@@ -5,14 +5,14 @@ import GameCard from '../components/ui/GameCard';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GAMES = [
-  { slug: 'minecraft', name: 'Minecraft', image: '/images/games/minecraft.jpg' },
-  { slug: 'roblox', name: 'Roblox', image: '/images/games/roblox.jpg' },
-  { slug: 'fivem', name: 'FiveM', image: '/images/games/fivem.jpg' },
-  { slug: 'the-isle-evrima', name: 'The Isle: Evrima', image: '/images/games/the-isle.jpg' },
-  { slug: 'gmod', name: "Garry's Mod", image: '/images/games/gmod.jpg' },
-  { slug: 'rust', name: 'Rust', image: '/images/games/rust.jpg' },
-  { slug: 'ark', name: 'ARK', image: '/images/games/ark.jpg' },
-  { slug: 'discord', name: 'Discord', image: '/images/games/discord.jpg' },
+  { slug: 'minecraft', name: 'Minecraft', logo: '/images/logos/minecraft.png', accentColor: '#4CAF50' },
+  { slug: 'roblox', name: 'Roblox', logo: '/images/logos/roblox.svg', accentColor: '#E53935' },
+  { slug: 'fivem', name: 'FiveM', logo: '/images/logos/fivem.png', accentColor: '#FF9800' },
+  { slug: 'the-isle-evrima', name: 'The Isle', logo: '/images/logos/the-isle.png', accentColor: '#2E7D32' },
+  { slug: 'gmod', name: "Garry's Mod", logo: '/images/logos/gmod.png', accentColor: '#1976D2' },
+  { slug: 'rust', name: 'Rust', logo: '/images/logos/rust.png', accentColor: '#CD5C5C' },
+  { slug: 'ark', name: 'ARK', logo: '/images/logos/ark.png', accentColor: '#00BFA5' },
+  { slug: 'discord', name: 'Discord', logo: '/images/logos/discord.png', accentColor: '#5865F2' },
 ];
 
 const HERO_IMAGES = [

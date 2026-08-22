@@ -164,8 +164,8 @@ const SearchBar = ({ onSearch, placeholder = "Search plugins, scripts, or games.
                       className={`px-4 py-3 cursor-pointer flex items-center justify-between transition-colors ${isSelected ? 'bg-blue-600/30 text-white' : 'hover:bg-white/5 text-slate-200'}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-slate-800">
-                          <img src={game.image} alt={game.name} className="w-full h-full object-cover" />
+                        <div className="w-10 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-slate-800 flex items-center justify-center p-1">
+                          <img src={game.logo || game.image} alt={game.name} className="max-h-full max-w-full object-contain" />
                         </div>
                         <div>
                           <p className="font-semibold text-sm md:text-base text-white">{game.name}</p>
