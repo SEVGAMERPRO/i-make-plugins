@@ -1,23 +1,50 @@
 import React, { useState } from 'react';
-import { Mail, Send, CheckCircle2, AlertCircle, Sparkles, X, Code2, ShieldCheck, DollarSign } from 'lucide-react';
+import { Mail, Send, CheckCircle2, AlertCircle, Sparkles, X, Code2, ShieldCheck, DollarSign, Phone, ChevronDown } from 'lucide-react';
 import axios from 'axios';
+
+const COUNTRY_CODES = [
+  { code: '+31', flag: '🇳🇱', name: 'Netherlands (+31)' },
+  { code: '+32', flag: '🇧🇪', name: 'Belgium (+32)' },
+  { code: '+49', flag: '🇩🇪', name: 'Germany (+49)' },
+  { code: '+44', flag: '🇬🇧', name: 'United Kingdom (+44)' },
+  { code: '+1', flag: '🇺🇸', name: 'United States (+1)' },
+  { code: '+1', flag: '🇨🇦', name: 'Canada (+1)' },
+  { code: '+33', flag: '🇫🇷', name: 'France (+33)' },
+  { code: '+34', flag: '🇪🇸', name: 'Spain (+34)' },
+  { code: '+39', flag: '🇮🇹', name: 'Italy (+39)' },
+  { code: '+41', flag: '🇨🇭', name: 'Switzerland (+41)' },
+  { code: '+43', flag: '🇦🇹', name: 'Austria (+43)' },
+  { code: '+61', flag: '🇦🇺', name: 'Australia (+61)' },
+  { code: '+46', flag: '🇸🇪', name: 'Sweden (+46)' },
+  { code: '+47', flag: '🇳🇴', name: 'Norway (+47)' },
+  { code: '+45', flag: '🇩🇰', name: 'Denmark (+45)' },
+  { code: '+358', flag: '🇫🇮', name: 'Finland (+358)' },
+  { code: '+48', flag: '🇵🇱', name: 'Poland (+48)' },
+  { code: '+55', flag: '🇧🇷', name: 'Brazil (+55)' },
+  { code: '+91', flag: '🇮🇳', name: 'India (+91)' },
+  { code: '+81', flag: '🇯🇵', name: 'Japan (+81)' },
+];
 
 const CustomPluginRequestModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+31');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [game, setGame] = useState('Minecraft');
   const [budget, setBudget] = useState('$50 - $150');
   const [requestDetails, setRequestDetails] = useState('');
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: '' }
+  const [notification, setNotification] = useState(null);
 
   if (!isOpen) return null;
 
+  const fullPhoneNumber = `${countryCode} ${phoneNumber.trim()}`;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim() || !requestDetails.trim()) {
+    if (!email.trim() || !phoneNumber.trim() || !requestDetails.trim()) {
       setNotification({
         type: 'error',
-        message: 'Please provide both your email address and detailed plugin request.'
+        message: 'Please fill in all required fields (Email, Phone Number, and Specifications).'
       });
       return;
     }
@@ -28,12 +55,13 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
     try {
       // 24/7 Cloud Email Gateway
       // 1. Sends full request ALWAYS to minoforge.requests@gmail.com
-      // 2. Sends automated confirmation receipt to the user's email filled in the form
+      // 2. Sends automated confirmation receipt to the user's email
       // 3. Completely hides all personal Google accounts and profile pictures
       const formData = new FormData();
       formData.append('_subject', `🚀 New Custom Plugin Order from colasmp.net [${game}]`);
-      formData.append('email', email); // Requester email for automatic confirmation
+      formData.append('email', email);
       formData.append('Client Email', email);
+      formData.append('Phone Number', fullPhoneNumber);
       formData.append('Platform / Game', game);
       formData.append('Estimated Budget', budget);
       formData.append('Specifications & Details', requestDetails);
@@ -44,7 +72,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
       formData.append('_autoresponse', `Thank you for contacting MinoForge Development!
 
 We have received your custom plugin order for ${game}.
-Our engineering team is reviewing your project requirements and will contact you directly at ${email} within 24 hours.
+Our engineering team is reviewing your project requirements and will contact you directly at ${email} or via SMS/WhatsApp at ${fullPhoneNumber} within 24 hours.
 
 Best regards,
 MinoForge Engineering Team
@@ -61,6 +89,7 @@ Official Marketplace: colasmp.net`);
       // Also dispatch to local server if active
       await axios.post('/api/requests/custom', {
         email,
+        phone: fullPhoneNumber,
         game,
         budget,
         requestDetails,
@@ -76,6 +105,7 @@ Official Marketplace: colasmp.net`);
 
       // Clear form
       setRequestDetails('');
+      setPhoneNumber('');
     } catch (err) {
       setNotification({
         type: 'error',
@@ -85,6 +115,8 @@ Official Marketplace: colasmp.net`);
       setLoading(false);
     }
   };
+
+  const selectedCountry = COUNTRY_CODES.find(c => c.code === countryCode) || COUNTRY_CODES[0];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
@@ -132,6 +164,8 @@ Official Marketplace: colasmp.net`);
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Email Address */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               Your Email Address *
@@ -151,6 +185,44 @@ Official Marketplace: colasmp.net`);
             </div>
           </div>
 
+          {/* Google-Style Phone Number Input with Flag Dropdown */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              Phone Number (WhatsApp / SMS) *
+            </label>
+            <div className="flex rounded-xl bg-slate-800/80 border border-white/10 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+              
+              {/* Flag & Dial Code Select */}
+              <div className="relative flex items-center bg-slate-900/90 border-r border-white/10 px-3 py-2 cursor-pointer hover:bg-slate-900 transition-colors">
+                <span className="text-lg mr-1.5 select-none">{selectedCountry.flag}</span>
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer appearance-none pr-4"
+                >
+                  {COUNTRY_CODES.map((c, i) => (
+                    <option key={`${c.code}-${i}`} value={c.code} className="bg-slate-900 text-white">
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 pointer-events-none" />
+              </div>
+
+              {/* Phone Input Box */}
+              <input
+                type="tel"
+                required
+                placeholder="06 12345678"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="flex-1 bg-transparent px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none"
+              />
+            </div>
+            <span className="text-[11px] text-slate-500 mt-1 block">Used for urgent dev notifications and order status.</span>
+          </div>
+
+          {/* Platform & Budget */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
@@ -187,6 +259,7 @@ Official Marketplace: colasmp.net`);
             </div>
           </div>
 
+          {/* Specifications */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               Your Detailed Plugin Request & Commands *
