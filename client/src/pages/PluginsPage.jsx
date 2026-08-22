@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Filter, Search } from 'lucide-react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { Filter, Search, PackageOpen, Upload } from 'lucide-react';
 import SearchBar from '../components/ui/SearchBar';
 import PluginCard from '../components/ui/PluginCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { getPlugins } from '../services/api';
 
-const MOCK_PLUGINS = Array.from({ length: 12 }).map((_, i) => ({
-  id: `p${i}`,
-  title: `Awesome Plugin ${i + 1}`,
-  authorName: 'DevMaster',
-  gameName: i % 2 === 0 ? 'Minecraft' : 'FiveM',
-  price: i % 3 === 0 ? '0.00' : (Math.random() * 20).toFixed(2),
-  rating: (Math.random() * 2 + 3).toFixed(1),
-  downloads: Math.floor(Math.random() * 5000),
-  imageUrl: ''
-}));
-
-const GAMES = ['All Games', 'Minecraft', 'Roblox', 'Hytale', 'Garry\'s Mod', 'FiveM', 'Rust', 'ARK', 'Discord'];
+const GAMES = ['All Games', 'Minecraft', 'Roblox', 'FiveM', 'The Isle: Evrima', 'Garry\'s Mod', 'Rust', 'ARK', 'Discord'];
 
 const PluginsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,39 +24,24 @@ const PluginsPage = () => {
 
   useEffect(() => {
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      let filtered = [...MOCK_PLUGINS];
-      
-      // Apply search
-      if (initialSearch) {
-        filtered = filtered.filter(p => p.title.toLowerCase().includes(initialSearch.toLowerCase()));
-      }
-      
-      // Apply game filter
-      if (selectedGame !== 'All Games') {
-        filtered = filtered.filter(p => p.gameName.toLowerCase() === selectedGame.toLowerCase());
-      }
-      
-      // Apply price filter
-      if (priceFilter === 'free') {
-        filtered = filtered.filter(p => p.price === '0.00' || p.price === 0);
-      } else if (priceFilter === 'paid') {
-        filtered = filtered.filter(p => p.price !== '0.00' && p.price !== 0);
-      }
-      
-      // Apply sort
-      if (sortBy === 'popular') {
-        filtered.sort((a, b) => b.downloads - a.downloads);
-      } else if (sortBy === 'price_asc') {
-        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-      } else if (sortBy === 'price_desc') {
-        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-      }
-      
-      setPlugins(filtered);
-      setLoading(false);
-    }, 600);
+    const params = {};
+    if (initialSearch) params.search = initialSearch;
+    if (selectedGame !== 'All Games') params.game = selectedGame;
+    if (priceFilter !== 'all') params.price = priceFilter;
+    if (sortBy) params.sort = sortBy;
+
+    // Fetch real plugins from API
+    getPlugins(params)
+      .then(res => {
+        setPlugins(res.data?.plugins || res.data || []);
+      })
+      .catch(() => {
+        // Zero fake mock plugins!
+        setPlugins([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [initialSearch, selectedGame, priceFilter, sortBy]);
 
   const handleSearch = (query) => {
@@ -85,24 +60,24 @@ const PluginsPage = () => {
   };
 
   return (
-    <div className="bg-[#F5F7FA] min-h-screen py-8">
+    <div className="bg-[#0b0f19] min-h-screen text-white py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Search */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/5">
           <div>
-            <h1 className="text-3xl font-bold text-[#1A1A2E]">Browse Plugins</h1>
-            <p className="text-gray-500 mt-1">Discover the best resources for your server</p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Browse Marketplace</h1>
+            <p className="text-slate-400 mt-1 text-sm md:text-base">Find verified plugins, scripts, and developer resources</p>
           </div>
           <div className="w-full md:w-96">
-            <SearchBar onSearch={handleSearch} initialValue={initialSearch} placeholder="Search by name..." />
+            <SearchBar onSearch={handleSearch} initialValue={initialSearch} placeholder="Search plugins..." />
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Mobile Filter Toggle */}
           <button 
-            className="lg:hidden flex items-center justify-center gap-2 w-full py-3 bg-white border border-gray-200 rounded-lg font-medium text-gray-700"
+            className="lg:hidden flex items-center justify-center gap-2 w-full py-3 bg-slate-900 border border-white/10 rounded-xl font-medium text-white"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
           >
             <Filter className="w-5 h-5" /> Filters & Sorting
@@ -110,54 +85,44 @@ const PluginsPage = () => {
 
           {/* Sidebar Filters */}
           <div className={`w-full lg:w-64 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-24">
+            <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/10 p-5 sticky top-24">
               
               <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3 uppercase text-xs tracking-wider">Game</h3>
-                <div className="space-y-2">
+                <h3 className="font-semibold text-slate-400 mb-3 uppercase text-xs tracking-wider">Game Category</h3>
+                <div className="space-y-1.5">
                   {GAMES.map(game => (
-                    <label key={game} className="flex items-center gap-2 cursor-pointer group">
-                      <input 
-                        type="radio" 
-                        name="game" 
-                        checked={selectedGame === game}
-                        onChange={() => updateGame(game)}
-                        className="text-[#2196F3] focus:ring-[#2196F3]"
-                      />
-                      <span className={`text-sm ${selectedGame === game ? 'text-[#1A1A2E] font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                        {game}
-                      </span>
-                    </label>
+                    <button 
+                      key={game}
+                      onClick={() => updateGame(game)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-between ${selectedGame === game ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      <span>{game}</span>
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3 uppercase text-xs tracking-wider">Price</h3>
-                <div className="space-y-2">
+                <h3 className="font-semibold text-slate-400 mb-3 uppercase text-xs tracking-wider">Price</h3>
+                <div className="grid grid-cols-3 gap-2">
                   {['all', 'free', 'paid'].map(price => (
-                    <label key={price} className="flex items-center gap-2 cursor-pointer group">
-                      <input 
-                        type="radio" 
-                        name="price" 
-                        checked={priceFilter === price}
-                        onChange={() => setPriceFilter(price)}
-                        className="text-[#2196F3] focus:ring-[#2196F3]"
-                      />
-                      <span className={`text-sm capitalize ${priceFilter === price ? 'text-[#1A1A2E] font-medium' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                        {price}
-                      </span>
-                    </label>
+                    <button
+                      key={price}
+                      onClick={() => setPriceFilter(price)}
+                      className={`py-1.5 px-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all text-center ${priceFilter === price ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                    >
+                      {price}
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3 uppercase text-xs tracking-wider">Sort By</h3>
+                <h3 className="font-semibold text-slate-400 mb-3 uppercase text-xs tracking-wider">Sort By</h3>
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#2196F3] focus:border-[#2196F3] block p-2.5 outline-none"
+                  className="w-full bg-slate-800 border border-white/10 text-slate-200 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 block p-2.5 outline-none"
                 >
                   <option value="newest">Newest First</option>
                   <option value="popular">Most Popular</option>
@@ -180,32 +145,33 @@ const PluginsPage = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-                <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 mb-2">No plugins found</h3>
-                <p className="text-gray-500">Try adjusting your search or filters to find what you're looking for.</p>
-                <button 
-                  onClick={() => {
-                    setSearchParams({});
-                    setSelectedGame('All Games');
-                    setPriceFilter('all');
-                  }}
-                  className="mt-6 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            )}
-            
-            {/* Pagination Placeholder */}
-            {!loading && plugins.length > 0 && (
-              <div className="mt-10 flex justify-center">
-                <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded">Previous</button>
-                  <button className="px-4 py-2 text-sm font-medium bg-[#2196F3] text-white rounded">1</button>
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">2</button>
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded">3</button>
-                  <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded">Next</button>
+              <div className="bg-slate-900/60 rounded-2xl border border-white/10 p-16 text-center max-w-xl mx-auto">
+                <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-blue-400">
+                  <PackageOpen className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">No plugins found</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                  {initialSearch 
+                    ? `No results matched "${initialSearch}". Try a different keyword or check your filters.` 
+                    : 'No plugins have been uploaded to this category yet. Be the first to list your plugin on MinoForge!'}
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <button 
+                    onClick={() => {
+                      setSearchParams({});
+                      setSelectedGame('All Games');
+                      setPriceFilter('all');
+                    }}
+                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 hover:from-blue-500 hover:to-blue-400 transition-all"
+                  >
+                    <Upload className="w-4 h-4" /> Upload a Plugin
+                  </Link>
                 </div>
               </div>
             )}

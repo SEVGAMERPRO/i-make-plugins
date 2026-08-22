@@ -113,10 +113,10 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Game Categories Carousel */}
+        {/* Game Categories Carousel (Fixed left-clipping and smooth scrolling) */}
         <div className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-4">
           <div className="max-w-7xl mx-auto">
-            <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 justify-start lg:justify-center px-4 hide-scrollbar">
+            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 pt-2 px-4 justify-start xl:justify-center hide-scrollbar scroll-smooth">
               {GAMES.map(game => (
                 <GameCard key={game.slug} {...game} />
               ))}

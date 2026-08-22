@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { getGamePlugins } from '../services/api';
 import PluginCard from '../components/ui/PluginCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { PackageOpen, Upload, ArrowLeft } from 'lucide-react';
 
 const GAME_DATA = {
-  'minecraft': { name: 'Minecraft', colorClass: 'from-green-500 to-emerald-700', description: 'Server plugins for Spigot, Paper, and more.' },
-  'roblox': { name: 'Roblox', colorClass: 'from-red-500 to-rose-700', description: 'Scripts and assets for Roblox Studio.' },
-  'hytale': { name: 'Hytale', colorClass: 'from-cyan-400 to-teal-600', description: 'Mods and scripts for Hytale servers.' },
-  'garrys-mod': { name: 'Garry\'s Mod', colorClass: 'from-blue-700 to-indigo-900', description: 'Addons, gamemodes, and scripts.' },
-  'fivem': { name: 'FiveM', colorClass: 'from-orange-500 to-amber-700', description: 'Scripts and vehicles for GTA V Roleplay.' },
-  'rust': { name: 'Rust', colorClass: 'from-amber-700 to-yellow-900', description: 'Oxide plugins and server mods.' },
-  'ark': { name: 'ARK', colorClass: 'from-emerald-700 to-green-900', description: 'Server API plugins and mods.' },
-  'discord': { name: 'Discord', colorClass: 'from-indigo-500 to-purple-700', description: 'Bots, templates, and scripts.' },
+  'minecraft': { name: 'Minecraft', image: '/images/games/minecraft.jpg', colorClass: 'from-emerald-600 to-green-800', description: 'Server plugins for Paper, Spigot, Purpur, and Velocity.' },
+  'roblox': { name: 'Roblox', image: '/images/games/roblox.jpg', colorClass: 'from-red-600 to-rose-800', description: 'Scripts, frameworks, and UI assets for Roblox Studio.' },
+  'fivem': { name: 'FiveM', image: '/images/games/fivem.jpg', colorClass: 'from-orange-600 to-amber-800', description: 'Custom scripts, vehicles, and MLOs for FiveM servers.' },
+  'the-isle-evrima': { name: 'The Isle: Evrima', image: '/images/games/the-isle.jpg', colorClass: 'from-teal-700 to-emerald-900', description: 'Server tools, bots, and configuration resources.' },
+  'gmod': { name: "Garry's Mod", image: '/images/games/gmod.jpg', colorClass: 'from-blue-600 to-indigo-800', description: 'Gamemodes, weapons, entities, and server addons.' },
+  'rust': { name: 'Rust', image: '/images/games/rust.jpg', colorClass: 'from-amber-700 to-orange-950', description: 'Oxide / uMod plugins and server management systems.' },
+  'ark': { name: 'ARK', image: '/images/games/ark.jpg', colorClass: 'from-green-700 to-emerald-950', description: 'ARK Server API plugins, cross-chat, and custom shop tools.' },
+  'discord': { name: 'Discord', image: '/images/games/discord.jpg', colorClass: 'from-indigo-600 to-purple-900', description: 'Verification bots, ticket systems, and community tools.' },
 };
 
 const GamePage = () => {
@@ -19,45 +21,66 @@ const GamePage = () => {
   const [loading, setLoading] = useState(true);
   const [plugins, setPlugins] = useState([]);
   
-  const gameInfo = GAME_DATA[slug] || { name: slug, colorClass: 'from-gray-500 to-gray-700', description: 'Plugins and resources.' };
+  const gameInfo = GAME_DATA[slug] || { 
+    name: slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), 
+    image: '/images/games/minecraft.jpg',
+    colorClass: 'from-blue-600 to-indigo-900', 
+    description: 'Explore verified community plugins and server resources.' 
+  };
 
   useEffect(() => {
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const mock = Array.from({ length: 8 }).map((_, i) => ({
-        id: `${slug}-p${i}`,
-        title: `${gameInfo.name} Plugin ${i + 1}`,
-        authorName: 'ProDev',
-        gameName: gameInfo.name,
-        price: i % 2 === 0 ? '0.00' : '9.99',
-        rating: '4.8',
-        downloads: Math.floor(Math.random() * 2000),
-        imageUrl: ''
-      }));
-      setPlugins(mock);
-      setLoading(false);
-    }, 500);
+    // Fetch actual plugins from the database
+    getGamePlugins(slug)
+      .then(res => {
+        setPlugins(res.data?.plugins || res.data || []);
+      })
+      .catch(() => {
+        // Zero fake mock plugins!
+        setPlugins([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [slug]);
 
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="bg-[#F5F7FA] min-h-screen pb-12">
+    <div className="bg-[#0b0f19] min-h-screen text-white pb-16">
       {/* Game Header Banner */}
-      <div className={`relative h-64 bg-gradient-to-br ${gameInfo.colorClass} overflow-hidden flex items-center justify-center`}>
-        <div className="absolute inset-0 bg-black/30"></div>
-        <div className="relative z-10 text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 drop-shadow-md">{gameInfo.name}</h1>
-          <p className="text-lg text-white/90 drop-shadow">{gameInfo.description}</p>
+      <div className="relative h-72 md:h-80 overflow-hidden flex items-center justify-center border-b border-white/10">
+        {/* In-game background image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center filter brightness-50 scale-105"
+          style={{ backgroundImage: `url(${gameInfo.image})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0f19] via-[#0b0f19]/70 to-transparent" />
+
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 mb-4 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Marketplace
+          </Link>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-3 tracking-tight drop-shadow-2xl">
+            {gameInfo.name}
+          </h1>
+          <p className="text-base md:text-lg text-slate-300 drop-shadow">
+            {gameInfo.description}
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-[#1A1A2E]">Latest {gameInfo.name} Plugins</h2>
-          <Link to={`/plugins?game=${encodeURIComponent(gameInfo.name)}`} className="text-[#2196F3] hover:underline font-medium text-sm">
-            View All
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Available Plugins</h2>
+            <p className="text-sm text-slate-400 mt-0.5">Showing verified community releases</p>
+          </div>
+          <Link 
+            to="/register" 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-600/20"
+          >
+            <Upload className="w-4 h-4" /> Upload Plugin
           </Link>
         </div>
 
@@ -68,9 +91,20 @@ const GamePage = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No plugins yet</h3>
-            <p className="text-gray-500">Be the first to publish a plugin for {gameInfo.name}!</p>
+          <div className="bg-slate-900/60 rounded-2xl border border-white/10 p-16 text-center max-w-xl mx-auto backdrop-blur-md">
+            <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-blue-400">
+              <PackageOpen className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No plugins uploaded yet</h3>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6">
+              There are currently no active plugins for {gameInfo.name}. Are you a developer? Be the first to upload and start earning!
+            </p>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/30 transition-all"
+            >
+              <Upload className="w-4 h-4" /> Start Selling for {gameInfo.name}
+            </Link>
           </div>
         )}
       </div>
