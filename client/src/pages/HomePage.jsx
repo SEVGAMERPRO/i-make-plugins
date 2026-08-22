@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
-import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight } from 'lucide-react';
+import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GAMES = [
   { slug: 'minecraft', name: 'Minecraft', image: '/images/games/minecraft.jpg' },
@@ -27,23 +27,58 @@ const HERO_IMAGES = [
 const HomePage = () => {
   const navigate = useNavigate();
   const [bgIndex, setBgIndex] = useState(0);
+  const scrollRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    // Smooth 9-second in-game wallpaper rotation
+    // 9-second cinematic hero background crossfade
     const interval = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % HERO_IMAGES.length);
     }, 9000);
     return () => clearInterval(interval);
   }, []);
 
+  // Smooth continuous auto-sliding loop for the game categories
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    let animationFrameId;
+    const speed = 0.65; // Smooth cinematic scroll speed
+
+    const step = () => {
+      if (!isPaused && scrollContainer) {
+        scrollContainer.scrollLeft += speed;
+        // Reset when halfway through the duplicated list for infinite seamless loop
+        if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
+          scrollContainer.scrollLeft = 0;
+        }
+      }
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPaused]);
+
+  const handleManualScroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -350 : 350;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   const handleSearch = (query) => {
     navigate(`/plugins?search=${encodeURIComponent(query)}`);
   };
 
+  // Duplicate the array for seamless infinite marquee loop
+  const displayGames = [...GAMES, ...GAMES, ...GAMES];
+
   return (
     <div className="flex-grow flex flex-col bg-[#0b0f19] text-white">
       {/* Hero Section */}
-      <div className="relative pt-24 pb-48 px-4 min-h-[640px] md:min-h-[700px] flex flex-col items-center justify-center overflow-visible">
+      <div className="relative pt-24 pb-52 px-4 min-h-[660px] md:min-h-[720px] flex flex-col items-center justify-center overflow-visible">
         {/* Animated In-Game Hero Wallpapers */}
         {HERO_IMAGES.map((bg, idx) => (
           <div
@@ -53,14 +88,14 @@ const HomePage = () => {
               backgroundImage: `url(${bg})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              opacity: idx === bgIndex ? 0.45 : 0,
+              opacity: idx === bgIndex ? 0.4 : 0,
               zIndex: 0,
             }}
           />
         ))}
 
-        {/* Cinematic dark gradient vignette */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0b0f19]/80 via-[#0b0f19]/60 to-[#0b0f19] pointer-events-none" />
+        {/* Cinematic dark gradient overlay */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0b0f19]/85 via-[#0b0f19]/65 to-[#0b0f19] pointer-events-none" />
 
         {/* Decorative Grid Pattern */}
         <div 
@@ -113,12 +148,38 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Game Categories Carousel (Fixed left-clipping and smooth scrolling) */}
-        <div className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 pt-2 px-4 justify-start xl:justify-center hide-scrollbar scroll-smooth">
-              {GAMES.map(game => (
-                <GameCard key={game.slug} {...game} />
+        {/* Automatic Moving Game Categories Carousel */}
+        <div 
+          className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-2 sm:px-4"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="max-w-7xl mx-auto relative group/carousel">
+            {/* Left Manual Scroll Button */}
+            <button
+              onClick={() => handleManualScroll('left')}
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-all duration-200"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Right Manual Scroll Button */}
+            <button
+              onClick={() => handleManualScroll('right')}
+              className="absolute -right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-all duration-200"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            {/* Seamless Infinite Moving Track */}
+            <div 
+              ref={scrollRef}
+              className="flex gap-3 md:gap-4 overflow-x-hidden pb-4 pt-2 px-2 hide-scrollbar select-none cursor-grab active:cursor-grabbing"
+            >
+              {displayGames.map((game, index) => (
+                <GameCard key={`${game.slug}-${index}`} {...game} />
               ))}
             </div>
           </div>
