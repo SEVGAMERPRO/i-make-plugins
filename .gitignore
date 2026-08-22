@@ -12,6 +12,8 @@ server/dist/
 .env.local
 .env.production
 .env.*.local
+server/.env
+client/.env
 
 # IDE
 .vscode/

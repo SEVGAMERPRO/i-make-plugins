@@ -3,11 +3,11 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 
 // Configure Transporter (supports Gmail SMTP, Hostinger, or custom domain SMTP)
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
   auth: {
     user: process.env.EMAIL_USER || 'minoforge.support@gmail.com',
-    pass: process.env.EMAIL_APP_PASSWORD || '' // Google 16-character App Password
+    pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '') // Google 16-character App Password (auto-strip spaces)
   }
 });
 
