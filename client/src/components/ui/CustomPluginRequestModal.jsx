@@ -1,32 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Send, CheckCircle2, AlertCircle, Sparkles, X, Code2, ShieldCheck, DollarSign, Phone } from 'lucide-react';
 import GooglePhoneInput from './GooglePhoneInput';
 import axios from 'axios';
 
-const COUNTRY_CODES = [
-  { code: '+31', flag: '🇳🇱', name: 'Netherlands (+31)' },
-  { code: '+32', flag: '🇧🇪', name: 'Belgium (+32)' },
-  { code: '+49', flag: '🇩🇪', name: 'Germany (+49)' },
-  { code: '+44', flag: '🇬🇧', name: 'United Kingdom (+44)' },
-  { code: '+1', flag: '🇺🇸', name: 'United States (+1)' },
-  { code: '+1', flag: '🇨🇦', name: 'Canada (+1)' },
-  { code: '+33', flag: '🇫🇷', name: 'France (+33)' },
-  { code: '+34', flag: '🇪🇸', name: 'Spain (+34)' },
-  { code: '+39', flag: '🇮🇹', name: 'Italy (+39)' },
-  { code: '+41', flag: '🇨🇭', name: 'Switzerland (+41)' },
-  { code: '+43', flag: '🇦🇹', name: 'Austria (+43)' },
-  { code: '+61', flag: '🇦🇺', name: 'Australia (+61)' },
-  { code: '+46', flag: '🇸🇪', name: 'Sweden (+46)' },
-  { code: '+47', flag: '🇳🇴', name: 'Norway (+47)' },
-  { code: '+45', flag: '🇩🇰', name: 'Denmark (+45)' },
-  { code: '+358', flag: '🇫🇮', name: 'Finland (+358)' },
-  { code: '+48', flag: '🇵🇱', name: 'Poland (+48)' },
-  { code: '+55', flag: '🇧🇷', name: 'Brazil (+55)' },
-  { code: '+91', flag: '🇮🇳', name: 'India (+91)' },
-  { code: '+81', flag: '🇯🇵', name: 'Japan (+81)' },
-];
-
 const CustomPluginRequestModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('+31');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -91,14 +70,15 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
       });
 
       if (response.data && response.data.success) {
-        setNotification({
-          type: 'success',
-          message: `Order submitted! The request was sent to minoforge.requests@gmail.com, and an official confirmation receipt from MinoForgeRequests has been sent to ${email}.`
+        onClose();
+        navigate('/request-success', {
+          state: {
+            email,
+            phone: fullPhoneNumber,
+            game,
+            budget
+          }
         });
-
-        // Clear form
-        setRequestDetails('');
-        setPhoneNumber('');
       } else {
         throw new Error(response.data?.message || 'Failed to dispatch emails.');
       }
