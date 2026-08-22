@@ -198,6 +198,23 @@ const PluginsPage = () => {
                 </Link>
               </div>
 
+              {/* Want Custom Plugins CTA */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/15 to-cyan-500/15 border border-blue-500/30 text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-blue-300 mb-1">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Custom Development</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
+                  Want us to make custom plugins for your server?
+                </p>
+                <Link
+                  to="/custom-plugin"
+                  className="block text-center py-2 px-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black rounded-lg text-xs shadow-md transition-all"
+                >
+                  Order Custom Plugin
+                </Link>
+              </div>
+
             </div>
           </div>
 

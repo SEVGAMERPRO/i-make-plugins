@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
+import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GAMES = [
@@ -25,6 +26,7 @@ const HomePage = () => {
   const [bgIndex, setBgIndex] = useState(0);
   const scrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isCustomRequestOpen, setIsCustomRequestOpen] = useState(false);
 
   useEffect(() => {
     // 9-second cinematic hero background crossfade
@@ -266,6 +268,36 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* BIG CUSTOM PLUGIN REQUEST CTA BANNER */}
+      <section className="py-8 px-4 max-w-7xl mx-auto w-full">
+        <div className="rounded-3xl bg-gradient-to-r from-blue-900/60 via-indigo-900/40 to-slate-900 border-2 border-blue-500/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="absolute -right-16 -top-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="space-y-3 max-w-2xl text-center md:text-left z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-blue-500/20 text-blue-300 text-xs font-black rounded-full border border-blue-500/30 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Official Development Studio</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+              Want us to make custom plugins?
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Have an idea for a unique Minecraft mechanic, FiveM script, or Discord bot? Fill in a quick request and our team will build and test it for you!
+            </p>
+          </div>
+
+          <div className="z-10 flex-shrink-0">
+            <button
+              onClick={() => setIsCustomRequestOpen(true)}
+              className="py-4 px-8 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 hover:from-blue-400 hover:to-cyan-300 text-white font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+            >
+              <span>Order Custom Plugin</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Why MinoForge Features Section */}
       <section className="py-20 px-4 bg-slate-900/50 border-t border-b border-white/5">
         <div className="max-w-6xl mx-auto">
@@ -380,6 +412,11 @@ const HomePage = () => {
           scrollbar-width: none;
         }
       `}} />
+      {/* Custom Plugin Request Modal */}
+      <CustomPluginRequestModal 
+        isOpen={isCustomRequestOpen} 
+        onClose={() => setIsCustomRequestOpen(false)} 
+      />
     </div>
   );
 };
