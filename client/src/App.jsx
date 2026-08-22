@@ -10,6 +10,7 @@ import PluginsPage from './pages/PluginsPage';
 import GamePage from './pages/GamePage';
 import PluginDetailPage from './pages/PluginDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
+import ThreeDTestPage from './pages/ThreeDTestPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/plugins/:id" element={<PluginDetailPage />} />
         <Route path="/games/:slug" element={<GamePage />} />
         <Route path="/users/:username" element={<UserProfilePage />} />
+        <Route path="/3d-test" element={<ThreeDTestPage />} />
         
         {/* Fallbacks */}
         <Route path="*" element={<div className="flex-grow flex items-center justify-center text-2xl font-bold text-gray-400">404 - Page Not Found</div>} />
