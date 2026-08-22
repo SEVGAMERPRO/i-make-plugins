@@ -5,14 +5,14 @@ import GameCard from '../components/ui/GameCard';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const GAMES = [
-  { slug: 'minecraft', name: 'Minecraft', logo: '/images/logos/minecraft.svg', accentColor: '#4CAF50' },
-  { slug: 'roblox', name: 'Roblox', logo: '/images/logos/roblox.svg', accentColor: '#E53935' },
-  { slug: 'fivem', name: 'FiveM', logo: '/images/logos/fivem.png', accentColor: '#FF9800' },
-  { slug: 'the-isle-evrima', name: 'The Isle', logo: '/images/logos/the-isle.png', accentColor: '#2E7D32' },
-  { slug: 'gmod', name: "Garry's Mod", logo: '/images/logos/gmod.png', accentColor: '#1976D2' },
-  { slug: 'rust', name: 'Rust', logo: '/images/logos/rust.png', accentColor: '#CD5C5C' },
-  { slug: 'ark', name: 'ARK', logo: '/images/logos/ark.png', accentColor: '#00BFA5' },
-  { slug: 'discord', name: 'Discord', logo: '/images/logos/discord.png', accentColor: '#5865F2' },
+  { slug: 'minecraft', name: 'Minecraft', capsule: '/images/capsules/minecraft.jpg', accentColor: '#4CAF50' },
+  { slug: 'roblox', name: 'Roblox', capsule: '/images/capsules/roblox.jpg', accentColor: '#E53935' },
+  { slug: 'fivem', name: 'FiveM', capsule: '/images/capsules/fivem.jpg', accentColor: '#FF9800' },
+  { slug: 'the-isle-evrima', name: 'The Isle', capsule: '/images/capsules/the-isle.jpg', accentColor: '#2E7D32' },
+  { slug: 'gmod', name: "Garry's Mod", capsule: '/images/capsules/gmod.jpg', accentColor: '#1976D2' },
+  { slug: 'rust', name: 'Rust', capsule: '/images/capsules/rust.jpg', accentColor: '#CD5C5C' },
+  { slug: 'ark', name: 'ARK', capsule: '/images/capsules/ark.jpg', accentColor: '#00BFA5' },
+  { slug: 'discord', name: 'Discord', capsule: '/images/capsules/discord.jpg', accentColor: '#5865F2' },
 ];
 
 const HERO_IMAGES = [
