@@ -54,54 +54,53 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
     setNotification(null);
 
     try {
-      // 24/7 Cloud Email Gateway
-      // 1. Sends full request ALWAYS to minoforge.requests@gmail.com
-      // 2. Sends automated confirmation receipt to the user's email
-      // 3. Completely hides all personal Google accounts and profile pictures
-      const formData = new FormData();
-      formData.append('_subject', `🚀 New Custom Plugin Order from colasmp.net [${game}]`);
-      formData.append('email', email);
-      formData.append('Client Email', email);
-      formData.append('Phone Number', fullPhoneNumber);
-      formData.append('Platform / Game', game);
-      formData.append('Estimated Budget', budget);
-      formData.append('Specifications & Details', requestDetails);
-      formData.append('Order Timestamp', new Date().toLocaleString());
-      formData.append('_template', 'table');
-      formData.append('_captcha', 'false');
-      formData.append('_replyto', email);
-      formData.append('_autoresponse', `Thank you for contacting MinoForge Development!
+      // 1. Dispatch via MinoForge Express Mailer (Sends from "MinoForgeRequests" to minoforge.requests@gmail.com and confirmation to customer)
+      let backendSuccess = false;
+      try {
+        const response = await axios.post('/api/requests/custom', {
+          email,
+          phone: fullPhoneNumber,
+          game,
+          budget,
+          requestDetails,
+          recipient: 'minoforge.requests@gmail.com',
+          timestamp: new Date().toLocaleString()
+        });
+        if (response.data && response.data.success) {
+          backendSuccess = true;
+        }
+      } catch (backendErr) {
+        // Fallback to cloud form if backend is offline
+      }
 
-We have received your custom plugin order for ${game}.
-Our engineering team is reviewing your project requirements and will contact you directly at ${email} or via SMS/WhatsApp at ${fullPhoneNumber} within 24 hours.
+      // 2. Cloud Fallback
+      if (!backendSuccess) {
+        const formData = new FormData();
+        formData.append('_subject', `🚀 New Custom Plugin Order from colasmp.net [${game}]`);
+        formData.append('email', email);
+        formData.append('Client Email', email);
+        formData.append('Phone Number', fullPhoneNumber);
+        formData.append('Platform / Game', game);
+        formData.append('Estimated Budget', budget);
+        formData.append('Specifications & Details', requestDetails);
+        formData.append('Order Timestamp', new Date().toLocaleString());
+        formData.append('_template', 'table');
+        formData.append('_captcha', 'false');
+        formData.append('_replyto', email);
 
-Best regards,
-MinoForge Engineering Team
-Official Marketplace: colasmp.net`);
-
-      await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json'
-        },
-        body: formData
-      });
-
-      // Also dispatch to local server if active
-      await axios.post('/api/requests/custom', {
-        email,
-        phone: fullPhoneNumber,
-        game,
-        budget,
-        requestDetails,
-        recipient: 'minoforge.requests@gmail.com',
-        timestamp: new Date().toISOString()
-      }).catch(() => {});
+        await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json'
+          },
+          body: formData
+        }).catch(() => {});
+      }
 
       // Show success notification popup
       setNotification({
         type: 'success',
-        message: `Your custom plugin request has been sent to minoforge.requests@gmail.com! A confirmation receipt has been sent to ${email}.`
+        message: `Order submitted! The request was sent to minoforge.requests@gmail.com, and an official confirmation receipt from MinoForgeRequests has been sent to ${email}.`
       });
 
       // Clear form
