@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Send, CheckCircle2, AlertCircle, Sparkles, X, Code2, ShieldCheck, DollarSign, Phone, ChevronDown } from 'lucide-react';
+import { Mail, Send, CheckCircle2, AlertCircle, Sparkles, X, Code2, ShieldCheck, DollarSign, Phone } from 'lucide-react';
+import GooglePhoneInput from './GooglePhoneInput';
 import axios from 'axios';
 
 const COUNTRY_CODES = [
@@ -190,36 +191,12 @@ Official Marketplace: colasmp.net`);
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               Phone Number (WhatsApp / SMS) *
             </label>
-            <div className="flex rounded-xl bg-slate-800/80 border border-white/10 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 transition-all">
-              
-              {/* Flag & Dial Code Select */}
-              <div className="relative flex items-center bg-slate-900/90 border-r border-white/10 px-3 py-2 cursor-pointer hover:bg-slate-900 transition-colors">
-                <span className="text-lg mr-1.5 select-none">{selectedCountry.flag}</span>
-                <select
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer appearance-none pr-4"
-                >
-                  {COUNTRY_CODES.map((c, i) => (
-                    <option key={`${c.code}-${i}`} value={c.code} className="bg-slate-900 text-white">
-                      {c.flag} {c.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 pointer-events-none" />
-              </div>
-
-              {/* Phone Input Box */}
-              <input
-                type="tel"
-                required
-                placeholder="06 12345678"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="flex-1 bg-transparent px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none"
-              />
-            </div>
-            <span className="text-[11px] text-slate-500 mt-1 block">Used for urgent dev notifications and order status.</span>
+            <GooglePhoneInput
+              value={phoneNumber}
+              onChange={setPhoneNumber}
+              selectedCountryCode={countryCode}
+              onCountryChange={setCountryCode}
+            />
           </div>
 
           {/* Platform & Budget */}
