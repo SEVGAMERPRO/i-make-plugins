@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen, Plus, X, Layers, Lock } from 'lucide-react';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 
 import { useNotifications } from '../context/NotificationContext';
@@ -15,14 +15,17 @@ const TABS = [
 
 const UploadPluginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialData = location.state || {};
+
   const { addNotification } = useNotifications();
   const [currentTab, setCurrentTab] = useState('general');
   const [loading, setLoading] = useState(false);
 
-  // Form State
-  const [title, setTitle] = useState('');
-  const [game, setGame] = useState('Minecraft');
-  const [summary, setSummary] = useState('');
+  // Form State initialized from Create Resource modal if available
+  const [title, setTitle] = useState(initialData.title || '');
+  const [game, setGame] = useState(initialData.category || 'Minecraft');
+  const [summary, setSummary] = useState(initialData.summary || '');
   const [version, setVersion] = useState('v1.0.0');
   const [tags, setTags] = useState('');
   // Cover & Screenshots State

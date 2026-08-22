@@ -74,11 +74,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="pt-5 pb-2 px-3">
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Creator Portal</p>
             </div>
+            <Link to="/creators" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/creators')}`}>
+              <Sparkles className="w-4 h-4 text-cyan-400" /> Become a Creator
+            </Link>
             <Link to="/dashboard" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/dashboard')}`}>
               <User className="w-4 h-4" /> Creator Dashboard
-            </Link>
-            <Link to="/upload" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/upload')}`}>
-              <Plus className="w-4 h-4 text-emerald-400" /> Upload Plugin
             </Link>
             <Link to="/staff/reviews" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/staff/reviews')}`}>
               <ShieldCheck className="w-4 h-4 text-purple-400" /> Staff Reviews

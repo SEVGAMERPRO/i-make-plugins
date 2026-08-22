@@ -77,14 +77,15 @@ const Navbar = ({ onMenuClick }) => {
       {/* Right User Actions */}
       <div className="flex items-center gap-2 sm:gap-3">
         
-        {/* Notification Bell (Left of Upload Plugin) */}
+        {/* Notification Bell (Left of Become a Creator) */}
         <NotificationBell />
 
         <Link
-          to="/upload"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 hover:text-white rounded-xl text-xs font-bold border border-blue-500/30 transition-all shadow-sm"
+          to="/creators"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600/30 to-cyan-500/30 hover:from-blue-600/40 hover:to-cyan-500/40 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-blue-500/40 transition-all shadow-sm"
         >
-          <Plus className="w-3.5 h-3.5" /> Upload Plugin
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Become a Creator</span>
         </Link>
 
         {!user ? (
