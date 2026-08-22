@@ -26,17 +26,34 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
     setNotification(null);
 
     try {
-      // Send request to backend or simulated mail handler targeting minoforge.support@gmail.com
+      // 24/7 Cloud Email Gateway (Works even when this device is powered off!)
+      const cloudResponse = await fetch('https://formsubmit.co/ajax/minoforge.requests@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `🚀 New Custom Plugin Order from colasmp.net [${game}]`,
+          client_email: email,
+          target_platform: game,
+          budget_range: budget,
+          plugin_specifications: requestDetails,
+          submission_time: new Date().toLocaleString(),
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
+
+      // Also trigger local backend if running
       await axios.post('/api/requests/custom', {
         email,
         game,
         budget,
         requestDetails,
-        recipient: 'minoforge.support@gmail.com',
+        recipient: 'minoforge.requests@gmail.com',
         timestamp: new Date().toISOString()
-      }).catch(() => {
-        // Handled gracefully even if offline locally
-      });
+      }).catch(() => {});
 
       // Show success notification popup
       setNotification({
