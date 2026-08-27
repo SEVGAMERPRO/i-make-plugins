@@ -79,15 +79,15 @@ const GameCreatorCard = ({ game, onOpenModal }) => {
 const FEATURES = [
   {
     icon: Users,
-    title: 'Huge userbase',
-    description: 'More than 500,000 users are already registered to MinoForge providing a huge audience of interested buyers and downloaders for your products.',
+    title: 'Dedicated Gaming Audience',
+    description: 'Connect directly with server owners, developers, and communities looking for authentic, tested game plugins and tools.',
     iconColor: 'text-blue-400',
     bg: 'bg-blue-500/10 border-blue-500/20'
   },
   {
     icon: CreditCard,
     title: 'Easy payments & payouts',
-    description: 'Accept payments through PayPal, credit cards, and 50+ other local payment methods, even without a PayPal account! We provide full chargeback protection and automatic payouts.',
+    description: 'Accept payments through PayPal, cards, and secure checkout simulation. We provide zero platform lock-in and creator-first revenue share.',
     iconColor: 'text-emerald-400',
     bg: 'bg-emerald-500/10 border-emerald-500/20'
   },
