@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import { CartProvider } from './context/CartContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import CartDrawer from './components/cart/CartDrawer';
 import PaymentSimulatorModal from './components/cart/PaymentSimulatorModal';
 
@@ -33,8 +34,9 @@ import StaffTicketsPage from './pages/StaffTicketsPage';
 
 function App() {
   return (
-    <CartProvider>
-      <Layout>
+    <CurrencyProvider>
+      <CartProvider>
+        <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -78,6 +80,7 @@ function App() {
       <CartDrawer />
       <PaymentSimulatorModal />
     </CartProvider>
+    </CurrencyProvider>
   );
 }
 

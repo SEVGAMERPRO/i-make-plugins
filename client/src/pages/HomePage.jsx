@@ -4,6 +4,7 @@ import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
 import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 const GAMES = [
   { slug: 'minecraft', name: 'Minecraft', image: '/images/categories/minecraft.png', accentColor: '#4CAF50' },
@@ -23,6 +24,7 @@ const HERO_IMAGES = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
   const [bgIndex, setBgIndex] = useState(0);
   const [isCustomRequestOpen, setIsCustomRequestOpen] = useState(false);
 
@@ -164,7 +166,7 @@ const HomePage = () => {
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                 PROMOTED
               </span>
-              <span className="text-xs font-bold text-emerald-400">$4.99 USD</span>
+              <span className="text-xs font-bold text-emerald-400">{formatPrice(4.99)}</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
               <img src="/images/plugins/minecraft_economy_gui.svg" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -183,7 +185,7 @@ const HomePage = () => {
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                 PROMOTED
               </span>
-              <span className="text-xs font-bold text-emerald-400">$3.49 USD</span>
+              <span className="text-xs font-bold text-emerald-400">{formatPrice(3.49)}</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
               <img src="/images/plugins/gta_gas_station.svg" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -202,7 +204,7 @@ const HomePage = () => {
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                 PROMOTED
               </span>
-              <span className="text-xs font-bold text-emerald-400">Free</span>
+              <span className="text-xs font-bold text-emerald-400">{formatPrice(0)}</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
               <img src="/images/plugins/discord_ticket_panel.svg" alt="Discord Bot" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />

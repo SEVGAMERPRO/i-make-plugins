@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Briefcase, DollarSign, Clock, MessageSquare, Plus, CheckCircle2, ShieldCheck, Filter, ArrowRight, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link } from 'react-router-dom';
 
 const SAMPLE_BOUNTIES = [
@@ -64,6 +65,7 @@ const SAMPLE_BOUNTIES = [
 
 const BountiesPage = () => {
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const [bounties, setBounties] = useState(SAMPLE_BOUNTIES);
   const [selectedGame, setSelectedGame] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
@@ -192,7 +194,7 @@ const BountiesPage = () => {
                 <div className="text-left md:text-right">
                   <span className="text-xs text-slate-400 font-semibold block">Escrow Budget</span>
                   <span className="text-2xl md:text-3xl font-black text-emerald-400">
-                    ${bounty.budget}
+                    {formatPrice(bounty.budget)}
                   </span>
                 </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, ShieldCheck, Heart } from 'lucide-react';
+import CurrencySwitcher from '../ui/CurrencySwitcher';
 
 const Footer = () => {
   return (
@@ -64,12 +65,14 @@ const Footer = () => {
 
         </div>
 
-        {/* Bottom copyright */}
+        {/* Bottom copyright and Currency Switcher */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} MinoForge. Built for server creators worldwide.</p>
-          <p className="flex items-center gap-1">
-            Protected by MinoShield Bytecode Security
-          </p>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-slate-400">Display Currency:</span>
+            <CurrencySwitcher compact={true} />
+          </div>
         </div>
       </div>
     </footer>

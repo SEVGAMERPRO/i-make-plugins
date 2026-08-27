@@ -4,6 +4,7 @@ import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, Shiel
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import NotificationBell from '../ui/NotificationBell';
+import CurrencySwitcher from '../ui/CurrencySwitcher';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -125,8 +126,11 @@ const Navbar = ({ onMenuClick }) => {
         </div>
 
         {/* Right User Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
           
+          {/* Currency Switcher */}
+          <CurrencySwitcher />
+
           {/* Notification Bell */}
           <NotificationBell />
 

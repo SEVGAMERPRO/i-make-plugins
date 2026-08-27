@@ -2,9 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Download, Sparkles, ArrowRight, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const PluginCard = ({ plugin }) => {
   const { addToCart, isInCart } = useCart();
+  const { formatPrice } = useCurrency();
   const isFree = parseFloat(plugin.price || 0) === 0 || plugin.price === '0.00';
   const imgUrl = plugin.coverImageUrl || plugin.imageUrl || '/images/plugins/minecraft_economy_gui.svg';
   const inCart = isInCart(plugin.id);
@@ -49,7 +51,7 @@ const PluginCard = ({ plugin }) => {
           </button>
           
           <span className="px-3 py-1 rounded-xl bg-slate-900/90 backdrop-blur-md text-sm font-black text-emerald-400 border border-emerald-500/30 shadow-lg">
-            {isFree ? 'Free' : `$${plugin.price}`}
+            {formatPrice(plugin.price)}
           </span>
         </div>
       </div>

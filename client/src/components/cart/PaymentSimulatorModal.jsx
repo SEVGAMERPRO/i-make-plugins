@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const PAYMENT_METHODS = [
   { id: 'card', name: 'Credit / Debit Card', icon: CreditCard, subtitle: 'Visa, Mastercard, Amex, Discover' },
   { id: 'paypal', name: 'PayPal Sandbox', icon: Wallet, subtitle: 'Instant 1-Click PayPal Checkout' },
   { id: 'crypto', name: 'Crypto Simulator', icon: QrCode, subtitle: 'Bitcoin, Ethereum, Solana, USDT' },
-  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Balance: $25.00 Test Credits' }
+  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Test Credits Balance Available' }
 ];
 
 const PaymentSimulatorModal = () => {
   const { isCheckoutOpen, setIsCheckoutOpen, cartItems, total, clearCart } = useCart();
+  const { formatPrice, activeCurrency } = useCurrency();
   const [selectedMethod, setSelectedMethod] = useState('card');
   const [status, setStatus] = useState('idle'); // 'idle' | 'processing' | 'success'
   const [processingStep, setProcessingStep] = useState(0);
@@ -244,7 +246,7 @@ const PaymentSimulatorModal = () => {
                 className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl shadow-blue-500/30 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
-                <span>Simulate Payment of ${total} USD</span>
+                <span>Simulate Payment of {formatPrice(total, true)}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 

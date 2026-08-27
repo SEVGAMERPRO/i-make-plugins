@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSign, Clock, HelpCircle, Rocket, Megaphone, Terminal } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link } from 'react-router-dom';
 
 const TIERS = [
@@ -107,6 +108,7 @@ const SECTIONS = [
 
 const PricingPage = () => {
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const [annualBilling, setAnnualBilling] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
@@ -203,7 +205,7 @@ const PricingPage = () => {
                   {/* Price */}
                   <div className="flex items-baseline gap-1 mb-8 pb-6 border-b border-white/10">
                     <span className="text-4xl md:text-5xl font-black text-white">
-                      ${price}
+                      {price === 0 ? 'Free' : formatPrice(price)}
                     </span>
                     <span className="text-slate-400 text-sm font-medium">
                       {price === 0 ? 'forever' : period}

@@ -2,9 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { X, Trash2, ShoppingCart, ArrowRight, ShieldCheck, Sparkles, Download, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const CartDrawer = () => {
   const { cartItems, isCartOpen, setIsCartOpen, removeFromCart, clearCart, subtotal, total, setIsCheckoutOpen } = useCart();
+  const { formatPrice, activeCurrency } = useCurrency();
 
   if (!isCartOpen) return null;
 
@@ -90,7 +92,7 @@ const CartDrawer = () => {
 
                     <div className="text-right flex flex-col items-end gap-1 flex-shrink-0">
                       <span className="font-black text-sm text-emerald-400">
-                        {parseFloat(item.price) === 0 ? 'Free' : `$${parseFloat(item.price).toFixed(2)}`}
+                        {formatPrice(item.price)}
                       </span>
                       <button
                         onClick={() => removeFromCart(item.id)}
@@ -128,7 +130,7 @@ const CartDrawer = () => {
               <div className="space-y-1.5 text-xs text-slate-300">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-mono font-bold">${subtotal} USD</span>
+                  <span className="font-mono font-bold">{formatPrice(subtotal, true)}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Digital Delivery &amp; DRM License</span>
@@ -136,15 +138,15 @@ const CartDrawer = () => {
                 </div>
                 <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-white/10">
                   <span>Total Amount</span>
-                  <span className="text-emerald-400 font-mono text-base">${total} USD</span>
+                  <span className="text-emerald-400 font-mono text-base">{formatPrice(total, true)}</span>
                 </div>
               </div>
 
               <button
                 onClick={handleProceedToCheckout}
-                className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
+                className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
               >
-                <span>Proceed to Pay Simulator</span>
+                <span>Proceed to Payment Simulator ({formatPrice(total)})</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 

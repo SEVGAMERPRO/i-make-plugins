@@ -4,6 +4,7 @@ import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Termin
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { getPluginById } from '../services/api';
 
 const SAMPLE_PLUGINS_DATABASE = {
@@ -495,6 +496,7 @@ Config.Blip = {
 const PluginDetailPage = () => {
   const { id } = useParams();
   const { addToCart, isInCart, setIsCheckoutOpen } = useCart();
+  const { formatPrice } = useCurrency();
   const [loading, setLoading] = useState(true);
   const [plugin, setPlugin] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -581,7 +583,7 @@ const PluginDetailPage = () => {
                   
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-black text-emerald-400">
-                      {isFree ? 'Free' : `$${plugin.price}`}
+                      {formatPrice(plugin.price)}
                     </span>
                   </div>
                 </div>
@@ -709,7 +711,7 @@ const PluginDetailPage = () => {
                     className="btn-glow-blue btn-shimmer btn-animated w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-base cursor-pointer"
                   >
                     <CreditCard className="w-5 h-5" />
-                    <span>Instant Pay Simulator (${plugin.price})</span>
+                    <span>Instant Pay Simulator ({formatPrice(plugin.price)})</span>
                   </button>
 
                   <button 
