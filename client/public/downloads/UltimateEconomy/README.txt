@@ -10,7 +10,7 @@
 ================================================================================
           ULTIMATE ECONOMY & MULTI-VAULT PRO v2.4.0 — DOCUMENTATION
 ================================================================================
-Author: SevGamer & MinoForge Studios
+Author: MinoForge Studios
 Platform: Paper / Purpur / Spigot / Folia (1.18 - 1.21.x)
 Vault API: 1.7+ Compatible
 PlaceholderAPI: Supported

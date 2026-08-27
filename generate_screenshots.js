@@ -59,7 +59,7 @@ const discordTicketSvg = `<svg width="1280" height="720" viewBox="0 0 1280 720" 
   <circle cx="96" cy="694" r="16" fill="#5865F2"/>
   <text x="96" y="699" fill="#ffffff" font-size="12" font-weight="800" text-anchor="middle">S</text>
   <circle cx="108" cy="706" r="5" fill="#23a55a" stroke="#232428" stroke-width="2"/>
-  <text x="120" y="690" fill="#ffffff" font-size="13" font-weight="700">SevGamer</text>
+  <text x="120" y="690" fill="#ffffff" font-size="13" font-weight="700">MinoUser</text>
   <text x="120" y="705" fill="#949ba4" font-size="11">Online (Developer)</text>
 
   <!-- Main Chat Window (968px) -->
@@ -139,7 +139,7 @@ const discordTicketSvg = `<svg width="1280" height="720" viewBox="0 0 1280 720" 
       <circle cx="12" cy="12" r="12" fill="#5865F2"/>
       <text x="12" y="16" fill="#ffffff" font-size="9" font-weight="900" text-anchor="middle">TM</text>
       <text x="32" y="12" fill="#ffffff" font-size="12" font-weight="700">Ticket Master [BOT]</text>
-      <text x="32" y="28" fill="#949ba4" font-size="10">Created by @SevGamer</text>
+      <text x="32" y="28" fill="#949ba4" font-size="10">Created by @MinoUser</text>
       
       <rect y="38" width="358" height="54" rx="4" fill="#2b2d31"/>
       <rect y="38" width="3" height="54" fill="#23a55a"/>
@@ -304,7 +304,7 @@ const minecraftEconomySvg = `<svg width="1280" height="720" viewBox="0 0 1280 72
     <text x="130" y="32" fill="#ffaa00" font-size="16" font-weight="900" text-anchor="middle">§6§lEconomySMP</text>
     <text x="16" y="56" fill="#aaaaaa" font-size="12">--------------------------</text>
     
-    <text x="16" y="80" fill="#ffffff" font-size="13">Player: <tspan fill="#55ffff">SevGamer</tspan></text>
+    <text x="16" y="80" fill="#ffffff" font-size="13">Player: <tspan fill="#55ffff">MinoPlayer</tspan></text>
     <text x="16" y="106" fill="#ffffff" font-size="13">Balance: <tspan fill="#55ff55" font-weight="900">$1,450,000</tspan></text>
     <text x="16" y="132" fill="#ffffff" font-size="13">Bank: <tspan fill="#22c55e" font-weight="900">$5,820,000</tspan></text>
     <text x="16" y="158" fill="#ffffff" font-size="13">Interest: <tspan fill="#ffff55">+2.5%/hr</tspan></text>

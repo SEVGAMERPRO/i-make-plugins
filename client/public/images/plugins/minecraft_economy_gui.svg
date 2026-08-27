@@ -412,7 +412,7 @@
     <text x="130" y="32" fill="#ffaa00" font-size="16" font-weight="900" text-anchor="middle">§6§lEconomySMP</text>
     <text x="16" y="56" fill="#aaaaaa" font-size="12">--------------------------</text>
     
-    <text x="16" y="80" fill="#ffffff" font-size="13">Player: <tspan fill="#55ffff">SevGamer</tspan></text>
+    <text x="16" y="80" fill="#ffffff" font-size="13">Player: <tspan fill="#55ffff">MinoPlayer</tspan></text>
     <text x="16" y="106" fill="#ffffff" font-size="13">Balance: <tspan fill="#55ff55" font-weight="900">$1,450,000</tspan></text>
     <text x="16" y="132" fill="#ffffff" font-size="13">Bank: <tspan fill="#22c55e" font-weight="900">$5,820,000</tspan></text>
     <text x="16" y="158" fill="#ffffff" font-size="13">Interest: <tspan fill="#ffff55">+2.5%/hr</tspan></text>
