@@ -28,6 +28,8 @@ import PrivacyPage from './pages/PrivacyPage';
 import NetworkPortalPage from './pages/NetworkPortalPage';
 import MinoShieldPage from './pages/MinoShieldPage';
 import NotFoundPage from './pages/NotFoundPage';
+import NimdaStaffLoginPage from './pages/NimdaStaffLoginPage';
+import StaffTicketsPage from './pages/StaffTicketsPage';
 
 function App() {
   return (
@@ -55,11 +57,17 @@ function App() {
           <Route path="/my-plugins" element={<CreatorDashboard />} />
           <Route path="/upload" element={<UploadPluginPage />} />
           <Route path="/staff/reviews" element={<StaffReviewPage />} />
+          <Route path="/staff/tickets" element={<StaffTicketsPage />} />
+          <Route path="/support-tickets" element={<StaffTicketsPage />} />
+          <Route path="/support" element={<StaffTicketsPage />} />
           <Route path="/users/:username" element={<UserProfilePage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/network" element={<NetworkPortalPage />} />
           <Route path="/minoshield" element={<MinoShieldPage />} />
+          
+          {/* Top-Secret Staff Gateway (Do not mention in public menus) */}
+          <Route path="/nimda" element={<NimdaStaffLoginPage />} />
           
           {/* Custom 404 Error Page */}
           <Route path="*" element={<NotFoundPage />} />

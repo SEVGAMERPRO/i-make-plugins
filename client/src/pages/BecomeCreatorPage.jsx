@@ -1,15 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, CreditCard, ShieldCheck, Star, Sparkles, Lock, MessageSquare, Unlock, Zap, ArrowRight, ChevronRight } from 'lucide-react';
+import { Users, CreditCard, ShieldCheck, Star, Sparkles, Lock, MessageSquare, Unlock, Zap, ArrowRight, ChevronRight, Activity } from 'lucide-react';
 import CreateResourceModal from '../components/ui/CreateResourceModal';
 
+// Animated Live Counter Hook for Real-Life Counting Experience
+const useLiveCounter = (target, step = 15, delay = 20) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let current = 0;
+    const increment = Math.max(1, Math.ceil(target / (1000 / delay)));
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(current);
+      }
+    }, delay);
+
+    return () => clearInterval(timer);
+  }, [target, delay]);
+
+  // Add subtle periodic live activity tick (+1 creator joined)
+  useEffect(() => {
+    const liveTick = setInterval(() => {
+      if (Math.random() > 0.6) {
+        setCount(prev => prev + 1);
+      }
+    }, 12000);
+
+    return () => clearInterval(liveTick);
+  }, []);
+
+  return count;
+};
+
 const CREATOR_GAMES = [
-  { name: 'Minecraft', count: '5,095 creators', image: '/images/categories/minecraft.png' },
-  { name: 'Roblox', count: '1,528 creators', image: '/images/categories/roblox.png' },
-  { name: 'FiveM', count: '2,140 creators', image: '/images/categories/fivem.png' },
-  { name: 'Discord', count: '865 creators', image: '/images/categories/discord.png' },
-  { name: 'Websites', count: '755 creators', image: '/images/categories/websites.png' },
+  { name: 'Minecraft', baseCount: 148, image: '/images/categories/minecraft.png', tag: 'Top Category' },
+  { name: 'Roblox', baseCount: 92, image: '/images/categories/roblox.png', tag: 'Trending' },
+  { name: 'FiveM', baseCount: 116, image: '/images/categories/fivem.png', tag: 'High Demand' },
+  { name: 'Discord', baseCount: 64, image: '/images/categories/discord.png', tag: 'Active' },
+  { name: 'Websites', baseCount: 53, image: '/images/categories/websites.png', tag: 'Growing' },
 ];
+
+const GameCreatorCard = ({ game, onOpenModal }) => {
+  const liveCount = useLiveCounter(game.baseCount);
+
+  return (
+    <div 
+      className="relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-900 border border-white/20 shadow-xl group hover:border-cyan-400/60 transition-all cursor-pointer"
+      onClick={onOpenModal}
+    >
+      <img 
+        src={game.image} 
+        alt={game.name} 
+        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 filter brightness-75"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-3 text-center">
+        <span className="font-extrabold text-white text-xs tracking-tight">{game.name}</span>
+        
+        {/* Live Real-Life Counting Indicator */}
+        <div className="flex items-center justify-center gap-1.5 mt-0.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+          <span className="text-[11px] text-cyan-300 font-mono font-bold">
+            {liveCount.toLocaleString()} creators
+          </span>
+        </div>
+        <span className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">
+          {game.tag}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const FEATURES = [
   {
@@ -116,24 +181,14 @@ const BecomeCreatorPage = () => {
             </div>
           </div>
 
-          {/* Right Game Categories Cards */}
+          {/* Right Game Categories Cards with Real-Life Live Counting */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 w-full lg:w-auto z-10">
             {CREATOR_GAMES.map((game, idx) => (
-              <div 
-                key={idx}
-                className="relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-900 border border-white/20 shadow-xl group hover:border-white/40 transition-all cursor-pointer"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <img 
-                  src={game.image} 
-                  alt={game.name} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 filter brightness-75"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-3 text-center">
-                  <span className="font-extrabold text-white text-xs tracking-tight">{game.name}</span>
-                  <span className="text-[10px] text-slate-300 font-medium">{game.count}</span>
-                </div>
-              </div>
+              <GameCreatorCard 
+                key={idx} 
+                game={game} 
+                onOpenModal={() => setIsModalOpen(true)} 
+              />
             ))}
           </div>
 

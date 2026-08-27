@@ -8,26 +8,7 @@ export const NotificationProvider = ({ children }) => {
       const saved = localStorage.getItem('minoforge_notifications');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return [
-      {
-        id: 'welcome-1',
-        title: 'Welcome to MinoForge! 🚀',
-        message: 'Explore 1,000+ custom game plugins or request a tailor-made build.',
-        type: 'info',
-        time: 'Just now',
-        read: false,
-        link: '/plugins'
-      },
-      {
-        id: 'sample-upload-1',
-        title: 'Plugin Upload Status: Approved! 🎉',
-        message: 'Your plugin "Ultimate Economy & Vault" is approved and live on the marketplace.',
-        type: 'approved',
-        time: '2 hours ago',
-        read: false,
-        link: '/plugins/1'
-      }
-    ];
+    return []; // No default fake notifications!
   });
 
   useEffect(() => {

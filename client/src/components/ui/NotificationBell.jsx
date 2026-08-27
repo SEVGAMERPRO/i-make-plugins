@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, CheckCircle2, XCircle, Clock, Info, Check, Trash2, Sparkles, ChevronRight } from 'lucide-react';
+import { Bell, CheckCircle2, XCircle, Clock, Info, Check, Trash2, Sparkles, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 
 const NotificationBell = () => {
@@ -26,6 +26,9 @@ const NotificationBell = () => {
         return <XCircle className="w-4 h-4 text-red-400" />;
       case 'pending':
         return <Clock className="w-4 h-4 text-amber-400" />;
+      case 'warning':
+      case 'ip_conflict':
+        return <AlertTriangle className="w-4 h-4 text-amber-400 animate-pulse" />;
       default:
         return <Info className="w-4 h-4 text-blue-400" />;
     }
@@ -39,6 +42,9 @@ const NotificationBell = () => {
         return 'bg-red-500/10 border-red-500/20 text-red-300';
       case 'pending':
         return 'bg-amber-500/10 border-amber-500/20 text-amber-300';
+      case 'warning':
+      case 'ip_conflict':
+        return 'bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-lg shadow-amber-500/10';
       default:
         return 'bg-blue-500/10 border-blue-500/20 text-blue-300';
     }
