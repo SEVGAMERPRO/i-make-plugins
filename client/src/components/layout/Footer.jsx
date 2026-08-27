@@ -10,11 +10,13 @@ const Footer = () => {
           
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5 text-xl font-black text-white tracking-tight">
-              <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-blue-500/20">
-                MF
-              </div>
-              <span>MinoForge</span>
+            <Link to="/" className="flex items-center gap-2.5 text-xl font-black text-white tracking-tight group">
+              <img 
+                src="/favicon.svg" 
+                alt="MinoForge Logo" 
+                className="w-8 h-8 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform" 
+              />
+              <span className="group-hover:text-blue-300 transition-colors">MinoForge</span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
               The premier marketplace for gaming plugins, server tools, scripts, and custom development.
