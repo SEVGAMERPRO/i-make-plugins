@@ -167,7 +167,7 @@ const HomePage = () => {
               <span className="text-xs font-bold text-emerald-400">$4.99 USD</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/minecraft_economy_gui.jpg" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <img src="/images/plugins/minecraft_economy_gui.svg" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
             </div>
             <div>
               <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Ultimate Economy & Vault System</h3>
@@ -186,7 +186,7 @@ const HomePage = () => {
               <span className="text-xs font-bold text-emerald-400">$3.49 USD</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/gta_gas_station.jpg" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <img src="/images/plugins/gta_gas_station.svg" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
             </div>
             <div>
               <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Advanced Fuel & Electric Charging</h3>
@@ -205,7 +205,7 @@ const HomePage = () => {
               <span className="text-xs font-bold text-emerald-400">Free</span>
             </div>
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/discord_ticket_panel.jpg" alt="Discord Bot" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <img src="/images/plugins/discord_ticket_panel.svg" alt="Discord Bot" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
             </div>
             <div>
               <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Discord Ticket & Transcripts Bot</h3>

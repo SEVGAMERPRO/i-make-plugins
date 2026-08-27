@@ -1,0 +1,134 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'gg sans', 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <!-- Discord App Background -->
+  <rect width="1280" height="720" fill="#313338"/>
+  
+  <!-- Left Guild Server Sidebar -->
+  <rect width="72" height="720" fill="#1e1f22"/>
+  <circle cx="36" cy="36" r="24" fill="#5865F2"/>
+  <text x="36" y="43" fill="#ffffff" font-size="16" font-weight="900" text-anchor="middle">MF</text>
+  <rect x="0" y="24" width="4" height="24" rx="2" fill="#ffffff"/>
+  
+  <circle cx="36" cy="96" r="22" fill="#2b2d31"/>
+  <text x="36" y="103" fill="#dbdee1" font-size="14" font-weight="700" text-anchor="middle">MC</text>
+  <circle cx="36" cy="150" r="22" fill="#2b2d31"/>
+  <text x="36" y="157" fill="#dbdee1" font-size="14" font-weight="700" text-anchor="middle">5M</text>
+
+  <!-- Channels Sidebar -->
+  <rect x="72" width="240" height="720" fill="#2b2d31"/>
+  <rect x="72" width="240" height="48" fill="#2b2d31"/>
+  <text x="88" y="30" fill="#ffffff" font-size="15" font-weight="800">MinoForge Server</text>
+  <path d="M290 26L296 32L302 26" stroke="#949ba4" stroke-width="2" stroke-linecap="round"/>
+  <line x1="72" y1="48" x2="312" y2="48" stroke="#1f2023" stroke-width="1"/>
+
+  <!-- Channel List -->
+  <text x="88" y="78" fill="#949ba4" font-size="12" font-weight="700" letter-spacing="0.5">▼ INFORMATION</text>
+  <text x="108" y="102" fill="#949ba4" font-size="14" font-weight="500"># 📢︱announcements</text>
+  <text x="108" y="130" fill="#949ba4" font-size="14" font-weight="500"># 📜︱rules</text>
+
+  <text x="88" y="170" fill="#949ba4" font-size="12" font-weight="700" letter-spacing="0.5">▼ SUPPORT TICKETS</text>
+  <!-- Active Channel Highlight -->
+  <rect x="80" y="184" width="224" height="34" rx="4" fill="#35373c"/>
+  <text x="108" y="206" fill="#ffffff" font-size="14" font-weight="700"># 🎫︱support-tickets</text>
+  <text x="108" y="244" fill="#949ba4" font-size="14" font-weight="500"># 📑︱ticket-logs</text>
+  <text x="108" y="274" fill="#949ba4" font-size="14" font-weight="500"># 💡︱suggestions</text>
+
+  <!-- User Bar at Bottom Left -->
+  <rect x="72" y="668" width="240" height="52" fill="#232428"/>
+  <circle cx="100" cy="694" r="16" fill="#5865F2"/>
+  <text x="100" y="699" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">S</text>
+  <circle cx="112" cy="706" r="5" fill="#23a55a" stroke="#232428" stroke-width="2"/>
+  <text x="124" y="690" fill="#ffffff" font-size="13" font-weight="700">SevGamer</text>
+  <text x="124" y="705" fill="#949ba4" font-size="11">#0001</text>
+
+  <!-- Main Chat Header -->
+  <rect x="312" width="968" height="48" fill="#313338"/>
+  <line x1="312" y1="48" x2="1280" y2="48" stroke="#1f2023" stroke-width="1"/>
+  <text x="336" y="30" fill="#ffffff" font-size="16" font-weight="700"># 🎫︱support-tickets</text>
+  <text x="510" y="30" fill="#949ba4" font-size="13" font-weight="500">|   Click below to create a private support ticket</text>
+
+  <!-- Setup Command Message -->
+  <g transform="translate(336, 75)">
+    <circle cx="20" cy="20" r="20" fill="#e53935"/>
+    <text x="20" y="26" fill="#ffffff" font-size="14" font-weight="900" text-anchor="middle">A</text>
+    <text x="52" y="16" fill="#ffffff" font-size="15" font-weight="700">ServerAdmin</text>
+    <rect x="145" y="4" width="48" height="16" rx="3" fill="#e53935"/>
+    <text x="169" y="16" fill="#ffffff" font-size="10" font-weight="800" text-anchor="middle">ADMIN</text>
+    <text x="205" y="16" fill="#949ba4" font-size="12">Today at 4:15 PM</text>
+    <text x="52" y="38" fill="#dbdee1" font-size="14">/ticket setup</text>
+  </g>
+
+  <!-- Ticket Master Bot Response & Embed Panel -->
+  <g transform="translate(336, 145)">
+    <circle cx="20" cy="20" r="20" fill="#5865F2"/>
+    <text x="20" y="26" fill="#ffffff" font-size="14" font-weight="900" text-anchor="middle">TM</text>
+    <text x="52" y="16" fill="#ffffff" font-size="15" font-weight="700">Ticket Master</text>
+    <rect x="150" y="4" width="36" height="16" rx="3" fill="#5865F2"/>
+    <text x="168" y="16" fill="#ffffff" font-size="10" font-weight="800" text-anchor="middle">BOT</text>
+    <text x="198" y="16" fill="#949ba4" font-size="12">Today at 4:15 PM</text>
+
+    <!-- Main Discord Embed Box -->
+    <g transform="translate(52, 32)">
+      <rect width="640" height="260" rx="4" fill="#2b2d31"/>
+      <rect width="4" height="260" rx="2" fill="#5865F2"/>
+
+      <text x="20" y="32" fill="#5865F2" font-size="12" font-weight="800" letter-spacing="0.5">MINOFORGE SUPPORT DESK</text>
+      <text x="20" y="60" fill="#ffffff" font-size="18" font-weight="800">🎫 Need Assistance with Plugins or Orders?</text>
+      <text x="20" y="90" fill="#dbdee1" font-size="14" font-weight="400">Click the button below to open a private 1-on-1 support ticket with our developer team.</text>
+      <text x="20" y="112" fill="#dbdee1" font-size="14" font-weight="400">Our staff is available 24/7 to resolve technical issues and deliver custom commissions.</text>
+
+      <!-- Embed Info Fields -->
+      <rect x="20" y="132" width="180" height="48" rx="4" fill="#1e1f22"/>
+      <text x="32" y="150" fill="#949ba4" font-size="11" font-weight="700">⚡ RESPONSE TIME</text>
+      <text x="32" y="170" fill="#23a55a" font-size="13" font-weight="800">&lt; 15 Minutes</text>
+
+      <rect x="210" y="132" width="180" height="48" rx="4" fill="#1e1f22"/>
+      <text x="222" y="150" fill="#949ba4" font-size="11" font-weight="700">🔒 PRIVACY &amp; ACCESS</text>
+      <text x="222" y="170" fill="#38bdf8" font-size="13" font-weight="800">Staff &amp; Creator Only</text>
+
+      <rect x="400" y="132" width="220" height="48" rx="4" fill="#1e1f22"/>
+      <text x="412" y="150" fill="#949ba4" font-size="11" font-weight="700">📑 TRANSCRIPTS</text>
+      <text x="412" y="170" fill="#f59e0b" font-size="13" font-weight="800">Automatic HTML Export</text>
+
+      <!-- Interactive Discord Action Row Buttons -->
+      <g transform="translate(20, 198)">
+        <!-- Blurple Primary Button -->
+        <rect width="145" height="38" rx="4" fill="#5865F2" cursor="pointer"/>
+        <text x="72" y="24" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">🎫 Open Ticket</text>
+
+        <!-- Red Danger Button -->
+        <rect x="155" width="130" height="38" rx="4" fill="#da373c" cursor="pointer"/>
+        <text x="220" y="24" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">🐛 Bug Report</text>
+
+        <!-- Green Success Button -->
+        <rect x="295" width="150" height="38" rx="4" fill="#248046" cursor="pointer"/>
+        <text x="370" y="24" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">📖 Documentation</text>
+
+        <!-- Gray Secondary Link Button -->
+        <rect x="455" width="145" height="38" rx="4" fill="#4e5058" cursor="pointer"/>
+        <text x="527" y="24" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">🌐 colasmp.net ↗</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Active Ticket Sample Overlay at Right -->
+  <g transform="translate(850, 430)">
+    <rect width="390" height="250" rx="8" fill="#1e1f22" stroke="#5865F2" stroke-width="2"/>
+    <rect width="390" height="38" rx="8" fill="#2b2d31"/>
+    <text x="16" y="24" fill="#ffffff" font-size="13" font-weight="800">#ticket-0412 (Active Session)</text>
+    
+    <g transform="translate(16, 52)">
+      <circle cx="12" cy="12" r="12" fill="#5865F2"/>
+      <text x="12" y="16" fill="#ffffff" font-size="9" font-weight="900" text-anchor="middle">TM</text>
+      <text x="32" y="12" fill="#ffffff" font-size="12" font-weight="700">Ticket Master [BOT]</text>
+      <text x="32" y="28" fill="#949ba4" font-size="10">Ticket opened by @SevGamer</text>
+      
+      <rect y="38" width="358" height="60" rx="4" fill="#2b2d31"/>
+      <rect y="38" width="3" height="60" fill="#23a55a"/>
+      <text x="12" y="56" fill="#23a55a" font-size="10" font-weight="800">REASON: Custom Plugin Question</text>
+      <text x="12" y="74" fill="#dbdee1" font-size="11">Staff Member @Alex has claimed this ticket.</text>
+
+      <rect y="110" width="180" height="32" rx="4" fill="#da373c" cursor="pointer"/>
+      <text x="90" y="131" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle">🔒 Close &amp; Save Transcript</text>
+    </g>
+  </g>
+</svg>

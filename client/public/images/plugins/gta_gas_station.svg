@@ -1,0 +1,63 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <!-- Night Gas Station Background Simulation -->
+  <rect width="1280" height="720" fill="#090d16"/>
+  
+  <!-- Ambient Gas Station Canopy Light Glow -->
+  <ellipse cx="640" cy="180" rx="500" ry="120" fill="#ff9900" opacity="0.15"/>
+  <rect x="200" y="40" width="880" height="60" rx="8" fill="#d97706" opacity="0.85"/>
+  <text x="640" y="80" fill="#ffffff" font-size="28" font-weight="900" letter-spacing="4" text-anchor="middle">RON OIL — LOS SANTOS</text>
+
+  <!-- Supercar Silhouette Representation -->
+  <path d="M300 480 Q450 420 620 420 Q800 420 980 490 L1020 540 L260 540 Z" fill="#1e293b"/>
+  <circle cx="380" cy="540" r="45" fill="#0f172a" stroke="#475569" stroke-width="8"/>
+  <circle cx="900" cy="540" r="45" fill="#0f172a" stroke="#475569" stroke-width="8"/>
+
+  <!-- Authentic FiveM QBCore / ox_lib Fuel NUI Overlay Box -->
+  <g transform="translate(820, 260)">
+    <rect width="400" height="380" rx="16" fill="#0b0f19" opacity="0.95" stroke="#f59e0b" stroke-width="2"/>
+    
+    <!-- NUI Header -->
+    <rect width="400" height="52" rx="16" fill="#1e293b"/>
+    <text x="24" y="33" fill="#f59e0b" font-size="16" font-weight="900">⛽ RON OIL REFUELING SYSTEM</text>
+    <circle cx="370" cy="26" r="6" fill="#22c55e"/>
+
+    <!-- Vehicle Info -->
+    <g transform="translate(24, 75)">
+      <text x="0" y="0" fill="#94a3b8" font-size="12" font-weight="600">TARGET VEHICLE</text>
+      <text x="0" y="20" fill="#ffffff" font-size="16" font-weight="800">Benefactor Krieger (88XCD921)</text>
+
+      <!-- Fuel Tank Progress Meter -->
+      <text x="0" y="60" fill="#94a3b8" font-size="12" font-weight="600">CURRENT FUEL LEVEL</text>
+      <text x="350" y="60" fill="#22c55e" font-size="14" font-weight="900" text-anchor="end">84%</text>
+
+      <rect y="70" width="350" height="16" rx="8" fill="#1e293b"/>
+      <rect y="70" width="294" height="16" rx="8" fill="#22c55e"/>
+
+      <!-- Pricing Summary Box -->
+      <rect y="105" width="350" height="85" rx="10" fill="#111827" stroke="#374151"/>
+      <text x="16" y="130" fill="#94a3b8" font-size="13">Fuel Type:</text>
+      <text x="334" y="130" fill="#ffffff" font-size="13" font-weight="700" text-anchor="end">98 Premium Octane</text>
+
+      <text x="16" y="152" fill="#94a3b8" font-size="13">Price per Liter:</text>
+      <text x="334" y="152" fill="#f59e0b" font-size="13" font-weight="700" text-anchor="end">$1.75 / L</text>
+
+      <text x="16" y="174" fill="#94a3b8" font-size="13">Total Cost (36.8L):</text>
+      <text x="334" y="174" fill="#22c55e" font-size="15" font-weight="900" text-anchor="end">$64.40</text>
+
+      <!-- Action Keybind Prompts -->
+      <g transform="translate(0, 210)">
+        <rect width="170" height="42" rx="8" fill="#f59e0b" cursor="pointer"/>
+        <text x="85" y="26" fill="#000000" font-size="13" font-weight="900" text-anchor="middle">[E] HOLD TO REFUEL</text>
+
+        <rect x="180" width="170" height="42" rx="8" fill="#dc2626" cursor="pointer"/>
+        <text x="265" y="26" fill="#ffffff" font-size="13" font-weight="900" text-anchor="middle">[X] STOP &amp; PAY</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Notification Toast in Top Center -->
+  <g transform="translate(490, 130)">
+    <rect width="300" height="46" rx="8" fill="#1e293b" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="150" y="28" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">⛽ Fuel Nozzle Connected to Vehicle</text>
+  </g>
+</svg>
