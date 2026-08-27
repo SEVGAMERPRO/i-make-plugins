@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -10,14 +10,31 @@ const Navbar = ({ onMenuClick }) => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 15) {
-        setIsScrolled(true);
-      } else {
+      const currentScrollY = window.scrollY;
+      
+      // Top of page: always show with original navbar background
+      if (currentScrollY <= 15) {
+        setIsVisible(true);
         setIsScrolled(false);
+      } 
+      // Scrolling DOWN -> Hide the top bar smoothly
+      else if (currentScrollY > lastScrollY.current && currentScrollY > 70) {
+        setIsVisible(false);
+        setIsScrolled(true);
+        setDropdownOpen(false); // Close dropdown if scrolling down
+      } 
+      // Scrolling UP -> Reveal the top bar with floating glass & glow!
+      else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true);
+        setIsScrolled(true);
       }
+
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -32,11 +49,17 @@ const Navbar = ({ onMenuClick }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 nav-glass-transition">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out transform ${
+        isVisible 
+          ? 'translate-y-0 opacity-100' 
+          : '-translate-y-full opacity-0 pointer-events-none'
+      }`}
+    >
       <nav 
-        className={`w-full nav-glass-transition flex items-center px-3.5 sm:px-6 md:px-8 text-white ${
+        className={`w-full transition-all duration-300 flex items-center px-3.5 sm:px-6 md:px-8 text-white ${
           isScrolled 
-            ? 'h-14 sm:h-16 bg-slate-950/85 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 border-b border-blue-500/20' 
+            ? 'h-14 sm:h-16 bg-slate-950/90 backdrop-blur-2xl shadow-2xl shadow-blue-500/15 border-b border-blue-500/25' 
             : 'h-16 bg-slate-950/90 backdrop-blur-xl border-b border-white/10'
         }`}
       >
