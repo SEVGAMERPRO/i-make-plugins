@@ -163,43 +163,91 @@ Config.RefuelSpeed = 1.5
     downloadUrl: '/downloads/DiscordTicketBot-v1.0.0.zip',
     summary: 'Automated ticket buttons, transcript HTML archiving, and staff rating system for Discord servers.',
     overview: `
-      <h3>Overview</h3>
-      <p>A professional Discord support ticket bot designed for gaming communities. Automatically creates ticket channels with one-click buttons, logs rich HTML transcripts to a staff channel, and asks users for staff ratings upon ticket closure.</p>
+      <h3>What It Does</h3>
+      <p>A fast, automated support ticket system for Discord servers that replaces messy direct messages with clean, private 1-on-1 support channels. Users open tickets with 1-click interactive buttons and modal popups, while full chat histories are automatically exported into standalone HTML transcripts upon closure.</p>
+      <br/>
+      <h4>How It Works</h4>
+      <ul>
+        <li><strong>1. Panel Deployment:</strong> The bot posts a permanent interactive button panel in your <code>#support</code> channel.</li>
+        <li><strong>2. Ticket Creation:</strong> Clicking "Open Ticket" opens a reason modal and creates a private channel (e.g. <code>#ticket-username</code>).</li>
+        <li><strong>3. Staff Resolution:</strong> Support Staff chat privately with the user to resolve their questions.</li>
+        <li><strong>4. Transcript Export:</strong> Clicking "Close Ticket" saves a full HTML transcript with timestamps/attachments to your logs channel, then cleanly deletes the ticket.</li>
+      </ul>
       <br/>
       <h4>Key Features</h4>
       <ul>
         <li>Interactive Discord Button & Modal menus</li>
-        <li>Self-hosted HTML transcripts viewable in browser</li>
-        <li>Staff performance ratings (1 to 5 stars)</li>
-        <li>Auto-close idle tickets after 24 hours of inactivity</li>
-        <li>Role-based permissions for support staff</li>
+        <li>Self-hosted HTML transcripts viewable in any web browser</li>
+        <li>Role-based permissions (only staff & ticket creator can view)</li>
+        <li>Auto-close idle tickets after inactivity</li>
+        <li>Zero external database required (pure Node.js & Discord.js v14)</li>
       </ul>
     `,
     installation: `
+      <h4>Step-by-Step Installation Guide (README.txt)</h4>
       <ol>
-        <li>Download and extract the bot archive, then run <code>npm install</code>.</li>
-        <li>Copy your Discord Bot Token into <code>config.json</code> or <code>.env</code>.</li>
-        <li>Run <code>npm start</code> or use PM2 for continuous hosting: <code>pm2 start index.js --name ticket-bot</code>.</li>
-        <li>Type <code>/ticket setup</code> in your Discord server to deploy the ticket panel.</li>
+        <li><strong>Prerequisites:</strong> Install Node.js 18+ from <a href="https://nodejs.org" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">nodejs.org</a>.</li>
+        <li><strong>Discord Developer Portal:</strong> Create a bot at <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">discord.com/developers</a>. Enable <em>Server Members Intent</em> and <em>Message Content Intent</em> under the Bot tab.</li>
+        <li><strong>Install Dependencies:</strong> Extract the downloaded zip and run <code>npm install</code>.</li>
+        <li><strong>Configuration:</strong> Rename <code>config.example.json</code> to <code>config.json</code> and paste your Bot Token and Server IDs.</li>
+        <li><strong>Start the Bot:</strong> Run <code>node index.js</code> (or use PM2 for 24/7 hosting: <code>pm2 start index.js --name ticket-bot</code>).</li>
+        <li><strong>Deploy Panel:</strong> Run <code>/ticket setup</code> in your Discord server #support channel!</li>
       </ol>
     `,
     commands: `
-      <ul>
-        <li><code>/ticket setup</code> - Deploy the interactive ticket panel to a channel</li>
-        <li><code>/ticket close [reason]</code> - Close active ticket and export transcript</li>
-        <li><code>/ticket add [user]</code> - Add user to current ticket</li>
-      </ul>
+      <h4>All Available Commands & Permissions</h4>
+      <table class="w-full text-left text-xs border border-white/10 mt-2 rounded-lg overflow-hidden">
+        <thead class="bg-slate-800 text-slate-300">
+          <tr>
+            <th class="p-2.5 border-b border-white/10">Command</th>
+            <th class="p-2.5 border-b border-white/10">Permission</th>
+            <th class="p-2.5 border-b border-white/10">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-slate-300">
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket setup</td>
+            <td class="p-2.5 text-amber-400 font-semibold">Administrator</td>
+            <td class="p-2.5">Deploys the interactive button panel to current channel</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket close [reason]</td>
+            <td class="p-2.5 text-emerald-400 font-semibold">Staff & Creator</td>
+            <td class="p-2.5">Closes ticket, logs reason, and exports HTML transcript</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket add @user</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
+            <td class="p-2.5">Grants another user access to the active ticket</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket remove @user</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
+            <td class="p-2.5">Removes a user from the active ticket</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket rename [name]</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
+            <td class="p-2.5">Renames the active ticket channel</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket transcript</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
+            <td class="p-2.5">Generates an instant HTML transcript without closing</td>
+          </tr>
+        </tbody>
+      </table>
     `,
-    configSample: `// Discord Ticket Bot Configuration
+    configSample: `// Discord Ticket Bot Configuration (config.json)
 // Format: JSON
 
 {
-  "botToken": "YOUR_DISCORD_BOT_TOKEN",
-  "clientId": "123456789012345678",
-  "guildId": "987654321098765432",
-  "ticketCategoryChannelId": "112233445566778899",
-  "transcriptLogsChannelId": "998877665544332211",
-  "supportStaffRoleId": "554433221100998877",
+  "botToken": "YOUR_DISCORD_BOT_TOKEN_HERE",
+  "clientId": "YOUR_DISCORD_APPLICATION_CLIENT_ID",
+  "guildId": "YOUR_DISCORD_SERVER_ID",
+  "ticketCategoryChannelId": "CATEGORY_CHANNEL_ID_FOR_TICKETS",
+  "transcriptLogsChannelId": "TEXT_CHANNEL_ID_FOR_HTML_TRANSCRIPTS",
+  "supportStaffRoleId": "ROLE_ID_OF_YOUR_SUPPORT_STAFF",
   "maxOpenTicketsPerUser": 2,
   "askFeedbackOnClose": true
 }

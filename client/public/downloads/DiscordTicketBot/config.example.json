@@ -1,0 +1,10 @@
+{
+  "botToken": "YOUR_BOT_TOKEN_HERE",
+  "clientId": "YOUR_DISCORD_APPLICATION_CLIENT_ID",
+  "guildId": "YOUR_DISCORD_SERVER_ID",
+  "ticketCategoryChannelId": "CATEGORY_CHANNEL_ID_FOR_TICKETS",
+  "transcriptLogsChannelId": "TEXT_CHANNEL_ID_FOR_TRANSCRIPTS",
+  "supportStaffRoleId": "ROLE_ID_OF_SUPPORT_STAFF",
+  "maxOpenTicketsPerUser": 2,
+  "askFeedbackOnClose": true
+}
