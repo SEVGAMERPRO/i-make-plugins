@@ -61,7 +61,10 @@ router.post('/send-verification-code', async (req, res) => {
     });
 
     const mailOptions = {
-      from: `"MinoForge Verification" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+      from: {
+        name: 'MinoForge Verification',
+        address: process.env.EMAIL_USER || 'severinkaptein8@gmail.com'
+      },
       to: cleanEmail,
       subject: `🔒 [MinoForge Verification] Your Security Code: ${code}`,
       text: `Hello,
@@ -420,7 +423,10 @@ router.post('/staff/send-code', async (req, res) => {
 
     // Send styled security email via transporter
     const mailOptions = {
-      from: `"MinoForge Security" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+      from: {
+        name: 'MinoForge Verification',
+        address: process.env.EMAIL_USER || 'severinkaptein8@gmail.com'
+      },
       to: staffEmail,
       subject: `🔒 [Nimda Gateway] Staff Verification Code: ${code}`,
       text: `Your MinoForge Staff 2FA Verification Code is: ${code}. This code expires in 10 minutes.`,
