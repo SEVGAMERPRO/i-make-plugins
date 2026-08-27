@@ -7,59 +7,80 @@
       <stop offset="100%" stop-color="#030712" />
     </linearGradient>
 
-    <!-- Outer Forge Wing Left Gradient -->
-    <linearGradient id="leftWing" x1="64" y1="96" x2="256" y2="416" gradientUnits="userSpaceOnUse">
+    <!-- Head & Feather Sheen Gradient -->
+    <linearGradient id="mynaFeather" x1="120" y1="80" x2="380" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="40%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Electric Cyan/Blue Cyber Wings Gradient -->
+    <linearGradient id="cyberWing" x1="80" y1="180" x2="430" y2="440" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#00f2fe" />
       <stop offset="40%" stop-color="#0284c7" />
       <stop offset="100%" stop-color="#1e3a8a" />
     </linearGradient>
 
-    <!-- Outer Forge Wing Right Gradient -->
-    <linearGradient id="rightWing" x1="448" y1="96" x2="256" y2="416" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="50%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#1d4ed8" />
-    </linearGradient>
-
-    <!-- Central Anvil & Forge Core Gradient -->
-    <linearGradient id="forgeCore" x1="256" y1="120" x2="256" y2="380" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="25%" stop-color="#38bdf8" />
-      <stop offset="70%" stop-color="#0284c7" />
-      <stop offset="100%" stop-color="#0369a1" />
+    <!-- Golden Myna Eye Patch & Beak Gradient -->
+    <linearGradient id="goldBeak" x1="200" y1="180" x2="360" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
     </linearGradient>
 
     <!-- Ambient Glow Filter -->
-    <filter id="forgeGlow" x="30" y="30" width="452" height="452" filterUnits="userSpaceOnUse">
-      <feGaussianBlur stdDeviation="24" result="blur" />
+    <filter id="mynaGlow" x="40" y="40" width="432" height="432" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="20" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
 
   <!-- Squircle Base with Obsidian Glass Texture -->
   <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
-  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#leftWing)" stroke-width="6" stroke-opacity="0.35" />
+  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#cyberWing)" stroke-width="6" stroke-opacity="0.35" />
 
-  <!-- Outer Neon Atmosphere -->
-  <circle cx="256" cy="256" r="140" fill="#0284c7" opacity="0.15" filter="url(#forgeGlow)" />
+  <!-- Ambient Eye & Wing Glow -->
+  <circle cx="256" cy="220" r="130" fill="#0284c7" opacity="0.12" filter="url(#mynaGlow)" />
 
-  <!-- MinoForge Signature Geometric 'M + Anvil Forge' Emblem -->
-  <!-- Left 'M' Pillar / Forge Pillar -->
-  <path d="M96 384 V 160 L 192 128 L 224 240 L 160 384 Z" fill="url(#leftWing)" />
-  
-  <!-- Right 'M' Pillar / Forge Pillar -->
-  <path d="M416 384 V 160 L 320 128 L 288 240 L 352 384 Z" fill="url(#rightWing)" />
+  <!-- ================= MINOFORGE MYNA BIRD MASCOT ================= -->
 
-  <!-- Central Forge Anvil Core & Hammer Descent -->
-  <path d="M192 128 L 256 192 L 320 128 L 296 280 L 256 384 L 216 280 Z" fill="url(#forgeCore)" />
+  <!-- Outer Stylized Wing Feathers (forming the 'M' contour) -->
+  <path d="M72 370 C 90 260, 140 160, 200 120 L 220 220 L 150 390 Z" fill="url(#cyberWing)" />
+  <path d="M440 370 C 422 260, 372 160, 312 120 L 292 220 L 362 390 Z" fill="url(#cyberWing)" />
 
-  <!-- Diamond Plasma Forge Spark (Apex) -->
-  <polygon points="256,110 274,136 256,162 238,136" fill="#ffffff" />
-  <circle cx="256" cy="136" r="28" fill="#38bdf8" opacity="0.6" filter="url(#forgeGlow)" />
-  <circle cx="256" cy="136" r="8" fill="#ffffff" />
+  <!-- Main Myna Bird Body & Crest -->
+  <path d="M160 400 C 140 300, 180 140, 256 100 C 332 140, 372 300, 352 400 C 320 440, 192 440, 160 400 Z" fill="url(#mynaFeather)" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.4" />
 
-  <!-- High-Tech Circuit Notches for Gaming Plugin Aesthetic -->
-  <rect x="96" y="270" width="28" height="6" rx="3" fill="#38bdf8" opacity="0.9" />
-  <rect x="388" y="270" width="28" height="6" rx="3" fill="#38bdf8" opacity="0.9" />
-  <rect x="242" y="320" width="28" height="6" rx="3" fill="#ffffff" opacity="0.8" />
+  <!-- Distinctive Myna Crown Feathers (Head Crest) -->
+  <path d="M256 70 L 270 115 L 256 100 L 242 115 Z" fill="#38bdf8" />
+  <path d="M236 85 L 250 120 L 230 110 Z" fill="#0284c7" />
+  <path d="M276 85 L 282 110 L 262 120 Z" fill="#0284c7" />
+
+  <!-- Signature Myna Golden Eye Patch (Behind Eye) -->
+  <path d="M210 200 C 210 165, 302 165, 302 200 C 302 235, 210 235, 210 200 Z" fill="url(#goldBeak)" opacity="0.95" />
+
+  <!-- Myna Bird Eyes -->
+  <!-- Left Eye -->
+  <circle cx="232" cy="198" r="14" fill="#020617" />
+  <circle cx="236" cy="194" r="5" fill="#ffffff" />
+  <circle cx="230" cy="202" r="2" fill="#38bdf8" />
+
+  <!-- Right Eye -->
+  <circle cx="280" cy="198" r="14" fill="#020617" />
+  <circle cx="276" cy="194" r="5" fill="#ffffff" />
+  <circle cx="282" cy="202" r="2" fill="#38bdf8" />
+
+  <!-- Sharp Golden Myna Beak (Pointing Downward / Forward) -->
+  <path d="M232 225 L 280 225 L 256 310 Z" fill="url(#goldBeak)" stroke="#ca8a04" stroke-width="2" />
+  <line x1="256" y1="225" x2="256" y2="280" stroke="#a16207" stroke-width="2" />
+  <!-- Upper Beak Shine -->
+  <polygon points="256,230 270,245 256,260 242,245" fill="#ffffff" opacity="0.6" />
+
+  <!-- Chest Forge Emblem (Diamond Spark on Chest) -->
+  <polygon points="256,340 272,362 256,384 240,362" fill="#38bdf8" />
+  <circle cx="256" cy="362" r="4" fill="#ffffff" />
+
+  <!-- Cybernetic Wing Detail Lines -->
+  <line x1="120" y1="300" x2="160" y2="340" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+  <line x1="392" y1="300" x2="352" y2="340" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
 </svg>
