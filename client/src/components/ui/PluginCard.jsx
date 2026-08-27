@@ -68,7 +68,7 @@ const PluginCard = ({ plugin }) => {
           <div className="flex items-center gap-1.5 text-xs text-slate-300">
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
             <span className="font-bold text-white">{plugin.rating || '5.0'}</span>
-            <span className="text-slate-500">({plugin.downloads || 120} dls)</span>
+            <span className="text-slate-500">({plugin.downloads || 0} downloads)</span>
           </div>
 
           <div className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:text-blue-300">

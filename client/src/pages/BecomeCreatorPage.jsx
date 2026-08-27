@@ -3,50 +3,32 @@ import { Link } from 'react-router-dom';
 import { Users, CreditCard, ShieldCheck, Star, Sparkles, Lock, MessageSquare, Unlock, Zap, ArrowRight, ChevronRight, Activity } from 'lucide-react';
 import CreateResourceModal from '../components/ui/CreateResourceModal';
 
-// Animated Live Counter Hook for Real-Life Counting Experience
-const useLiveCounter = (target, step = 15, delay = 20) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let current = 0;
-    const increment = Math.max(1, Math.ceil(target / (1000 / delay)));
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(current);
-      }
-    }, delay);
-
-    return () => clearInterval(timer);
-  }, [target, delay]);
-
-  // Add subtle periodic live activity tick (+1 creator joined)
-  useEffect(() => {
-    const liveTick = setInterval(() => {
-      if (Math.random() > 0.6) {
-        setCount(prev => prev + 1);
-      }
-    }, 12000);
-
-    return () => clearInterval(liveTick);
-  }, []);
-
-  return count;
+// Real creator counts starting strictly from zero (0)
+const getRealCreatorCount = (gameName) => {
+  try {
+    const uploaded = JSON.parse(localStorage.getItem('minoforge_uploaded_plugins') || '[]');
+    const matched = uploaded.filter(p => (p.game || p.gameName || '').toLowerCase() === gameName.toLowerCase());
+    return matched.length; // Starts strictly at 0!
+  } catch {
+    return 0;
+  }
 };
 
 const CREATOR_GAMES = [
-  { name: 'Minecraft', baseCount: 148, image: '/images/categories/minecraft.png', tag: 'Top Category' },
-  { name: 'Roblox', baseCount: 92, image: '/images/categories/roblox.png', tag: 'Trending' },
-  { name: 'FiveM', baseCount: 116, image: '/images/categories/fivem.png', tag: 'High Demand' },
-  { name: 'Discord', baseCount: 64, image: '/images/categories/discord.png', tag: 'Active' },
-  { name: 'Websites', baseCount: 53, image: '/images/categories/websites.png', tag: 'Growing' },
+  { name: 'Minecraft', image: '/images/categories/minecraft.png', tag: 'Open Category' },
+  { name: 'Roblox', image: '/images/categories/roblox.png', tag: 'Open Category' },
+  { name: 'FiveM', image: '/images/categories/fivem.png', tag: 'Open Category' },
+  { name: 'Discord', image: '/images/categories/discord.png', tag: 'Open Category' },
+  { name: 'Websites', image: '/images/categories/websites.png', tag: 'Open Category' },
 ];
 
 const GameCreatorCard = ({ game, onOpenModal }) => {
-  const liveCount = useLiveCounter(game.baseCount);
+  const [creatorCount, setCreatorCount] = useState(0);
+
+  useEffect(() => {
+    // Read real creator count starting strictly from 0
+    setCreatorCount(getRealCreatorCount(game.name));
+  }, [game.name]);
 
   return (
     <div 
@@ -61,15 +43,14 @@ const GameCreatorCard = ({ game, onOpenModal }) => {
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-3 text-center">
         <span className="font-extrabold text-white text-xs tracking-tight">{game.name}</span>
         
-        {/* Live Real-Life Counting Indicator */}
+        {/* Real-life creator count starting from 0 */}
         <div className="flex items-center justify-center gap-1.5 mt-0.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
           <span className="text-[11px] text-cyan-300 font-mono font-bold">
-            {liveCount.toLocaleString()} creators
+            {creatorCount} {creatorCount === 1 ? 'creator' : 'creators'}
           </span>
         </div>
         <span className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">
-          {game.tag}
+          {creatorCount === 0 ? 'Be the first!' : game.tag}
         </span>
       </div>
     </div>
