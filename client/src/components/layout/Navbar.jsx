@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone } from 'lucide-react';
+import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from '../ui/NotificationBell';
 
@@ -9,6 +9,20 @@ const Navbar = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 15) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -18,94 +32,113 @@ const Navbar = ({ onMenuClick }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-slate-950/90 backdrop-blur-xl z-40 border-b border-white/10 flex items-center px-4 md:px-8 text-white">
-      {/* Brand & Left Menu */}
-      <div className="flex items-center gap-4 flex-1">
-        <button 
-          onClick={onMenuClick}
-          className="p-2 -ml-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors md:hidden"
-          aria-label="Open menu"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-
-        <Link to="/" className="flex items-center gap-2.5 text-xl font-black text-white tracking-tight group">
-          <img 
-            src="/favicon.svg" 
-            alt="MinoForge Logo" 
-            className="w-8 h-8 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform" 
-          />
-          <span className="group-hover:text-blue-300 transition-colors">MinoForge</span>
-        </Link>
-
-        {/* Desktop Quick Links */}
-        <div className="hidden md:flex items-center gap-1 ml-6 text-sm font-semibold">
-          <Link
-            to="/plugins"
-            className={`px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/plugins') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
+    <header className="fixed top-0 left-0 right-0 z-50 nav-glass-transition">
+      <nav 
+        className={`w-full nav-glass-transition flex items-center px-3.5 sm:px-6 md:px-8 text-white ${
+          isScrolled 
+            ? 'h-14 sm:h-16 bg-slate-950/85 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 border-b border-blue-500/20' 
+            : 'h-16 bg-slate-950/90 backdrop-blur-xl border-b border-white/10'
+        }`}
+      >
+        {/* Brand & Left Menu */}
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+          <button 
+            onClick={onMenuClick}
+            className="p-2 -ml-1 text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 rounded-xl transition-all md:hidden flex-shrink-0"
+            aria-label="Open menu"
           >
-            Marketplace
-          </Link>
-          <Link
-            to="/bounties"
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/bounties') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
-          >
-            <Briefcase className="w-3.5 h-3.5 text-amber-400" />
-            <span>Bounties</span>
-          </Link>
-          <Link
-            to="/ai-config"
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/ai-config') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>AI Config</span>
-          </Link>
-          <Link
-            to="/upgrade"
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/upgrade') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-amber-400 hover:text-amber-300 hover:bg-white/5'}`}
-          >
-            <Crown className="w-3.5 h-3.5 text-amber-400" />
-            <span>Ultimate</span>
-          </Link>
-          <Link
-            to="/dashboard"
-            className={`px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/dashboard') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
-          >
-            Creator Hub
-          </Link>
-        </div>
-      </div>
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
 
-      {/* Right User Actions */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        
-        {/* Notification Bell (Left of Become a Creator) */}
-        <NotificationBell />
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 text-lg sm:text-xl font-black text-white tracking-tight group flex-shrink-0">
+            <img 
+              src="/favicon.svg" 
+              alt="MinoForge Logo" 
+              className={`rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 nav-glass-transition ${
+                isScrolled ? 'w-7 h-7 sm:w-8 sm:h-8' : 'w-8 h-8'
+              }`}
+            />
+            <span className="group-hover:text-blue-300 transition-colors">MinoForge</span>
+          </Link>
 
-        <Link
-          to="/creators"
-          className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-blue-600/30 hover:from-blue-600/40 hover:via-cyan-500/30 hover:to-blue-600/40 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-cyan-400/40 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-          <span>Become a Creator</span>
-        </Link>
-
-        {!user ? (
-          <div className="flex items-center gap-2">
-            <Link 
-              to="/login" 
-              className="btn-animated text-slate-300 hover:text-white font-bold text-sm px-3.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+          {/* Desktop Quick Links */}
+          <div className="hidden md:flex items-center gap-1 ml-6 text-sm font-semibold">
+            <Link
+              to="/plugins"
+              className={`px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/plugins') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
             >
-              Log In
+              Marketplace
             </Link>
-            <Link 
-              to="/register" 
-              className="btn-glow-blue btn-shimmer btn-animated bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm px-4 py-2 rounded-xl"
+            <Link
+              to="/bounties"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/bounties') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
             >
-              Register
+              <Briefcase className="w-3.5 h-3.5 text-amber-400" />
+              <span>Bounties</span>
+            </Link>
+            <Link
+              to="/ai-config"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/ai-config') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>AI Config</span>
+            </Link>
+            <Link
+              to="/upgrade"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/upgrade') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-amber-400 hover:text-amber-300 hover:bg-white/5'}`}
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ultimate</span>
+            </Link>
+            <Link
+              to="/dashboard"
+              className={`px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/dashboard') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
+            >
+              Creator Hub
             </Link>
           </div>
-        ) : (
+        </div>
+
+        {/* Right User Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          
+          {/* Notification Bell */}
+          <NotificationBell />
+
+          {/* Mobile Quick Marketplace icon shortcut */}
+          <Link
+            to="/plugins"
+            className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 rounded-xl transition-all"
+            title="Browse Marketplace"
+          >
+            <Compass className="w-5 h-5 text-blue-400" />
+          </Link>
+
+          {/* Desktop "Become a Creator" Button */}
+          <Link
+            to="/creators"
+            className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-blue-600/30 hover:from-blue-600/40 hover:via-cyan-500/30 hover:to-blue-600/40 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-cyan-400/40 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <span>Become a Creator</span>
+          </Link>
+
+          {!user ? (
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Link 
+                to="/login" 
+                className="btn-animated text-slate-300 hover:text-white font-bold text-xs sm:text-sm px-2.5 sm:px-3.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+              >
+                Log In
+              </Link>
+              <Link 
+                to="/register" 
+                className="btn-glow-blue btn-shimmer btn-animated bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl"
+              >
+                Register
+              </Link>
+            </div>
+          ) : (
           <div className="relative">
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -188,6 +221,11 @@ const Navbar = ({ onMenuClick }) => {
         )}
       </div>
     </nav>
+    {/* Animated dynamic bottom glow line when scrolled */}
+    {isScrolled && (
+      <div className="h-[1.5px] w-full nav-glow-line opacity-90 shadow-sm shadow-cyan-500/50" />
+    )}
+  </header>
   );
 };
 
