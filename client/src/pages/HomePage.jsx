@@ -24,8 +24,6 @@ const HERO_IMAGES = [
 const HomePage = () => {
   const navigate = useNavigate();
   const [bgIndex, setBgIndex] = useState(0);
-  const scrollRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
   const [isCustomRequestOpen, setIsCustomRequestOpen] = useState(false);
 
   useEffect(() => {
@@ -36,42 +34,9 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Smooth continuous auto-sliding loop for the game categories
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    let animationFrameId;
-    const speed = 0.65; // Smooth cinematic scroll speed
-
-    const step = () => {
-      if (!isPaused && scrollContainer) {
-        scrollContainer.scrollLeft += speed;
-        // Reset when halfway through the duplicated list for infinite seamless loop
-        if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
-          scrollContainer.scrollLeft = 0;
-        }
-      }
-      animationFrameId = requestAnimationFrame(step);
-    };
-
-    animationFrameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [isPaused]);
-
-  const handleManualScroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -350 : 350;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   const handleSearch = (query) => {
     navigate(`/plugins?search=${encodeURIComponent(query)}`);
   };
-
-  // Duplicate the array for seamless infinite marquee loop
-  const displayGames = [...GAMES, ...GAMES, ...GAMES];
 
   return (
     <div className="flex-grow flex flex-col bg-[#0b0f19] text-white">
@@ -146,37 +111,21 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Automatic Moving Game Categories Carousel */}
+        {/* 100% Seamless Endless Moving Game Categories Marquee */}
         <div className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-2 sm:px-4 pointer-events-none">
-          <div className="max-w-7xl mx-auto relative group/carousel pointer-events-auto">
-            {/* Left Manual Scroll Button */}
-            <button
-              onClick={() => handleManualScroll('left')}
-              className="absolute -left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 hover:border-blue-400/50 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 transition-all duration-200"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            {/* Right Manual Scroll Button */}
-            <button
-              onClick={() => handleManualScroll('right')}
-              className="absolute -right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 hover:border-blue-400/50 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 transition-all duration-200"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-
-            {/* Seamless Infinite Moving Track (Only pauses when hovering directly on cards) */}
-            <div 
-              ref={scrollRef}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-3 md:gap-4 overflow-x-hidden pb-4 pt-2 px-2 hide-scrollbar select-none cursor-grab active:cursor-grabbing"
-            >
-              {displayGames.map((game, index) => (
-                <GameCard key={`${game.slug}-${index}`} {...game} />
-              ))}
+          <div className="max-w-7xl mx-auto relative group/carousel pointer-events-auto overflow-hidden">
+            {/* Seamless Endless Infinite Moving Track */}
+            <div className="overflow-hidden pb-4 pt-2 px-2 select-none w-full">
+              <div className="animate-marquee-infinite flex gap-3 md:gap-4">
+                {/* First Half */}
+                {[...GAMES, ...GAMES].map((game, index) => (
+                  <GameCard key={`${game.slug}-a-${index}`} {...game} />
+                ))}
+                {/* Second Half (Exact Mirror for 100% Seamless Infinite Loop) */}
+                {[...GAMES, ...GAMES].map((game, index) => (
+                  <GameCard key={`${game.slug}-b-${index}`} {...game} />
+                ))}
+              </div>
             </div>
           </div>
         </div>

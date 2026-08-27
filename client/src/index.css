@@ -47,6 +47,27 @@ body {
   }
 }
 
+/* 100% Seamless Endless Marquee Loop */
+@keyframes infiniteMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: infiniteMarquee 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
