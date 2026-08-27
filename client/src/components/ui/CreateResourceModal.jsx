@@ -140,10 +140,10 @@ const CreateResourceModal = ({ isOpen, onClose }) => {
           <div className="pt-2">
             <button
               type="submit"
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
+              className="btn-glow-blue btn-shimmer btn-animated w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>Create</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
             </button>
           </div>
 

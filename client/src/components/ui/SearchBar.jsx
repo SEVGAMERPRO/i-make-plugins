@@ -137,8 +137,9 @@ const SearchBar = ({ onSearch, placeholder = "Search plugins, scripts, or games.
           {/* Search Action Button */}
           <button
             type="submit"
-            className="px-6 md:px-7 py-3 md:py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2 flex-shrink-0"
+            className="btn-glow-blue btn-shimmer btn-animated px-6 md:px-7 py-3 md:py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl flex items-center gap-2 flex-shrink-0 cursor-pointer"
           >
+            <Search className="w-4 h-4 text-blue-200" />
             <span>Search</span>
           </button>
         </form>

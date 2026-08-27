@@ -108,10 +108,10 @@ const BecomeCreatorPage = () => {
             <div className="pt-2">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-7 py-3.5 bg-slate-950/90 hover:bg-black text-white font-black text-sm rounded-xl border border-white/20 shadow-2xl hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 group"
+                className="btn-shimmer btn-animated px-7 py-3.5 bg-slate-950/90 hover:bg-slate-900 text-white font-black text-sm rounded-xl border border-white/30 hover:border-cyan-400/60 shadow-2xl hover:shadow-cyan-500/20 inline-flex items-center gap-2 group cursor-pointer"
               >
                 <span>Publish a resource</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </div>
           </div>
@@ -177,10 +177,10 @@ const BecomeCreatorPage = () => {
         <div className="pt-8 text-center">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-sm rounded-xl shadow-xl shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2"
+            className="btn-glow-blue btn-shimmer btn-animated px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-xl inline-flex items-center gap-2 group cursor-pointer"
           >
             <span>Start Selling Today — Publish a Resource</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
           </button>
         </div>
       </section>

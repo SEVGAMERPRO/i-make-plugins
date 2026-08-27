@@ -33,6 +33,20 @@ body {
   to { transform: translateX(-100%); }
 }
 
+@keyframes shimmerSweep {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(56, 189, 248, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.7), 0 0 45px rgba(56, 189, 248, 0.4);
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -47,4 +61,96 @@ body {
 
 .transition-crossfade {
   transition: opacity 1s ease-in-out;
+}
+
+/* Premium Button Animation Utility Classes */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.btn-animated:hover {
+  transform: translateY(-2px);
+}
+
+.btn-animated:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Shimmer Highlight Effect on Hover */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-shimmer:hover::after {
+  opacity: 1;
+  animation: shimmerSweep 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Glowing Primary Button */
+.btn-glow-blue {
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glow-blue:hover {
+  box-shadow: 0 8px 25px 0 rgba(37, 99, 235, 0.55), 0 0 15px 2px rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-glow-blue:active {
+  box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.4);
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Glowing Amber Button */
+.btn-glow-amber {
+  box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glow-amber:hover {
+  box-shadow: 0 8px 25px 0 rgba(245, 158, 11, 0.55), 0 0 15px 2px rgba(251, 191, 36, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-glow-amber:active {
+  box-shadow: 0 2px 8px 0 rgba(245, 158, 11, 0.4);
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Interactive Tag / Pill Button */
+.btn-tag-animated {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-tag-animated:hover {
+  transform: translateY(-1.5px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-tag-animated:active {
+  transform: translateY(0.5px) scale(0.97);
 }

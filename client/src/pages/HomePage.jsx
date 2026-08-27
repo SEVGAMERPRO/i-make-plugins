@@ -131,14 +131,14 @@ const HomePage = () => {
 
           {/* Popular Quick Search Tags */}
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs md:text-sm">
-            <span className="text-slate-400 flex items-center gap-1 font-medium">
+            <span className="text-slate-400 flex items-center gap-1 font-medium mr-1">
               <TrendingUp className="w-3.5 h-3.5 text-blue-400" /> Popular:
             </span>
             {['Economy', 'Staff Admin', 'PvP Kits', 'Anti-Cheat', 'Custom Vehicles', 'Discord Sync'].map(tag => (
               <button
                 key={tag}
                 onClick={() => handleSearch(tag)}
-                className="text-slate-300 hover:text-white bg-slate-800/80 hover:bg-blue-600/30 border border-white/5 hover:border-blue-400/40 px-3 py-1 rounded-lg transition-all"
+                className="btn-tag-animated text-slate-300 hover:text-white bg-slate-800/80 hover:bg-blue-600/25 border border-white/10 hover:border-blue-400/50 px-3.5 py-1.5 rounded-xl font-medium shadow-sm transition-all"
               >
                 {tag}
               </button>
@@ -147,16 +147,12 @@ const HomePage = () => {
         </div>
 
         {/* Automatic Moving Game Categories Carousel */}
-        <div 
-          className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-2 sm:px-4"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          <div className="max-w-7xl mx-auto relative group/carousel">
+        <div className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-2 sm:px-4 pointer-events-none">
+          <div className="max-w-7xl mx-auto relative group/carousel pointer-events-auto">
             {/* Left Manual Scroll Button */}
             <button
               onClick={() => handleManualScroll('left')}
-              className="absolute -left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-all duration-200"
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 hover:border-blue-400/50 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 transition-all duration-200"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -165,15 +161,17 @@ const HomePage = () => {
             {/* Right Manual Scroll Button */}
             <button
               onClick={() => handleManualScroll('right')}
-              className="absolute -right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 transition-all duration-200"
+              className="absolute -right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 bg-slate-900/90 hover:bg-blue-600 border border-white/10 hover:border-blue-400/50 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md opacity-0 group-hover/carousel:opacity-100 hover:scale-110 active:scale-95 transition-all duration-200"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
 
-            {/* Seamless Infinite Moving Track */}
+            {/* Seamless Infinite Moving Track (Only pauses when hovering directly on cards) */}
             <div 
               ref={scrollRef}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
               className="flex gap-3 md:gap-4 overflow-x-hidden pb-4 pt-2 px-2 hide-scrollbar select-none cursor-grab active:cursor-grabbing"
             >
               {displayGames.map((game, index) => (
@@ -201,10 +199,10 @@ const HomePage = () => {
           </div>
           <button
             onClick={() => navigate('/ads')}
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1"
+            className="btn-animated text-xs font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 group"
           >
             <span>Promote Your Plugin</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
@@ -289,10 +287,10 @@ const HomePage = () => {
           <div className="z-10 flex-shrink-0">
             <button
               onClick={() => setIsCustomRequestOpen(true)}
-              className="py-4 px-8 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 hover:from-blue-400 hover:to-cyan-300 text-white font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+              className="btn-glow-blue btn-shimmer btn-animated py-4 px-8 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base sm:text-lg rounded-2xl flex items-center gap-3 group"
             >
               <span>Order Custom Plugin</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
             </button>
           </div>
         </div>

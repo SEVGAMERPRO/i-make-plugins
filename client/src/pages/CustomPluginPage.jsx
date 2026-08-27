@@ -243,9 +243,9 @@ const CustomPluginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto py-4 px-10 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-base rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-3"
+                className="btn-glow-blue btn-shimmer btn-animated w-full sm:w-auto py-4 px-10 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base rounded-2xl flex items-center justify-center gap-3 group cursor-pointer disabled:opacity-50"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200" />
                 <span>{loading ? 'Sending Request...' : 'Send Custom Plugin Request'}</span>
               </button>
             </div>

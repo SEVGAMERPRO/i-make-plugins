@@ -234,16 +234,16 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm transition-colors"
+              className="btn-animated px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold rounded-xl text-sm transition-colors cursor-pointer"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center gap-2"
+              className="btn-glow-blue btn-shimmer btn-animated px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm flex items-center gap-2 group cursor-pointer disabled:opacity-50"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
               <span>{loading ? 'Sending Request...' : 'Send Request'}</span>
             </button>
           </div>

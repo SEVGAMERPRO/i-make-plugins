@@ -82,18 +82,24 @@ const Navbar = ({ onMenuClick }) => {
 
         <Link
           to="/creators"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600/30 to-cyan-500/30 hover:from-blue-600/40 hover:to-cyan-500/40 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-blue-500/40 transition-all shadow-sm"
+          className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-blue-600/30 hover:from-blue-600/40 hover:via-cyan-500/30 hover:to-blue-600/40 text-blue-200 hover:text-white rounded-xl text-xs font-bold border border-cyan-400/40 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
           <span>Become a Creator</span>
         </Link>
 
         {!user ? (
           <div className="flex items-center gap-2">
-            <Link to="/login" className="text-slate-300 hover:text-white font-bold text-sm px-3.5 py-1.5 transition-colors">
+            <Link 
+              to="/login" 
+              className="btn-animated text-slate-300 hover:text-white font-bold text-sm px-3.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+            >
               Log In
             </Link>
-            <Link to="/register" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/25">
+            <Link 
+              to="/register" 
+              className="btn-glow-blue btn-shimmer btn-animated bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm px-4 py-2 rounded-xl"
+            >
               Register
             </Link>
           </div>
