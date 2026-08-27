@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen, Plus, X, Layers, Lock } from 'lucide-react';
+import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen, Plus, X, Layers, Lock, LogIn, UserPlus } from 'lucide-react';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
-
 import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 
 const TABS = [
   { id: 'general', label: '1. General Info' },
@@ -18,9 +18,48 @@ const UploadPluginPage = () => {
   const location = useLocation();
   const initialData = location.state || {};
 
+  const { user } = useAuth();
   const { addNotification } = useNotifications();
   const [currentTab, setCurrentTab] = useState('general');
   const [loading, setLoading] = useState(false);
+
+  // If not logged in, show authentication required prompt
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] text-white flex items-center justify-center p-4">
+        <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center mx-auto text-white shadow-xl shadow-blue-500/20">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-white">Creator Login Required</h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              You must be logged in to upload plugins, publish new releases, and earn revenue on MinoForge.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Link
+              to="/login?redirect=/upload"
+              className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Log In to Your Account</span>
+            </Link>
+
+            <Link
+              to="/register?redirect=/upload"
+              className="btn-animated w-full py-3 bg-slate-950 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/10 flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4 text-cyan-400" />
+              <span>Register Free Account</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Form State initialized from Create Resource modal if available
   const [title, setTitle] = useState(initialData.title || '');

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Sparkles, AlertCircle, ArrowRight, Layers, FileCode } from 'lucide-react';
+import { X, Sparkles, AlertCircle, ArrowRight, Layers, FileCode, Lock, LogIn, UserPlus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = [
   'Minecraft',
@@ -14,12 +15,63 @@ const CATEGORIES = [
 
 const CreateResourceModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [category, setCategory] = useState('Minecraft');
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
+
+  if (!user) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+        <div className="bg-slate-950 border border-white/20 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center text-white space-y-6 shadow-2xl relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center mx-auto text-white shadow-xl shadow-blue-500/20">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-black text-white">Login Required</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              You must be signed into your MinoForge account to create and publish plugins.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => {
+                onClose();
+                navigate('/login?redirect=/upload');
+              }}
+              className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Log In to Your Account</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onClose();
+                navigate('/register?redirect=/upload');
+              }}
+              className="btn-animated w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/10 flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4 text-cyan-400" />
+              <span>Create Free Account</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreate = (e) => {
     e.preventDefault();

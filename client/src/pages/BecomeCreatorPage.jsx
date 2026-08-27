@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Users, CreditCard, ShieldCheck, Star, Sparkles, Lock, MessageSquare, Unlock, Zap, ArrowRight, ChevronRight, Activity } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Users, CreditCard, ShieldCheck, Star, Sparkles, Lock, MessageSquare, Unlock, Zap, ArrowRight, ChevronRight, Activity, LogIn, UserPlus } from 'lucide-react';
 import CreateResourceModal from '../components/ui/CreateResourceModal';
+import { useAuth } from '../context/AuthContext';
 
 // Real creator counts starting strictly from zero (0)
 const getRealCreatorCount = (gameName) => {
@@ -102,32 +103,43 @@ const FEATURES = [
   },
   {
     icon: MessageSquare,
-    title: 'Creator community',
-    description: 'Join channels on Discord exclusively available to our creators! Make friends, get feedback and get notified of new features as they release.',
+    title: 'Support & ticketing',
+    description: 'Support buyers directly without sharing personal details. Built-in support tickets, Discord roles, and instant notifications keep your buyers happy.',
     iconColor: 'text-indigo-400',
     bg: 'bg-indigo-500/10 border-indigo-500/20'
   },
   {
     icon: Unlock,
-    title: 'No exclusivity required',
-    description: "Publishing through our platform doesn't mean that you're locked in to only sell through us, you are free to sell your products through other platforms alongside ours.",
+    title: 'No exclusivity locks',
+    description: 'You own your work. Publish your resources on MinoForge alongside any other platform without exclusivity penalties or restrictions.',
     iconColor: 'text-teal-400',
     bg: 'bg-teal-500/10 border-teal-500/20'
   },
   {
     icon: Zap,
-    title: 'Instant delivery',
-    description: "We'll store your products and ensure that they're delivered securely. We make the process hassle-free for you and your buyers, meaning you can spend less time providing support.",
-    iconColor: 'text-yellow-400',
-    bg: 'bg-yellow-500/10 border-yellow-500/20'
-  },
+    title: 'Instant payouts & crypto',
+    description: 'Withdraw your earnings whenever you want. Support for PayPal, Stripe, Wise, and cryptocurrency payouts with transparent low transaction fees.',
+    iconColor: 'text-orange-400',
+    bg: 'bg-orange-500/10 border-orange-500/20'
+  }
 ];
 
 const BecomeCreatorPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleStartPublishing = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      setIsModalOpen(true);
+    }
+  };
 
   return (
-    <div className="bg-[#0b0f19] min-h-screen text-white pb-20">
+    <div className="min-h-screen bg-[#0b0f19] text-white">
       
       {/* Create Resource Modal */}
       <CreateResourceModal 
@@ -135,8 +147,8 @@ const BecomeCreatorPage = () => {
         onClose={() => setIsModalOpen(false)} 
       />
 
-      {/* Hero Blue Banner (Matching Image 1) */}
-      <section className="pt-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Hero Banner Section */}
+      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 p-8 sm:p-12 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10 border border-white/15">
           
           {/* Subtle background hexagon pattern overlay */}
@@ -144,16 +156,21 @@ const BecomeCreatorPage = () => {
 
           {/* Left Text */}
           <div className="space-y-5 max-w-xl z-10 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/30 border border-white/20 text-xs font-bold text-cyan-300">
+              <Lock className="w-3.5 h-3.5" />
+              <span>{user ? `Logged in as @${user.username}` : 'Login Required to Publish'}</span>
+            </div>
+
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
               Sell your creations through MinoForge
             </h1>
             <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
-              Publishing your creations as resources on MinoForge means that you can spend more time creating, we'll handle the rest. We're the best place for creators to share their work and it's completely free to get started!
+              Publishing your creations as resources on MinoForge means that you can spend more time creating, we'll handle the rest. You must have a registered account to start publishing.
             </p>
 
             <div className="pt-2">
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleStartPublishing}
                 className="btn-shimmer btn-animated px-7 py-3.5 bg-slate-950/90 hover:bg-slate-900 text-white font-black text-sm rounded-xl border border-white/30 hover:border-cyan-400/60 shadow-2xl hover:shadow-cyan-500/20 inline-flex items-center gap-2 group cursor-pointer"
               >
                 <span>Publish a resource</span>
@@ -168,7 +185,7 @@ const BecomeCreatorPage = () => {
               <GameCreatorCard 
                 key={idx} 
                 game={game} 
-                onOpenModal={() => setIsModalOpen(true)} 
+                onOpenModal={handleStartPublishing} 
               />
             ))}
           </div>
@@ -220,6 +237,51 @@ const BecomeCreatorPage = () => {
           </button>
         </div>
       </section>
+
+      {/* Authentication Required Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-950 border border-white/20 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center text-white space-y-6 shadow-2xl relative overflow-hidden">
+            
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center mx-auto text-white shadow-xl shadow-blue-500/20">
+              <Lock className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-white">Login Required to Publish</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                You must be logged into a MinoForge account to register as a creator, publish resources, and manage payouts.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <button
+                onClick={() => navigate('/login?redirect=/creators')}
+                className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Log In to Your Account</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/register?redirect=/creators')}
+                className="btn-animated w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/10 flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <span>Create Free Account</span>
+              </button>
+
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="text-xs text-slate-500 hover:text-slate-400 font-medium transition-colors pt-2 block mx-auto"
+              >
+                Cancel
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
