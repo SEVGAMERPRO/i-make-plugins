@@ -138,11 +138,13 @@ const LoginPage = () => {
 
       <div className="max-w-md w-full space-y-8 bg-slate-900/80 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl border border-white/10 relative z-10">
         
-        {/* Header */}
+        {/* Header with MinoForge Myna Bird Mascot */}
         <div className="text-center">
-          <div className="mx-auto w-14 h-14 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-blue-500/20 mb-4">
-            MF
-          </div>
+          <Link to="/" className="inline-block group mb-3">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-400/40 p-2.5 flex items-center justify-center shadow-xl shadow-cyan-500/20 group-hover:scale-105 group-hover:border-cyan-400 transition-all">
+              <img src="/favicon.svg" alt="MinoForge Myna Bird" className="w-full h-full object-contain" />
+            </div>
+          </Link>
           <h2 className="text-3xl font-black text-white tracking-tight">
             {step === 'CREDENTIALS' ? 'Sign In to MinoForge' : 'Security Verification'}
           </h2>

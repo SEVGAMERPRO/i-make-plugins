@@ -169,6 +169,10 @@ const NimdaStaffLoginPage = () => {
         
         {/* Top Secret Badge */}
         <div className="text-center space-y-3">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-400/40 p-2.5 flex items-center justify-center shadow-xl shadow-cyan-500/20">
+            <img src="/favicon.svg" alt="MinoForge Myna Bird" className="w-full h-full object-contain" />
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-black tracking-widest uppercase shadow-lg shadow-red-500/10">
             <Lock className="w-3.5 h-3.5 animate-pulse" />
             <span>NIMDA SECRET GATEWAY</span>

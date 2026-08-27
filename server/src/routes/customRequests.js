@@ -48,7 +48,7 @@ router.post('/custom', async (req, res) => {
 
   // 1. Order details email: SENT ONLY TO ADMIN (minoforge.requests@gmail.com)
   const adminMailOptions = {
-    from: `"MinoForgeRequests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Verification" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
     to: adminEmail, // STRICTLY ADMIN ONLY
     replyTo: cleanEmail,
     subject: `🚀 [NEW ORDER] Custom Plugin Request: ${game} (${budget || 'Flexible'})`,
@@ -92,7 +92,7 @@ ${requestDetails}
 
   // 2. Receipt confirmation email: SENT ONLY TO REQUESTER (cleanEmail)
   const clientConfirmationOptions = {
-    from: `"MinoForgeRequests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Verification" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
     to: cleanEmail, // STRICTLY REQUESTER ONLY
     replyTo: adminEmail,
     subject: '✅ Order Confirmation: Your MinoForge Custom Plugin Request',
