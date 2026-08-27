@@ -20,6 +20,11 @@ import AdsManagerPage from './pages/AdsManagerPage';
 import CustomPluginPage from './pages/CustomPluginPage';
 import RequestSuccessPage from './pages/RequestSuccessPage';
 import BecomeCreatorPage from './pages/BecomeCreatorPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import NetworkPortalPage from './pages/NetworkPortalPage';
+import MinoShieldPage from './pages/MinoShieldPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -47,9 +52,13 @@ function App() {
         <Route path="/upload" element={<UploadPluginPage />} />
         <Route path="/staff/reviews" element={<StaffReviewPage />} />
         <Route path="/users/:username" element={<UserProfilePage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/network" element={<NetworkPortalPage />} />
+        <Route path="/minoshield" element={<MinoShieldPage />} />
         
-        {/* 404 Fallback */}
-        <Route path="*" element={<div className="flex-grow flex items-center justify-center text-2xl font-bold text-slate-400 bg-[#0b0f19]">404 - Page Not Found</div>} />
+        {/* Custom 404 Error Page */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>
   );

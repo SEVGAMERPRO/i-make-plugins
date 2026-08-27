@@ -19,10 +19,10 @@ const Footer = () => {
             <p className="text-xs text-slate-400 leading-relaxed">
               The premier marketplace for gaming plugins, server tools, scripts, and custom development.
             </p>
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            <Link to="/minoshield" className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/20 transition-all">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>MinoShield 100% Protected</span>
-            </div>
+            </Link>
           </div>
 
           {/* Categories */}
@@ -44,7 +44,7 @@ const Footer = () => {
               <li><Link to="/ai-config" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5"><Sparkles className="w-3 h-3 text-cyan-400" /> AI Config Generator</Link></li>
               <li><Link to="/bounties" className="hover:text-amber-400 transition-colors">Custom Plugin Bounties</Link></li>
               <li><Link to="/dashboard" className="hover:text-blue-400 transition-colors">Creator Dashboard</Link></li>
-              <li><Link to="/upload" className="hover:text-blue-400 transition-colors">Sell Your Plugins</Link></li>
+              <li><Link to="/creators" className="hover:text-blue-400 transition-colors">Sell Your Plugins</Link></li>
               <li><Link to="/staff/reviews" className="hover:text-purple-400 transition-colors">Staff Review Queue</Link></li>
             </ul>
           </div>
@@ -55,7 +55,7 @@ const Footer = () => {
             <ul className="space-y-2.5 text-xs font-medium text-slate-300">
               <li><Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
-              <li><a href="https://colasmp.net" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition-colors">Network Portal</a></li>
+              <li><Link to="/network" className="hover:text-blue-400 transition-colors">Network Portal</Link></li>
               <li><span className="text-slate-500">Official domain: colasmp.net</span></li>
             </ul>
           </div>
