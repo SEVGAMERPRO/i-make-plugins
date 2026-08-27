@@ -8,10 +8,10 @@ import { getPluginById } from '../services/api';
 const SAMPLE_PLUGINS_DATABASE = {
   'p-mine-1': {
     id: 'p-mine-1',
-    title: 'Ultimate Economy & Vault System',
+    title: 'Ultimate Economy & Multi-Vault Pro',
     authorName: 'MinoDeveloper',
     gameName: 'Minecraft',
-    price: '4.99', // Lowered from 14.99!
+    price: '4.99',
     rating: '4.9',
     reviewsCount: 142,
     downloads: 4820,
@@ -25,15 +25,17 @@ const SAMPLE_PLUGINS_DATABASE = {
     downloadUrl: '/downloads/UltimateEconomy-v2.4.0.zip',
     summary: 'High-performance multi-currency vault system with GUI ATMs, pin codes, and transaction logs.',
     overview: `
-      <h3>Overview</h3>
-      <p>The premier economy plugin for modern Minecraft servers. Built from the ground up for Paper, Purpur, and Folia with zero lag and instant SQL synchronization.</p>
+      <h3>Minecraft Economy & Banking Engine (Paper / Purpur / Folia 1.20 - 1.21)</h3>
+      <p>The premier economy, multi-vault, and player auction house plugin engineered for high-concurrency Minecraft networks. Built with asynchronous thread safety to eliminate server tick lag even with hundreds of concurrent transactions.</p>
       <br/>
-      <h4>Key Features</h4>
+      <h4>⚡ Core Engine Features</h4>
       <ul>
-        <li>Multi-Currency Support (Coins, Gems, Bank Credits)</li>
-        <li>Interactive GUI ATM & Banking System with PIN codes</li>
-        <li>Automated Interest & Loan Management</li>
-        <li>Full Vault, PlaceholderAPI, and Discord Webhook integration</li>
+        <li><strong>Multi-Currency System:</strong> Configure distinct wallet pools (Coins, Mob Tokens, Bank Credits, Vouchers) with custom formatting symbols.</li>
+        <li><strong>Interactive Chest GUI ATMs:</strong> DonutSMP & EconomySMP style 54-slot visual banking interface with 4-digit PIN security to prevent account theft.</li>
+        <li><strong>Automated Bank Interest:</strong> Customizable compound savings interest distributed hourly or daily to active bank deposits.</li>
+        <li><strong>Integrated Auction House (AH):</strong> Full BIN (Buy It Now) and bidding marketplace with sales tax deduction and search filters.</li>
+        <li><strong>Cross-Server Sync:</strong> Instant MySQL & PostgreSQL connection pooling with Redis caching for multi-proxy Velocity/BungeeCord networks.</li>
+        <li><strong>100% Vault Hook:</strong> Drop-in replacement for EssentialsX Economy with instant compatibility across 100+ shop and claim plugins.</li>
       </ul>
     `,
     installation: `
@@ -42,10 +44,11 @@ const SAMPLE_PLUGINS_DATABASE = {
       </div>
       <h4>Step-by-Step Installation (README.txt)</h4>
       <ol>
-        <li><strong>Requirements:</strong> Ensure your server runs Paper, Purpur, Spigot, or Folia (1.18 - 1.21.x) with <a href="https://www.spigotmc.org/resources/vault.34315/" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">Vault</a>.</li>
-        <li><strong>Place Plugin:</strong> Extract and place <code>UltimateEconomy</code> into your <code>/plugins/</code> directory.</li>
-        <li><strong>Start Server:</strong> Restart your server to automatically generate <code>config.yml</code> and SQLite database.</li>
-        <li><strong>Reload:</strong> Customize starting balances, interest rates, and run <code>/eco reload</code>.</li>
+        <li><strong>Prerequisites:</strong> Ensure your server is running Paper, Purpur, Spigot, or Folia (1.18.2 - 1.21.x) with <a href="https://www.spigotmc.org/resources/vault.34315/" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">Vault</a> installed.</li>
+        <li><strong>Place Plugin:</strong> Extract and place <code>UltimateEconomy</code> (or <code>UltimateEconomy.jar</code>) into your server's <code>/plugins/</code> directory.</li>
+        <li><strong>Start Server:</strong> Start your Minecraft server to automatically generate <code>config.yml</code> and the SQLite database.</li>
+        <li><strong>Configuration:</strong> Customize starting balances, interest rates, and currency symbols in <code>plugins/UltimateEconomy/config.yml</code>.</li>
+        <li><strong>Reload:</strong> Run <code>/eco reload</code> in-game or console to apply your changes with zero downtime!</li>
       </ol>
     `,
     commands: `
@@ -75,9 +78,24 @@ const SAMPLE_PLUGINS_DATABASE = {
             <td class="p-2.5">Open personal banking ATM GUI with PIN protection</td>
           </tr>
           <tr>
-            <td class="p-2.5 font-mono text-emerald-400">/ah [search]</td>
+            <td class="p-2.5 font-mono text-emerald-400">/bank pin &lt;set|change&gt; &lt;####&gt;</td>
+            <td class="p-2.5 text-blue-400 font-semibold">mino.bank.pin</td>
+            <td class="p-2.5">Configure 4-digit security PIN for ATM withdrawals</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-emerald-400">/ah [search query]</td>
             <td class="p-2.5 text-blue-400 font-semibold">mino.ah.use</td>
-            <td class="p-2.5">Open global Auction House & player market</td>
+            <td class="p-2.5">Open global Auction House & player marketplace</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-emerald-400">/ah sell &lt;price&gt;</td>
+            <td class="p-2.5 text-blue-400 font-semibold">mino.ah.sell</td>
+            <td class="p-2.5">List held item on Auction House with optional tax fee</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-emerald-400">/eco baltop [page]</td>
+            <td class="p-2.5 text-blue-400 font-semibold">mino.eco.baltop</td>
+            <td class="p-2.5">View server-wide leaderboard of the wealthiest players</td>
           </tr>
           <tr>
             <td class="p-2.5 font-mono text-emerald-400">/eco give|take|set &lt;player&gt; &lt;amount&gt;</td>
@@ -93,7 +111,7 @@ const SAMPLE_PLUGINS_DATABASE = {
       </table>
     `,
     configSample: `# Ultimate Economy Configuration (config.yml)
-# Generated by MinoForge
+# Generated by MinoForge • https://colasmp.net
 
 database:
   type: "SQLITE" # Options: SQLITE, MYSQL, POSTGRESQL
@@ -102,6 +120,7 @@ database:
   database: "minecraft_eco"
   username: "root"
   password: "password123"
+  pool-size: 10
 
 currency:
   name-singular: "Coin"
@@ -109,11 +128,20 @@ currency:
   symbol: "$"
   starting-balance: 250.00
   allow-negative-balance: false
+  format: "$#,##0.00"
 
 banking:
   enabled: true
   max-accounts-per-player: 3
-  daily-interest-rate: 0.015 # 1.5% daily interest
+  daily-interest-rate: 0.015 # 1.5% daily compound interest
+  interest-payout-interval-hours: 1
+  require-pin-on-atm: true
+
+auction-house:
+  enabled: true
+  listing-fee-percentage: 0.02 # 2% sales tax
+  max-active-listings: 10
+  listing-duration-hours: 48
 `
   },
   'p-fivem-2': {
@@ -121,7 +149,7 @@ banking:
     title: 'Advanced Fuel & Electric Charging System',
     authorName: 'FiveMDev_99',
     gameName: 'FiveM',
-    price: '3.49', // Lowered from 9.99!
+    price: '3.49',
     rating: '4.8',
     reviewsCount: 88,
     downloads: 2150,
@@ -135,16 +163,17 @@ banking:
     downloadUrl: '/downloads/advanced_fuel-v1.1.2.zip',
     summary: 'Realistic gas stations, EV charging stations, Jerry cans, and smooth 60fps UI for QBCore and ESX.',
     overview: `
-      <h3>Overview</h3>
-      <p>A next-generation vehicle refueling system for FiveM. Features animated nozzle physics, fuel consumption based on RPM/speed, EV chargers for electric cars, and Jerry cans with roadside delivery.</p>
+      <h3>Next-Gen Vehicle Refueling & EV Supercharging (FiveM Lua 5.4)</h3>
+      <p>An automotive refueling simulation and electric charging infrastructure package designed for immersive roleplay servers. Hyper-optimized to maintain an impeccable 0.00ms idle resmon.</p>
       <br/>
-      <h4>Key Features</h4>
+      <h4>⚡ Core Engine Features</h4>
       <ul>
-        <li>Optimized 0.00ms idle resmon performance</li>
-        <li>Supports both QBCore, ESX Legacy, and standalone frameworks</li>
-        <li>Jerry can refueling and roadside mechanics</li>
-        <li>Electric vehicle charging stations with sound effects</li>
-        <li>Sleek modern NUI interface with customizable colors</li>
+        <li><strong>RPM-Based Dynamic Fuel Consumption:</strong> Calculates gas consumption dynamically based on engine acceleration, gear shifting, vehicle class, and damages.</li>
+        <li><strong>Electric Vehicle (EV) Superchargers:</strong> Auto-detects EV sports cars (Raiden, Neon, Cyclone, Omnis e-GT) with realistic charging audio effects.</li>
+        <li><strong>Interactive Nozzle & Hose Physics:</strong> Grab the pump nozzle, walk up to the gas cap, and insert it with synced multi-player animations and sound effects.</li>
+        <li><strong>Roadside Jerry Cans:</strong> Buy portable 25L Jerry cans from 24/7 convenience stores to rescue stranded cars on highways.</li>
+        <li><strong>Fuel Siphoning Theft:</strong> Criminals can use siphon hoses with lockpick minigames to steal gasoline from parked vehicles.</li>
+        <li><strong>Multi-Framework Compatibility:</strong> Auto-detects QBCore, ESX Legacy, QBox, and standalone setups with ox_target and qb-target support.</li>
       </ul>
     `,
     installation: `
@@ -153,19 +182,23 @@ banking:
       </div>
       <h4>Step-by-Step Installation (README.txt)</h4>
       <ol>
-        <li><strong>Prerequisites:</strong> Ensure you have <a href="https://github.com/overextended/ox_lib" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">ox_lib</a> and <code>ox_target</code> / <code>qb-target</code> installed.</li>
-        <li><strong>Extract Resource:</strong> Extract <code>advanced_fuel</code> into your server's <code>resources/[standalone]</code> directory.</li>
-        <li><strong>Server Config:</strong> Add <code>ensure advanced_fuel</code> in your <code>server.cfg</code>.</li>
-        <li><strong>Restart:</strong> Restart your server or run <code>refresh</code> and <code>ensure advanced_fuel</code> in console.</li>
+        <li><strong>Prerequisites:</strong> Ensure you have <a href="https://github.com/overextended/ox_lib" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">ox_lib</a> and <code>ox_target</code> or <code>qb-target</code> installed.</li>
+        <li><strong>Extract Resource:</strong> Extract <code>advanced_fuel</code> into your server's <code>resources/[standalone]/advanced_fuel</code> directory.</li>
+        <li><strong>Server Configuration:</strong> Open your <code>server.cfg</code> and ensure the loading order:
+          <pre class="bg-black/40 p-2 rounded text-xs mt-1 font-mono text-slate-300">ensure ox_lib
+ensure advanced_fuel</pre>
+        </li>
+        <li><strong>Configuration:</strong> Open <code>config.lua</code> to adjust fuel prices, gas station Blips, and EV car model lists.</li>
+        <li><strong>Restart:</strong> Restart your server or run <code>refresh</code> and <code>ensure advanced_fuel</code> in server console!</li>
       </ol>
     `,
     commands: `
-      <h4>All Available Commands & Exports</h4>
+      <h4>All Available Commands, Keybinds & Exports</h4>
       <table class="w-full text-left text-xs border border-white/10 mt-2 rounded-lg overflow-hidden">
         <thead class="bg-slate-800 text-slate-300">
           <tr>
-            <th class="p-2.5 border-b border-white/10">Command / Export</th>
-            <th class="p-2.5 border-b border-white/10">Permission</th>
+            <th class="p-2.5 border-b border-white/10">Command / Keybind / Export</th>
+            <th class="p-2.5 border-b border-white/10">Scope</th>
             <th class="p-2.5 border-b border-white/10">Description</th>
           </tr>
         </thead>
@@ -176,41 +209,64 @@ banking:
             <td class="p-2.5">Set current target vehicle fuel percentage</td>
           </tr>
           <tr>
-            <td class="p-2.5 font-mono text-orange-400">/givejerrycan [player]</td>
+            <td class="p-2.5 font-mono text-orange-400">/givejerrycan [player] [liters]</td>
             <td class="p-2.5 text-amber-400 font-semibold">Admin Only</td>
-            <td class="p-2.5">Give a fuel jerry can item to target player</td>
+            <td class="p-2.5">Spawn a portable fuel jerry can item for target player</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-emerald-400">[E] Keybind</td>
+            <td class="p-2.5 text-blue-400 font-semibold">Player Action</td>
+            <td class="p-2.5">Hold to grab pump nozzle and refuel vehicle tank</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-emerald-400">[G] Keybind</td>
+            <td class="p-2.5 text-blue-400 font-semibold">Player Action</td>
+            <td class="p-2.5">Use portable Jerry can to add 25L of emergency fuel</td>
           </tr>
           <tr>
             <td class="p-2.5 font-mono text-cyan-400">exports['advanced_fuel']:GetFuel(veh)</td>
-            <td class="p-2.5 text-blue-400 font-semibold">Public API</td>
-            <td class="p-2.5">Returns vehicle fuel percentage (float 0.0 to 100.0)</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Lua Export</td>
+            <td class="p-2.5">Returns vehicle fuel level as float (0.0 to 100.0)</td>
           </tr>
           <tr>
             <td class="p-2.5 font-mono text-cyan-400">exports['advanced_fuel']:SetFuel(veh, val)</td>
-            <td class="p-2.5 text-blue-400 font-semibold">Public API</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Lua Export</td>
             <td class="p-2.5">Programmatically modify vehicle fuel level</td>
           </tr>
         </tbody>
       </table>
     `,
-    configSample: `-- FiveM Fuel Configuration
--- Format: Lua (QBCore / ESX)
+    configSample: `-- FiveM Fuel & EV Charging Configuration (config.lua)
+-- Framework: QBCore / ESX Legacy / Standalone
 
 Config = {}
 Config.Framework = 'qb' -- 'qb', 'esx', or 'standalone'
 Config.Target = 'ox_target' -- 'ox_target' or 'qb-target'
-Config.FuelPrice = 1.75 -- Price per Liter
 
+Config.FuelPrice = 1.75 -- Price per Liter (USD)
+Config.JerryCanCapacity = 25.0 -- Liters
+Config.JerryCanPrice = 150.0 -- Shop Purchase Price
+Config.RefuelSpeed = 1.5 -- Liters per second
+
+-- Electric Vehicles Whitelist
 Config.ElectricVehicles = {
     'raiden',
     'neon',
     'cyclone',
+    'cyclone2',
     'iwagen',
-    'tezeract'
+    'tezeract',
+    'omnisegt'
 }
 
-Config.JerryCanCapacity = 25.0
-Config.RefuelSpeed = 1.5
+-- Station Blip Settings
+Config.Blip = {
+    Show = true,
+    Sprite = 361,
+    Scale = 0.6,
+    Color = 47,
+    Name = "Gas Station"
+}
 `
   },
   'p-bot-3': {
@@ -218,7 +274,7 @@ Config.RefuelSpeed = 1.5
     title: 'Discord Ticket & Transcripts Bot',
     authorName: 'BotCrafter',
     gameName: 'Discord',
-    price: '0.00', // Free!
+    price: '0.00',
     rating: '5.0',
     reviewsCount: 210,
     downloads: 3940,
@@ -232,24 +288,16 @@ Config.RefuelSpeed = 1.5
     downloadUrl: '/downloads/DiscordTicketBot-v1.0.0.zip',
     summary: 'Automated ticket buttons, transcript HTML archiving, and staff rating system for Discord servers.',
     overview: `
-      <h3>What It Does</h3>
-      <p>A fast, automated support ticket system for Discord servers that replaces messy direct messages with clean, private 1-on-1 support channels. Users open tickets with 1-click interactive buttons and modal popups, while full chat histories are automatically exported into standalone HTML transcripts upon closure.</p>
+      <h3>Automated Support Desk & HTML Archiving (Discord.js v14)</h3>
+      <p>A support ticketing bot built for gaming servers, marketplaces, and developer communities. Replaces unorganized direct messages with clean, private channels with automatic HTML transcript generation.</p>
       <br/>
-      <h4>How It Works</h4>
+      <h4>⚡ Core Engine Features</h4>
       <ul>
-        <li><strong>1. Panel Deployment:</strong> The bot posts a permanent interactive button panel in your <code>#support</code> channel.</li>
-        <li><strong>2. Ticket Creation:</strong> Clicking "Open Ticket" opens a reason modal and creates a private channel (e.g. <code>#ticket-username</code>).</li>
-        <li><strong>3. Staff Resolution:</strong> Support Staff chat privately with the user to resolve their questions.</li>
-        <li><strong>4. Transcript Export:</strong> Clicking "Close Ticket" saves a full HTML transcript with timestamps/attachments to your logs channel, then cleanly deletes the ticket.</li>
-      </ul>
-      <br/>
-      <h4>Key Features</h4>
-      <ul>
-        <li>Interactive Discord Button & Modal menus</li>
-        <li>Self-hosted HTML transcripts viewable in any web browser</li>
-        <li>Role-based permissions (only staff & ticket creator can view)</li>
-        <li>Auto-close idle tickets after inactivity</li>
-        <li>Zero external database required (pure Node.js & Discord.js v14)</li>
+        <li><strong>1-Click Button & Modal Panel:</strong> Deploy interactive panels in <code>#support</code> with modal forms requesting user issue summaries.</li>
+        <li><strong>Self-Hosted HTML Transcripts:</strong> On ticket closure, exports complete visual HTML archives with message history, embeds, attachments, and timestamps to <code>#ticket-logs</code>.</li>
+        <li><strong>Role-Based Privacy:</strong> Automatic permission overwrites ensuring only assigned Support Staff and the ticket creator can view channel messages.</li>
+        <li><strong>Staff Performance Star Ratings:</strong> Prompts the user for 1-5 star staff satisfaction reviews upon ticket resolution.</li>
+        <li><strong>Idle Ticket Auto-Close:</strong> Automatically warns and closes inactive tickets after 24 hours without moderator activity.</li>
       </ul>
     `,
     installation: `
@@ -258,7 +306,7 @@ Config.RefuelSpeed = 1.5
       </div>
       <h4>Step-by-Step Installation Guide (README.txt)</h4>
       <ol>
-        <li><strong>1-Click Install:</strong> Double click <code>install.bat</code> (or run <code>npm install</code>).</li>
+        <li><strong>1-Click Install:</strong> Double click <code>install.bat</code> (or run <code>npm install</code> in terminal).</li>
         <li><strong>Discord Developer Portal:</strong> Create a bot at <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">discord.com/developers</a>. Enable <em>Server Members Intent</em> and <em>Message Content Intent</em> under the Bot tab.</li>
         <li><strong>Configuration:</strong> Rename <code>config.example.json</code> to <code>config.json</code> and paste your Bot Token and Server IDs.</li>
         <li><strong>Start the Bot:</strong> Run <code>node index.js</code> (or use PM2 for 24/7 hosting: <code>pm2 start index.js --name ticket-bot</code>).</li>
@@ -306,6 +354,11 @@ Config.RefuelSpeed = 1.5
             <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
             <td class="p-2.5">Generates an instant HTML transcript without closing</td>
           </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-blue-400">/ticket stats [@staff]</td>
+            <td class="p-2.5 text-purple-400 font-semibold">Staff Only</td>
+            <td class="p-2.5">View ticket resolution volume and average star rating</td>
+          </tr>
         </tbody>
       </table>
     `,
@@ -320,7 +373,8 @@ Config.RefuelSpeed = 1.5
   "transcriptLogsChannelId": "TEXT_CHANNEL_ID_FOR_HTML_TRANSCRIPTS",
   "supportStaffRoleId": "ROLE_ID_OF_YOUR_SUPPORT_STAFF",
   "maxOpenTicketsPerUser": 2,
-  "askFeedbackOnClose": true
+  "askFeedbackOnClose": true,
+  "autoCloseInactiveHours": 24
 }
 `
   },
@@ -329,7 +383,7 @@ Config.RefuelSpeed = 1.5
     title: '2b2t Anarchy Utility & Baritone Auto-Highway Builder',
     authorName: 'AnarchyDev_2b',
     gameName: 'Minecraft: 2b2t & Anarchy Clients',
-    price: '0.00', // Free!
+    price: '0.00',
     rating: '5.0',
     reviewsCount: 310,
     downloads: 8940,
@@ -340,51 +394,99 @@ Config.RefuelSpeed = 1.5
     screenshots: [
       '/images/plugins/minecraft_anarchy_highway.svg'
     ],
+    downloadUrl: '/downloads/2b2t_Anarchy_Utility_v3.2.0.zip',
     summary: 'High-speed Baritone Nether highway builder, Auto-Totem, GrimAC bypasses, PacketFly, and terrain stash finder for 2b2t.org.',
     overview: `
-      <h3>2b2t Anarchy Utility Suite (Fabric 1.20 - 1.21)</h3>
-      <p>The ultimate anarchy survival and highway construction utility mod for 2b2t.org and anarchy servers. Optimized for GrimAC and NoCheatPlus bypasses.</p>
+      <h3>2b2t Anarchy Survival & Construction Utility (Fabric 1.20 - 1.21)</h3>
+      <p>A specialized utility mod built specifically for 2b2t.org, Constantiam, and vanilla anarchy servers. Tested against strict GrimAC and NoCheatPlus anti-cheat updates.</p>
       <br/>
-      <h4>Modules Included</h4>
+      <h4>⚡ Core Utility Modules</h4>
       <ul>
-        <li><strong>Auto-Highway Builder:</strong> Automated Baritone pathfinder that clears obsidian, bridges lava, and builds 3x3 Nether highways at maximum tick speeds.</li>
-        <li><strong>Offhand Auto-Totem:</strong> Zero-tick inventory refilling and invulnerability swap.</li>
-        <li><strong>2b2t ElytraFly & PacketFly:</strong> Custom pitch/speed bypass tailored for 2b2t patch limits.</li>
-        <li><strong>Stash & Chest ESP:</strong> Scans chunk metadata to highlight dupe stashes and unlooted bases.</li>
-        <li><strong>Anti-Hunger & Auto-Disconnect:</strong> Automatically logs off on low health or nearby hostile players.</li>
+        <li><strong>Automated Baritone Highway Digger:</strong> Automated pathfinder that clears Nether obstacles, places obsidian floors, auto-bridges over lava oceans, and repairs broken highway blocks at 18.4 blocks/sec.</li>
+        <li><strong>0-Tick Offhand Auto-Totem:</strong> Instant inventory totem replenishment with strict inventory desync protection.</li>
+        <li><strong>2b2t ElytraFly & PacketFly:</strong> Custom pitch and speed bypasses tuned to remain below 2b2t rubberband velocity thresholds.</li>
+        <li><strong>Chunk Stash & Shulker Finder:</strong> Scans chunk block entity payloads to detect buried dupe stashes, chests, and player bases across millions of coordinates.</li>
+        <li><strong>Obsidian Surround & Anti-CevBreaker:</strong> Instant obsidian defensive cocoon placement with packet rotation bypass.</li>
       </ul>
     `,
     installation: `
+      <div class="mb-4 p-3.5 bg-purple-500/15 border border-purple-400/30 rounded-xl text-purple-200 text-xs">
+        <strong>⚡ Quick Fabric Setup:</strong> Place the mod jar into your <code>.minecraft/mods</code> folder with Fabric Loader 1.20.4 or 1.21 installed!
+      </div>
+      <h4>Step-by-Step Installation (README.txt)</h4>
       <ol>
-        <li>Install Fabric Loader 1.20.4 or 1.21 on your Minecraft launcher.</li>
-        <li>Place <code>2b2t-Anarchy-Utility-3.2.0.jar</code> into your <code>.minecraft/mods</code> folder.</li>
-        <li>Launch Minecraft and press <kbd>RSHIFT</kbd> or type <code>.help</code> in chat to open the ClickGUI.</li>
+        <li><strong>Prerequisites:</strong> Install <a href="https://fabricmc.net/" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">Fabric Loader</a> (1.20.4 or 1.21) and Fabric API.</li>
+        <li><strong>Place Mod:</strong> Extract and place <code>2b2t-Anarchy-Utility-3.2.0.jar</code> into your <code>.minecraft/mods</code> directory.</li>
+        <li><strong>Launch Game:</strong> Start your Minecraft launcher and join your favorite anarchy server.</li>
+        <li><strong>ClickGUI:</strong> Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-white/20 rounded font-mono text-purple-300">RSHIFT</kbd> or type <code>.help</code> in chat to configure modules!</li>
       </ol>
     `,
     commands: `
-      <ul>
-        <li><code>.highway [x] [z]</code> - Start automated Baritone Nether highway construction</li>
-        <li><code>.stash scan [radius]</code> - Scan loaded chunks for chests and shulkers</li>
-        <li><code>.elytra mode 2b2t</code> - Switch ElytraFly bypass to 2b2t profile</li>
-      </ul>
+      <h4>All Available Chat Commands & Keybinds</h4>
+      <table class="w-full text-left text-xs border border-white/10 mt-2 rounded-lg overflow-hidden">
+        <thead class="bg-slate-800 text-slate-300">
+          <tr>
+            <th class="p-2.5 border-b border-white/10">Command / Keybind</th>
+            <th class="p-2.5 border-b border-white/10">Module</th>
+            <th class="p-2.5 border-b border-white/10">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-slate-300">
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">.highway &lt;X|Z&gt; &lt;distance&gt;</td>
+            <td class="p-2.5 text-cyan-400 font-semibold">Baritone</td>
+            <td class="p-2.5">Start automated Nether highway excavation and obsidian paving</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">.highway pause | resume</td>
+            <td class="p-2.5 text-cyan-400 font-semibold">Baritone</td>
+            <td class="p-2.5">Temporarily pause or resume highway construction</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">.stash scan [radius]</td>
+            <td class="p-2.5 text-emerald-400 font-semibold">StashFinder</td>
+            <td class="p-2.5">Scan loaded chunk entities for dupe stashes and hidden chests</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">.packetfly mode &lt;grim|ncp&gt;</td>
+            <td class="p-2.5 text-blue-400 font-semibold">PacketFly</td>
+            <td class="p-2.5">Select anti-cheat bypass profile for vertical phasing</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">[R] Keybind</td>
+            <td class="p-2.5 text-yellow-400 font-semibold">Surround</td>
+            <td class="p-2.5">Toggle instant obsidian 360-degree defensive surround</td>
+          </tr>
+          <tr>
+            <td class="p-2.5 font-mono text-purple-400">[G] Keybind</td>
+            <td class="p-2.5 text-purple-400 font-semibold">ElytraFly</td>
+            <td class="p-2.5">Toggle 2b2t speed-locked infinite Elytra flight</td>
+          </tr>
+        </tbody>
+      </table>
     `,
-    configSample: `# 2b2t Anarchy Utility Configuration (JSON/YAML)
-
-modules:
-  auto_totem:
-    enabled: true
-    health_threshold: 14.0
-    strict_mode: true
-  highway_builder:
-    width: 3
-    height: 3
-    clear_blocks: ["NETHERRACK", "BASALT", "BLACKSTONE", "LAVA"]
-    bridge_material: "OBSIDIAN"
-    auto_eat: true
-  bypasses:
-    grim_packet_sync: true
-    anti_velocity_bypass: true
-    fast_break_tick_delay: 0
+    configSample: `# 2b2t Anarchy Utility Configuration (config.json)
+{
+  "modules": {
+    "auto_totem": {
+      "enabled": true,
+      "health_threshold": 14.0,
+      "strict_inventory_sync": true
+    },
+    "highway_builder": {
+      "tunnel_width": 3,
+      "tunnel_height": 3,
+      "auto_bridge_lava": true,
+      "bridge_material": "OBSIDIAN",
+      "auto_eat": true
+    },
+    "bypasses": {
+      "grim_packet_sync": true,
+      "anti_velocity_bypass": true,
+      "fast_break_tick_delay": 0
+    }
+  }
+}
 `
   }
 };
