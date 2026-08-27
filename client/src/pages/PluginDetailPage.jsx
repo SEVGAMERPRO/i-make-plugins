@@ -184,11 +184,13 @@ Config.RefuelSpeed = 1.5
       </ul>
     `,
     installation: `
+      <div class="mb-4 p-3.5 bg-blue-500/15 border border-blue-400/30 rounded-xl text-blue-200 text-xs">
+        <strong>⚡ Quick 1-Click Setup:</strong> Run the <code>install.bat</code> file inside the zip to download everything automatically, then just configure your bot in <code>config.example.json</code>!
+      </div>
       <h4>Step-by-Step Installation Guide (README.txt)</h4>
       <ol>
-        <li><strong>Prerequisites:</strong> Install Node.js 18+ from <a href="https://nodejs.org" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">nodejs.org</a>.</li>
+        <li><strong>1-Click Install:</strong> Double click <code>install.bat</code> (or run <code>npm install</code>).</li>
         <li><strong>Discord Developer Portal:</strong> Create a bot at <a href="https://discord.com/developers/applications" target="_blank" rel="noreferrer" class="text-blue-400 hover:underline">discord.com/developers</a>. Enable <em>Server Members Intent</em> and <em>Message Content Intent</em> under the Bot tab.</li>
-        <li><strong>Install Dependencies:</strong> Extract the downloaded zip and run <code>npm install</code>.</li>
         <li><strong>Configuration:</strong> Rename <code>config.example.json</code> to <code>config.json</code> and paste your Bot Token and Server IDs.</li>
         <li><strong>Start the Bot:</strong> Run <code>node index.js</code> (or use PM2 for 24/7 hosting: <code>pm2 start index.js --name ticket-bot</code>).</li>
         <li><strong>Deploy Panel:</strong> Run <code>/ticket setup</code> in your Discord server #support channel!</li>

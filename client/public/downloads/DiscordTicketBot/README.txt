@@ -1,3 +1,11 @@
+################################################################################
+#                                                                              #
+#   ⚡ QUICK 1-CLICK SETUP:                                                    #
+#   Or run the install.bat file to download everything, then just configure   #
+#   your bot in config.example.json (or config.json)!                          #
+#                                                                              #
+################################################################################
+
 ================================================================================
            DISCORD TICKET & TRANSCRIPTS BOT — OFFICIAL DOCUMENTATION
 ================================================================================
@@ -29,6 +37,11 @@ This bot provides a fast, automated support ticket system for Discord servers:
 
 [3] STEP-BY-STEP SETUP INSTRUCTIONS
 --------------------------------------------------------------------------------
+⚡ FASTEST WAY (WINDOWS):
+  • Just double click "install.bat" to download all dependencies automatically!
+  • Then configure "config.json" (or "config.example.json").
+
+MANUAL WAY:
 STEP 1: Prerequisites
   • Install Node.js (v18.0.0 or newer) from https://nodejs.org
   • Create an application at https://discord.com/developers/applications
@@ -84,11 +97,13 @@ COMMAND                      PERMISSION        DESCRIPTION
 
 [5] FILE STRUCTURE
 --------------------------------------------------------------------------------
+├── install.bat          -> 1-Click automated installer for Windows
 ├── index.js             -> Main Discord.js bot source code
 ├── package.json         -> Node.js dependencies (discord.js, etc.)
 ├── config.example.json  -> Template configuration file
 ├── config.json          -> Your live secret bot token & server IDs
 ├── README.txt           -> This quick instruction and command guide
+├── README.md            -> Markdown documentation guide
 └── transcripts/         -> Local directory storing archived HTML transcripts
 
 [6] TROUBLESHOOTING & FAQ
