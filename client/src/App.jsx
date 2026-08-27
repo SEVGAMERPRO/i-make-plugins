@@ -1,6 +1,9 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import { CartProvider } from './context/CartContext';
+import CartDrawer from './components/cart/CartDrawer';
+import PaymentSimulatorModal from './components/cart/PaymentSimulatorModal';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -28,39 +31,45 @@ import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/plugins" element={<PluginsPage />} />
-        <Route path="/plugins/:id" element={<PluginDetailPage />} />
-        <Route path="/games/:slug" element={<GamePage />} />
-        <Route path="/bounties" element={<BountiesPage />} />
-        <Route path="/ai-config" element={<AiConfigPage />} />
-        <Route path="/ads" element={<AdsManagerPage />} />
-        <Route path="/custom-plugin" element={<CustomPluginPage />} />
-        <Route path="/custom-plugins" element={<CustomPluginPage />} />
-        <Route path="/request-success" element={<RequestSuccessPage />} />
-        <Route path="/creators" element={<BecomeCreatorPage />} />
-        <Route path="/become-creator" element={<BecomeCreatorPage />} />
-        <Route path="/upgrade" element={<PricingPage />} />
-        <Route path="/membership" element={<PricingPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/dashboard" element={<CreatorDashboard />} />
-        <Route path="/my-plugins" element={<CreatorDashboard />} />
-        <Route path="/upload" element={<UploadPluginPage />} />
-        <Route path="/staff/reviews" element={<StaffReviewPage />} />
-        <Route path="/users/:username" element={<UserProfilePage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/network" element={<NetworkPortalPage />} />
-        <Route path="/minoshield" element={<MinoShieldPage />} />
-        
-        {/* Custom 404 Error Page */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Layout>
+    <CartProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/plugins" element={<PluginsPage />} />
+          <Route path="/plugins/:id" element={<PluginDetailPage />} />
+          <Route path="/games/:slug" element={<GamePage />} />
+          <Route path="/bounties" element={<BountiesPage />} />
+          <Route path="/ai-config" element={<AiConfigPage />} />
+          <Route path="/ads" element={<AdsManagerPage />} />
+          <Route path="/custom-plugin" element={<CustomPluginPage />} />
+          <Route path="/custom-plugins" element={<CustomPluginPage />} />
+          <Route path="/request-success" element={<RequestSuccessPage />} />
+          <Route path="/creators" element={<BecomeCreatorPage />} />
+          <Route path="/become-creator" element={<BecomeCreatorPage />} />
+          <Route path="/upgrade" element={<PricingPage />} />
+          <Route path="/membership" element={<PricingPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/dashboard" element={<CreatorDashboard />} />
+          <Route path="/my-plugins" element={<CreatorDashboard />} />
+          <Route path="/upload" element={<UploadPluginPage />} />
+          <Route path="/staff/reviews" element={<StaffReviewPage />} />
+          <Route path="/users/:username" element={<UserProfilePage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/network" element={<NetworkPortalPage />} />
+          <Route path="/minoshield" element={<MinoShieldPage />} />
+          
+          {/* Custom 404 Error Page */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Layout>
+      
+      {/* Global Slide-Over Cart Drawer & Payment Simulator */}
+      <CartDrawer />
+      <PaymentSimulatorModal />
+    </CartProvider>
   );
 }
 

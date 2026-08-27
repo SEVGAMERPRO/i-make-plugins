@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check } from 'lucide-react';
+import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
+import { useCart } from '../context/CartContext';
 import { getPluginById } from '../services/api';
 
 const SAMPLE_PLUGINS_DATABASE = {
@@ -493,6 +494,7 @@ Config.Blip = {
 
 const PluginDetailPage = () => {
   const { id } = useParams();
+  const { addToCart, isInCart, setIsCheckoutOpen } = useCart();
   const [loading, setLoading] = useState(true);
   const [plugin, setPlugin] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -693,15 +695,58 @@ const PluginDetailPage = () => {
           {/* Sidebar */}
           <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
             
-            {/* Purchase / Download Card */}
-            <div className="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl sticky top-24 space-y-5">
-              <button 
-                onClick={handleDownload}
-                className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-base"
-              >
-                {downloadSuccess ? <Check className="w-5 h-5 text-emerald-300" /> : <Download className="w-5 h-5" />}
-                <span>{downloadSuccess ? 'Downloaded!' : isFree ? 'Download Free Package (.zip)' : `Get Resource for $${plugin.price}`}</span>
-              </button>
+              {/* Purchase / Download Card */}
+            <div className="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl sticky top-24 space-y-4">
+              
+              {/* Primary Action Button */}
+              {!isFree ? (
+                <div className="space-y-2.5">
+                  <button 
+                    onClick={() => {
+                      addToCart(plugin, false);
+                      setIsCheckoutOpen(true);
+                    }}
+                    className="btn-glow-blue btn-shimmer btn-animated w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-base cursor-pointer"
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    <span>Instant Pay Simulator (${plugin.price})</span>
+                  </button>
+
+                  <button 
+                    onClick={() => addToCart(plugin, true)}
+                    className="btn-animated w-full py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-cyan-400" />
+                    <span>{isInCart(plugin.id) ? 'In Cart • View Cart' : 'Add to Shopping Cart'}</span>
+                  </button>
+
+                  <button 
+                    onClick={handleDownload}
+                    className="w-full py-2 text-slate-400 hover:text-emerald-400 transition-colors flex items-center justify-center gap-1.5 text-[11px] font-semibold"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Direct Download Resource (.zip)</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  <button 
+                    onClick={handleDownload}
+                    className="btn-glow-blue btn-shimmer btn-animated w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-black rounded-2xl shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 text-base cursor-pointer"
+                  >
+                    {downloadSuccess ? <Check className="w-5 h-5 text-white" /> : <Download className="w-5 h-5" />}
+                    <span>{downloadSuccess ? 'Downloaded!' : 'Download Free Package (.zip)'}</span>
+                  </button>
+
+                  <button 
+                    onClick={() => addToCart(plugin, true)}
+                    className="btn-animated w-full py-2.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-emerald-400" />
+                    <span>{isInCart(plugin.id) ? 'In Cart • View Cart' : 'Add Free Item to Cart'}</span>
+                  </button>
+                </div>
+              )}
 
               {downloadSuccess && (
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center font-bold animate-fade-in">

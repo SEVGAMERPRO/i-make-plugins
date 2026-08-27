@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass } from 'lucide-react';
+import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import NotificationBell from '../ui/NotificationBell';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const { cartCount, setIsCartOpen } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -127,6 +129,21 @@ const Navbar = ({ onMenuClick }) => {
           
           {/* Notification Bell */}
           <NotificationBell />
+
+          {/* Shopping Cart Button */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 rounded-xl transition-all cursor-pointer"
+            aria-label="Shopping Cart"
+            title="View Shopping Cart"
+          >
+            <ShoppingCart className="w-5 h-5 text-slate-300 hover:text-blue-400 transition-colors" />
+            {cartCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-slate-950 text-[10px] font-black rounded-full flex items-center justify-center shadow-lg shadow-blue-500/50 animate-pulse">
+                {cartCount}
+              </span>
+            )}
+          </button>
 
           {/* Mobile Quick Marketplace icon shortcut */}
           <Link

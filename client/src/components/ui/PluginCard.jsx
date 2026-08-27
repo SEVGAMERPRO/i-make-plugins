@@ -1,10 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Download, Sparkles, ArrowRight } from 'lucide-react';
+import { Star, Download, Sparkles, ArrowRight, ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 
 const PluginCard = ({ plugin }) => {
+  const { addToCart, isInCart } = useCart();
   const isFree = parseFloat(plugin.price || 0) === 0 || plugin.price === '0.00';
-  const imgUrl = plugin.coverImageUrl || plugin.imageUrl || '/images/plugins/minecraft_economy_gui.jpg';
+  const imgUrl = plugin.coverImageUrl || plugin.imageUrl || '/images/plugins/minecraft_economy_gui.svg';
+  const inCart = isInCart(plugin.id);
+
+  const handleQuickAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(plugin, true);
+  };
 
   return (
     <Link 
@@ -25,7 +34,20 @@ const PluginCard = ({ plugin }) => {
           </span>
         </div>
 
-        <div className="absolute bottom-3 right-3">
+        <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+          <button
+            onClick={handleQuickAdd}
+            className={`p-1.5 rounded-xl backdrop-blur-md border transition-all cursor-pointer ${
+              inCart 
+                ? 'bg-emerald-500/90 border-emerald-400 text-slate-950' 
+                : 'bg-slate-900/90 hover:bg-blue-600 border-white/10 text-slate-300 hover:text-white'
+            }`}
+            title={inCart ? 'Already in cart' : 'Add to cart'}
+            aria-label="Add to cart"
+          >
+            {inCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+          </button>
+          
           <span className="px-3 py-1 rounded-xl bg-slate-900/90 backdrop-blur-md text-sm font-black text-emerald-400 border border-emerald-500/30 shadow-lg">
             {isFree ? 'Free' : `$${plugin.price}`}
           </span>
@@ -50,7 +72,7 @@ const PluginCard = ({ plugin }) => {
           </div>
 
           <div className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:text-blue-300">
-            <span>Open</span>
+            <span>Details</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
