@@ -581,44 +581,51 @@ router.post('/generate-config', async (req, res) => {
     const cleanPrompt = prompt.trim();
     const effectiveApiKey = apiKey || process.env.GEMINI_API_KEY;
 
-    // If Gemini API Key exists, call Gemini Pro
+    // If Gemini API Key exists, call Google Gemini AI Models
     if (effectiveApiKey && effectiveApiKey.trim()) {
       try {
-        const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${effectiveApiKey.trim()}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: `You are an expert game server developer and plugin configuration architect.
-Generate a complete, production-ready, highly detailed configuration file for ${game} based on this exact user request:
+        const candidateModels = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-flash-latest', 'gemini-pro-latest'];
+        
+        for (const model of candidateModels) {
+          try {
+            const geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveApiKey.trim()}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{
+                    parts: [{
+                      text: `You are an expert game server developer and plugin configuration architect.
+Generate a complete, production-ready, highly detailed configuration file for ${game} (format: ${format}) based on this exact user request:
 
 "${cleanPrompt}"
 
 Rules:
-1. Return ONLY the raw code (e.g. YAML, Lua, or JSON) with helpful developer comments.
-2. Do NOT enclose in markdown backticks (\`\`\`yaml or \`\`\`).
-3. Make it fully customized to every specific detail mentioned in the prompt.
+1. Return ONLY the clean raw configuration code (e.g. YAML, Lua, JSON, or TOML) with helpful developer comments.
+2. Do NOT enclose in markdown code block backticks (\`\`\`yaml or \`\`\`).
+3. Make it 100% customized to every specific detail mentioned in the prompt.
 4. Include realistic item IDs, permission nodes, sound effects, localized messages, and cooldowns.`
-                }]
-              }]
-            })
-          }
-        );
+                    }]
+                  }]
+                })
+              }
+            );
 
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          let aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (aiText) {
-            aiText = aiText.replace(/^```[a-z]*\n/i, '').replace(/\n```$/, '').trim();
-            return res.json({
-              success: true,
-              source: 'Google Gemini Pro AI',
-              config: aiText
-            });
+            if (geminiRes.ok) {
+              const data = await geminiRes.json();
+              let aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (aiText) {
+                aiText = aiText.replace(/^```[a-z]*\n/i, '').replace(/\n```$/, '').trim();
+                return res.json({
+                  success: true,
+                  source: `Google Gemini AI (${model})`,
+                  config: aiText
+                });
+              }
+            }
+          } catch (mErr) {
+            console.warn(`Model ${model} failed, trying next:`, mErr.message);
           }
         }
       } catch (geminiErr) {
