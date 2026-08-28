@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import GoogleRecaptcha from '../components/common/GoogleRecaptcha';
 import { Sparkles, ArrowRight, Lock, Mail, User, ShieldAlert } from 'lucide-react';
 
 const RegisterPage = () => {
@@ -10,6 +11,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -182,11 +184,14 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {/* Google reCAPTCHA v2 Checkbox */}
+          <GoogleRecaptcha onVerify={(token) => setRecaptchaToken(token)} onExpired={() => setRecaptchaToken('')} />
+
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              disabled={loading || !recaptchaToken}
+              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer ${loading || !recaptchaToken ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span>{loading ? 'Creating account...' : 'Create Account'}</span>
               <ArrowRight className="w-4 h-4" />
