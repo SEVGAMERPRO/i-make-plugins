@@ -51,6 +51,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import NimdaStaffLoginPage from './pages/NimdaStaffLoginPage';
 import StaffTicketsPage from './pages/StaffTicketsPage';
 import DiscordConnectPage from './pages/DiscordConnectPage';
+import Security2FAPage from './pages/Security2FAPage';
 
 function App() {
   return (
@@ -63,6 +64,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/discord" element={<DiscordConnectPage />} />
           <Route path="/discord-connect" element={<DiscordConnectPage />} />
+          <Route path="/security" element={<Security2FAPage />} />
+          <Route path="/settings/2fa" element={<Security2FAPage />} />
+          <Route path="/2fa" element={<Security2FAPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/plugins" element={<PluginsPage />} />

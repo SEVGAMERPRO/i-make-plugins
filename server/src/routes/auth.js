@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const { body } = require('express-validator');
 const { PrismaClient } = require('@prisma/client');
 const nodemailer = require('nodemailer');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const validate = require('../middleware/validate');
 const { auth } = require('../middleware/auth');
 const store = require('../store/globalStore');
@@ -22,6 +24,20 @@ const transporter = nodemailer.createTransport({
 
 // Verification Codes In-Memory Storage (email -> { code, expiresAt, type })
 const verificationCodes = new Map();
+
+// Google Authenticator 2FA Settings (email -> { secret, backupCodes, enabled, enabledAt })
+const user2FASettings = new Map();
+
+// Helper to generate 8 single-use backup recovery codes
+function generateBackupCodes() {
+  const codes = [];
+  for (let i = 0; i < 8; i++) {
+    const part1 = Math.floor(1000 + Math.random() * 9000);
+    const part2 = Math.floor(1000 + Math.random() * 9000);
+    codes.push(`${part1}-${part2}`);
+  }
+  return codes;
+}
 
 // Helper to generate a 9-digit alphanumeric code (e.g., 9X2-K7W-4BP)
 function generate9DigitCode() {
@@ -525,22 +541,27 @@ router.post('/staff/verify-code', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Verification code is required.' });
     }
 
-    const record = verificationCodes.get(`staff_${staffEmail.toLowerCase()}`);
-    if (!record) {
-      return res.status(400).json({ success: false, message: 'No active verification code found or expired. Please request a new one.' });
-    }
-
-    if (Date.now() > record.expiresAt) {
+    let isStaffValid = false;
+    if (record && Date.now() <= record.expiresAt && record.code === code.trim()) {
+      isStaffValid = true;
       verificationCodes.delete(`staff_${staffEmail.toLowerCase()}`);
-      return res.status(400).json({ success: false, message: 'Verification code expired. Please request a new one.' });
+    } else {
+      // Check Google Authenticator TOTP if enabled
+      const settings = user2FASettings.get(staffEmail.toLowerCase());
+      if (settings && settings.enabled) {
+        const isTotp = speakeasy.totp.verify({
+          secret: settings.secret,
+          encoding: 'base32',
+          token: code.trim(),
+          window: 2
+        });
+        if (isTotp) isStaffValid = true;
+      }
     }
 
-    if (record.code !== code.trim()) {
-      return res.status(400).json({ success: false, message: 'Incorrect verification code. Please try again.' });
+    if (!isStaffValid) {
+      return res.status(400).json({ success: false, message: 'Incorrect verification code or Google Authenticator token. Please try again.' });
     }
-
-    // Clean up used code
-    verificationCodes.delete(`staff_${staffEmail.toLowerCase()}`);
 
     // Create / fetch staff user in database or fallback object
     let staffUser;
@@ -595,6 +616,219 @@ router.post('/staff/verify-code', async (req, res) => {
     console.error('Staff verify-code error:', error);
     res.status(500).json({ success: false, message: 'Failed to verify staff code.' });
   }
+});
+
+// ==========================================
+// 🛡️ GOOGLE AUTHENTICATOR (TOTP 2FA) ENDPOINTS
+// ==========================================
+
+// @route   POST /api/auth/2fa/setup
+// @desc    Generate Google Authenticator Base32 secret, QR Code DataURL, and 8 Backup Codes
+router.post('/2fa/setup', async (req, res) => {
+  try {
+    const { email, username } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required for 2FA setup.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const accountName = username ? `${username} (${cleanEmail})` : cleanEmail;
+
+    // Generate RFC 6238 Base32 Secret
+    const secret = speakeasy.generateSecret({
+      name: `MinoForge:${accountName}`,
+      issuer: 'MinoForge Security',
+      length: 20
+    });
+
+    // Generate QR Code image as base64 Data URL
+    const qrCodeDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+    // Generate 8 Emergency Recovery Codes
+    const backupCodes = generateBackupCodes();
+
+    res.json({
+      success: true,
+      secret: secret.base32,
+      formattedSecret: secret.base32.match(/.{1,4}/g).join(' '),
+      qrCode: qrCodeDataUrl,
+      otpauthUrl: secret.otpauth_url,
+      backupCodes
+    });
+  } catch (error) {
+    console.error('[2FA Setup Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate 2FA secret and QR code.' });
+  }
+});
+
+// @route   POST /api/auth/2fa/verify-and-activate
+// @desc    Verify initial 6-digit TOTP code and lock in 2FA for the account
+router.post('/2fa/verify-and-activate', async (req, res) => {
+  try {
+    const { email, secret, token, backupCodes } = req.body;
+    if (!email || !secret || !token) {
+      return res.status(400).json({ success: false, message: 'Email, secret, and 6-digit token are required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanToken = token.toString().replace(/\s+/g, '').trim();
+
+    // Verify TOTP token (allow 60s clock skew window)
+    const verified = speakeasy.totp.verify({
+      secret: secret.trim(),
+      encoding: 'base32',
+      token: cleanToken,
+      window: 2
+    });
+
+    if (!verified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid 6-digit code. Please ensure your device clock is synchronized.'
+      });
+    }
+
+    // Save to user2FASettings
+    user2FASettings.set(cleanEmail, {
+      enabled: true,
+      secret: secret.trim(),
+      backupCodes: Array.isArray(backupCodes) ? backupCodes : generateBackupCodes(),
+      enabledAt: new Date().toISOString()
+    });
+
+    store.trackActivity({
+      type: 'SECURITY_2FA_ENABLED',
+      email: cleanEmail,
+      ip: req.ip || '127.0.0.1',
+      details: 'Google Authenticator 2FA activated successfully'
+    });
+
+    res.json({
+      success: true,
+      message: 'Google Authenticator 2FA has been successfully activated on your account!'
+    });
+  } catch (error) {
+    console.error('[2FA Verify Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to verify 2FA token.' });
+  }
+});
+
+// @route   POST /api/auth/2fa/validate
+// @desc    Validate 6-digit TOTP token OR backup recovery code during login / admin access
+router.post('/2fa/validate', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    if (!email || !token) {
+      return res.status(400).json({ success: false, message: 'Email and 2FA code are required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanToken = token.toString().replace(/[\s-]/g, '').trim();
+    const settings = user2FASettings.get(cleanEmail);
+
+    // If user hasn't explicitly set up 2FA yet, allow pass or require setup
+    if (!settings || !settings.enabled) {
+      return res.json({
+        success: true,
+        valid: true,
+        twoFactorRequired: false,
+        message: '2FA not enabled for this account.'
+      });
+    }
+
+    // 1. Check if 6-digit TOTP token
+    const isTotpValid = speakeasy.totp.verify({
+      secret: settings.secret,
+      encoding: 'base32',
+      token: cleanToken,
+      window: 2
+    });
+
+    if (isTotpValid) {
+      return res.json({
+        success: true,
+        valid: true,
+        method: 'TOTP_GOOGLE_AUTHENTICATOR',
+        message: 'Google Authenticator verified.'
+      });
+    }
+
+    // 2. Check if single-use backup code
+    const formattedToken = token.trim();
+    const backupIndex = settings.backupCodes.findIndex(
+      c => c === formattedToken || c.replace(/-/g, '') === cleanToken
+    );
+
+    if (backupIndex !== -1) {
+      // Consume the single-use backup code
+      settings.backupCodes.splice(backupIndex, 1);
+      user2FASettings.set(cleanEmail, settings);
+
+      store.trackActivity({
+        type: 'SECURITY_BACKUP_CODE_USED',
+        email: cleanEmail,
+        ip: req.ip || '127.0.0.1',
+        details: `Emergency backup recovery code used. Remaining codes: ${settings.backupCodes.length}`
+      });
+
+      return res.json({
+        success: true,
+        valid: true,
+        method: 'BACKUP_RECOVERY_CODE',
+        remainingBackupCodes: settings.backupCodes.length,
+        message: 'Emergency backup recovery code accepted.'
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      valid: false,
+      message: 'Invalid Authenticator code or backup recovery code.'
+    });
+  } catch (error) {
+    console.error('[2FA Validate Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to validate 2FA code.' });
+  }
+});
+
+// @route   POST /api/auth/2fa/disable
+// @desc    Disable 2FA on account
+router.post('/2fa/disable', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    user2FASettings.delete(cleanEmail);
+
+    store.trackActivity({
+      type: 'SECURITY_2FA_DISABLED',
+      email: cleanEmail,
+      ip: req.ip || '127.0.0.1',
+      details: 'Google Authenticator 2FA disabled'
+    });
+
+    res.json({
+      success: true,
+      message: 'Two-Factor Authentication has been disabled.'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to disable 2FA.' });
+  }
+});
+
+// @route   GET /api/auth/2fa/status/:email
+// @desc    Get 2FA status for user
+router.get('/2fa/status/:email', (req, res) => {
+  const cleanEmail = req.params.email.trim().toLowerCase();
+  const settings = user2FASettings.get(cleanEmail);
+  res.json({
+    enabled: !!(settings && settings.enabled),
+    enabledAt: settings?.enabledAt || null,
+    remainingBackupCodes: settings?.backupCodes?.length || 0
+  });
 });
 
 // @route   GET /api/auth/me
