@@ -118,11 +118,6 @@ const LoginPage = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!recaptchaToken) {
-      setError('Please check the "I\'m not a robot" box before signing in with Google.');
-      return;
-    }
-
     setError('');
     setLoading(true);
     try {
