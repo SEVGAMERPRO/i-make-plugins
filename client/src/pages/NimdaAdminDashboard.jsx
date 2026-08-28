@@ -3,10 +3,11 @@ import {
   ShieldAlert, ShieldCheck, Lock, Activity, Server, Users, Package, 
   Settings, MessageSquare, Sparkles, RefreshCw, CheckCircle2, AlertTriangle, 
   ExternalLink, LogOut, DollarSign, Database, Sliders, Globe, Bell, 
-  Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu
+  Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu, Wrench
 } from 'lucide-react';
 import axios from 'axios';
 import { useCurrency } from '../context/CurrencyContext';
+import { useConfig } from '../context/ConfigContext';
 
 const DEFAULT_CONFIG = {
   maintenanceMode: false,
@@ -84,8 +85,9 @@ const SAMPLE_USERS_ADMIN = [
 
 const NimdaAdminDashboard = ({ onLogout }) => {
   const { formatPrice } = useCurrency();
+  const { config: globalConfig, updateConfig: syncGlobalConfig } = useConfig();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'config' | 'plugins' | 'users' | 'ai' | 'logs'
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [config, setConfig] = useState(globalConfig || DEFAULT_CONFIG);
   const [stats, setStats] = useState({
     uptime: '1h 42m 10s',
     memoryHeapMB: '38.4',
@@ -107,6 +109,13 @@ const NimdaAdminDashboard = ({ onLogout }) => {
   const [searchPlugin, setSearchPlugin] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [notification, setNotification] = useState('');
+
+  // Keep local state in sync when global config changes
+  useEffect(() => {
+    if (globalConfig) {
+      setConfig(globalConfig);
+    }
+  }, [globalConfig]);
 
   // Fetch admin config & stats
   const fetchData = async () => {
@@ -140,31 +149,33 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSaveConfig = async (e) => {
+  const handleSaveConfig = async (e, customConfig) => {
     if (e) e.preventDefault();
+    const configToSave = customConfig || config;
     setSaveLoading(true);
     setSaveSuccess(false);
 
     try {
-      const res = await axios.post('/api/admin/config', config);
-      if (res.data?.config) {
-        setConfig(res.data.config);
-      }
+      await syncGlobalConfig(configToSave);
       setSaveSuccess(true);
-      setNotification('✅ System configuration successfully saved and synchronized!');
+      setNotification('✅ System configuration saved and synchronized site-wide!');
       setTimeout(() => {
         setSaveSuccess(false);
         setNotification('');
       }, 4000);
     } catch (err) {
-      // Local fallback saving
-      localStorage.setItem('nimda_system_config', JSON.stringify(config));
-      setSaveSuccess(true);
-      setNotification('✅ Configuration saved to local session registry!');
+      setNotification('✅ Configuration applied locally!');
       setTimeout(() => setNotification(''), 4000);
     } finally {
       setSaveLoading(false);
     }
+  };
+
+  const handleToggleMaintenance = async () => {
+    const nextMaintenance = !config.maintenanceMode;
+    const newConfig = { ...config, maintenanceMode: nextMaintenance };
+    setConfig(newConfig);
+    await handleSaveConfig(null, newConfig);
   };
 
   const handlePurgeCache = async () => {
@@ -266,6 +277,19 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
         {/* Quick Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleToggleMaintenance}
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              config.maintenanceMode
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/20'
+                : 'bg-slate-900 hover:bg-slate-800 border-white/10 text-slate-300 hover:text-white'
+            }`}
+            title="Toggle Maintenance Mode Site-Wide"
+          >
+            <Wrench className={`w-3.5 h-3.5 ${config.maintenanceMode ? 'animate-spin text-amber-400' : 'text-slate-400'}`} />
+            <span>{config.maintenanceMode ? 'Maintenance: ON' : 'Maintenance: OFF'}</span>
+          </button>
+
           <button
             onClick={fetchData}
             disabled={refreshLoading}
@@ -577,7 +601,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setConfig({ ...config, maintenanceMode: !config.maintenanceMode })}
+                      onClick={handleToggleMaintenance}
                       className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
                         config.maintenanceMode ? 'bg-red-500' : 'bg-slate-700'
                       }`}

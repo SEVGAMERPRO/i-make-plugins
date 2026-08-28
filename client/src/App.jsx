@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import { CartProvider } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
+import { ConfigProvider } from './context/ConfigContext';
 import CartDrawer from './components/cart/CartDrawer';
 import PaymentSimulatorModal from './components/cart/PaymentSimulatorModal';
 
@@ -34,9 +35,10 @@ import StaffTicketsPage from './pages/StaffTicketsPage';
 
 function App() {
   return (
-    <CurrencyProvider>
-      <CartProvider>
-        <Layout>
+    <ConfigProvider>
+      <CurrencyProvider>
+        <CartProvider>
+          <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -79,8 +81,9 @@ function App() {
       {/* Global Slide-Over Cart Drawer & Payment Simulator */}
       <CartDrawer />
       <PaymentSimulatorModal />
-    </CartProvider>
+      </CartProvider>
     </CurrencyProvider>
+    </ConfigProvider>
   );
 }
 
