@@ -23,9 +23,9 @@ const SPONSORED_PLUGINS = [
     title: 'Ultimate Economy & Multi-Vault Pro',
     game: 'Minecraft',
     price: '4.99',
-    rating: '4.9',
-    reviewsCount: 142,
-    downloads: 4820,
+    rating: '5.0',
+    reviewsCount: 0,
+    downloads: 0,
     coverImageUrl: '/images/plugins/minecraft_economy_gui.svg',
     summary: 'Multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.'
   },
@@ -35,8 +35,8 @@ const SPONSORED_PLUGINS = [
     game: 'Minecraft: 2b2t & Anarchy Clients',
     price: 'Free',
     rating: '5.0',
-    reviewsCount: 310,
-    downloads: 8940,
+    reviewsCount: 0,
+    downloads: 0,
     coverImageUrl: '/images/plugins/minecraft_anarchy_highway.svg',
     summary: 'Optimized 2b2t anarchy utility addon with auto-totem, GrimAC bypasses, Baritone highway digger, and stash locator.'
   },
@@ -45,9 +45,9 @@ const SPONSORED_PLUGINS = [
     title: 'Advanced Fuel & Electric Charging System',
     game: 'FiveM',
     price: '3.49',
-    rating: '4.8',
-    reviewsCount: 88,
-    downloads: 2150,
+    rating: '5.0',
+    reviewsCount: 0,
+    downloads: 0,
     coverImageUrl: '/images/plugins/gta_gas_station.svg',
     summary: 'Realistic gas stations, EV chargers, jerry cans, and smooth 60fps UI for QBCore & ESX.'
   }

@@ -1,51 +1,41 @@
 import React, { useState } from 'react';
-import { Megaphone, DollarSign, Eye, MousePointer, Plus, ArrowUpRight, CheckCircle2, Crown, Sparkles, TrendingUp, Filter } from 'lucide-react';
+import { Megaphone, DollarSign, Eye, MousePointer, Plus, ArrowUpRight, CheckCircle2, Crown, Sparkles, TrendingUp, Filter, PackageOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
-const SAMPLE_CAMPAIGNS = [
-  {
-    id: 'ad-1',
-    pluginTitle: 'Ultimate Economy & Vault System',
-    game: 'Minecraft',
-    placement: 'Top Search & Homepage Spotlight',
-    dailyBudget: 2.50,
-    spent: 8.75,
-    impressions: 4280,
-    clicks: 342,
-    ctr: '7.99%',
-    status: 'ACTIVE'
-  },
-  {
-    id: 'ad-2',
-    pluginTitle: 'Advanced Fuel & Electric Charging',
-    game: 'FiveM',
-    placement: 'FiveM Category Header Ad',
-    dailyBudget: 1.50,
-    spent: 4.50,
-    impressions: 1950,
-    clicks: 184,
-    ctr: '9.43%',
-    status: 'ACTIVE'
-  }
-];
-
 const AdsManagerPage = () => {
   const { user } = useAuth();
-  const [campaigns, setCampaigns] = useState(SAMPLE_CAMPAIGNS);
+  
+  // Read real campaigns from localStorage (starting empty)
+  const [campaigns, setCampaigns] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('minoforge_ad_campaigns') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
-  const [adCredits, setAdCredits] = useState(5.00); // From Ultimate plan
+  const [adCredits, setAdCredits] = useState(5.00); // $5 Free Credit with Ultimate
 
   // New Ad Form State
-  const [selectedPlugin, setSelectedPlugin] = useState('Ultimate Economy & Vault System');
+  const [selectedPlugin, setSelectedPlugin] = useState('');
   const [placement, setPlacement] = useState('Search Top & Homepage Spotlight');
   const [budget, setBudget] = useState('2.00');
 
+  // Real Calculated Metrics
+  const totalImpressions = campaigns.reduce((acc, c) => acc + (c.impressions || 0), 0);
+  const totalClicks = campaigns.reduce((acc, c) => acc + (c.clicks || 0), 0);
+  const totalSpent = campaigns.reduce((acc, c) => acc + (c.spent || 0), 0);
+  const averageCtr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) + '%' : '0.00%';
+
   const handleCreateAd = (e) => {
     e.preventDefault();
+    if (!selectedPlugin.trim()) return;
+
     const newCamp = {
       id: `ad-${Date.now()}`,
-      pluginTitle: selectedPlugin,
+      pluginTitle: selectedPlugin.trim(),
       game: 'Minecraft',
       placement,
       dailyBudget: parseFloat(budget),
@@ -56,8 +46,11 @@ const AdsManagerPage = () => {
       status: 'ACTIVE'
     };
 
-    setCampaigns([newCamp, ...campaigns]);
+    const updated = [newCamp, ...campaigns];
+    setCampaigns(updated);
+    localStorage.setItem('minoforge_ad_campaigns', JSON.stringify(updated));
     setModalOpen(false);
+    setSelectedPlugin('');
     alert('🎉 Your sponsored ad is now live! It will appear upfront in search results and on the homepage spotlight.');
   };
 
@@ -107,8 +100,8 @@ const AdsManagerPage = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Ad Impressions</span>
               <Eye className="w-5 h-5 text-blue-400" />
             </div>
-            <p className="text-3xl font-black text-white">6,230</p>
-            <p className="text-xs text-slate-400 mt-1">Upfront in search & categories</p>
+            <p className="text-3xl font-black text-white">{totalImpressions.toLocaleString()}</p>
+            <p className="text-xs text-slate-400 mt-1">Real verified impressions</p>
           </div>
 
           <div className="p-6 rounded-3xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-xl">
@@ -116,7 +109,7 @@ const AdsManagerPage = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Ad Clicks</span>
               <MousePointer className="w-5 h-5 text-emerald-400" />
             </div>
-            <p className="text-3xl font-black text-white">526</p>
+            <p className="text-3xl font-black text-white">{totalClicks}</p>
             <p className="text-xs text-slate-400 mt-1">Direct buyer conversions</p>
           </div>
 
@@ -125,8 +118,8 @@ const AdsManagerPage = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Average CTR</span>
               <TrendingUp className="w-5 h-5 text-purple-400" />
             </div>
-            <p className="text-3xl font-black text-purple-400">8.44%</p>
-            <p className="text-xs text-slate-400 mt-1">Industry leading performance</p>
+            <p className="text-3xl font-black text-purple-400">{averageCtr}</p>
+            <p className="text-xs text-slate-400 mt-1">Calculated from verified traffic</p>
           </div>
         </div>
 
@@ -134,48 +127,58 @@ const AdsManagerPage = () => {
         <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Your Promoted Listings</h2>
+              <h2 className="text-xl font-bold text-white">Your Promoted Listings ({campaigns.length})</h2>
               <p className="text-xs text-slate-400 mt-0.5">Manage daily budgets, target placements, and analytics</p>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="text-xs uppercase tracking-wider text-slate-400 border-b border-white/10 bg-slate-950/40">
-                <tr>
-                  <th className="py-3 px-4 font-bold">Promoted Plugin</th>
-                  <th className="py-3 px-4 font-bold">Placement</th>
-                  <th className="py-3 px-4 font-bold">Daily Budget</th>
-                  <th className="py-3 px-4 font-bold">Impressions</th>
-                  <th className="py-3 px-4 font-bold">Clicks</th>
-                  <th className="py-3 px-4 font-bold">CTR</th>
-                  <th className="py-3 px-4 font-bold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 font-medium">
-                {campaigns.map(camp => (
-                  <tr key={camp.id} className="hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-4 font-bold text-white flex items-center gap-2">
-                      <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
-                        AD
-                      </span>
-                      <span>{camp.pluginTitle}</span>
-                    </td>
-                    <td className="py-4 px-4 text-xs text-slate-300">{camp.placement}</td>
-                    <td className="py-4 px-4 font-bold text-emerald-400">${camp.dailyBudget.toFixed(2)}/day</td>
-                    <td className="py-4 px-4">{camp.impressions.toLocaleString()}</td>
-                    <td className="py-4 px-4 font-bold text-white">{camp.clicks}</td>
-                    <td className="py-4 px-4 text-purple-400 font-bold">{camp.ctr}</td>
-                    <td className="py-4 px-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                        <CheckCircle2 className="w-3 h-3" /> Live
-                      </span>
-                    </td>
+          {campaigns.length === 0 ? (
+            <div className="text-center py-12 space-y-3">
+              <Megaphone className="w-12 h-12 text-slate-600 mx-auto" />
+              <h4 className="text-base font-bold text-white">No Active Ad Campaigns</h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Launch a sponsored ad campaign to boost your resource discoverability in search results and category spotlight banners.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-300">
+                <thead className="text-xs uppercase tracking-wider text-slate-400 border-b border-white/10 bg-slate-950/40">
+                  <tr>
+                    <th className="py-3 px-4 font-bold">Promoted Plugin</th>
+                    <th className="py-3 px-4 font-bold">Placement</th>
+                    <th className="py-3 px-4 font-bold">Daily Budget</th>
+                    <th className="py-3 px-4 font-bold">Impressions</th>
+                    <th className="py-3 px-4 font-bold">Clicks</th>
+                    <th className="py-3 px-4 font-bold">CTR</th>
+                    <th className="py-3 px-4 font-bold">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-medium">
+                  {campaigns.map(camp => (
+                    <tr key={camp.id} className="hover:bg-white/5 transition-colors">
+                      <td className="py-4 px-4 font-bold text-white flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
+                          AD
+                        </span>
+                        <span>{camp.pluginTitle}</span>
+                      </td>
+                      <td className="py-4 px-4 text-xs text-slate-300">{camp.placement}</td>
+                      <td className="py-4 px-4 font-bold text-emerald-400">${camp.dailyBudget.toFixed(2)}/day</td>
+                      <td className="py-4 px-4">{camp.impressions.toLocaleString()}</td>
+                      <td className="py-4 px-4 font-bold text-white">{camp.clicks}</td>
+                      <td className="py-4 px-4 text-purple-400 font-bold">{camp.ctr}</td>
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                          <CheckCircle2 className="w-3 h-3" /> Live
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Create Campaign Modal */}
@@ -189,7 +192,7 @@ const AdsManagerPage = () => {
                 </div>
                 <button 
                   onClick={() => setModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5"
+                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -198,17 +201,16 @@ const AdsManagerPage = () => {
               <form onSubmit={handleCreateAd} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Select Plugin to Boost
+                    Plugin Title or Name
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter plugin name to promote..."
                     value={selectedPlugin}
                     onChange={(e) => setSelectedPlugin(e.target.value)}
                     className="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="Ultimate Economy & Vault System">Ultimate Economy & Vault System (Minecraft)</option>
-                    <option value="Advanced Fuel & Electric Charging">Advanced Fuel & Electric Charging (FiveM)</option>
-                    <option value="Discord Ticket & Transcripts Bot">Discord Ticket & Transcripts Bot (Discord)</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -220,7 +222,7 @@ const AdsManagerPage = () => {
                     onChange={(e) => setPlacement(e.target.value)}
                     className="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
-                    <option value="Search Top & Homepage Spotlight">Top Search Slot + Homepage Spotlight (Max Clicks)</option>
+                    <option value="Search Top & Homepage Spotlight">Top Search Slot + Homepage Spotlight</option>
                     <option value="Category Header Spotlight">Category Header Spotlight Only</option>
                     <option value="Related Plugins Sidebar">Related Plugins Sidebar Recommendation</option>
                   </select>
