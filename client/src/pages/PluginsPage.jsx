@@ -17,41 +17,7 @@ const GAMES = [
   'Websites'
 ];
 
-const SPONSORED_PLUGINS = [
-  {
-    id: 'p-mine-1',
-    title: 'Ultimate Economy & Multi-Vault Pro',
-    game: 'Minecraft',
-    price: '4.99',
-    rating: '5.0',
-    reviewsCount: 0,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/minecraft_economy_gui.svg',
-    summary: 'Multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.'
-  },
-  {
-    id: 'p-2b2t-1',
-    title: '2b2t Anarchy Utility & Baritone Auto-Highway Builder',
-    game: 'Minecraft: 2b2t & Anarchy Clients',
-    price: 'Free',
-    rating: '5.0',
-    reviewsCount: 0,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/minecraft_anarchy_highway.svg',
-    summary: 'Optimized 2b2t anarchy utility addon with auto-totem, GrimAC bypasses, Baritone highway digger, and stash locator.'
-  },
-  {
-    id: 'p-fivem-2',
-    title: 'Advanced Fuel & Electric Charging System',
-    game: 'FiveM',
-    price: '3.49',
-    rating: '5.0',
-    reviewsCount: 0,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/gta_gas_station.svg',
-    summary: 'Realistic gas stations, EV chargers, jerry cans, and smooth 60fps UI for QBCore & ESX.'
-  }
-];
+const SPONSORED_PLUGINS = [];
 
 const PluginsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

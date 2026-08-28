@@ -39,32 +39,6 @@ const DEFAULT_CONFIG = {
 
 const SAMPLE_PLUGINS_ADMIN = [
   {
-    id: 'p-mine-1',
-    title: 'Ultimate Economy & Multi-Currency Vault',
-    author: 'SevGamerPro',
-    game: 'Minecraft',
-    price: 4.99,
-    downloads: 0,
-    status: 'APPROVED',
-    isPromoted: true,
-    version: '2.4.0',
-    fileSize: '4.2 MB',
-    minoShieldStatus: 'CLEAN_BYTECODE'
-  },
-  {
-    id: 'p-fivem-2',
-    title: 'Advanced Fuel & Electric Vehicle Charging Station',
-    author: 'SevGamerPro',
-    game: 'FiveM',
-    price: 3.49,
-    downloads: 0,
-    status: 'APPROVED',
-    isPromoted: true,
-    version: '1.1.2',
-    fileSize: '8.7 MB',
-    minoShieldStatus: 'CLEAN_BYTECODE'
-  },
-  {
     id: 'p-bot-3',
     title: 'Discord Automated Ticket & Transcript Bot',
     author: 'SevGamerPro',
