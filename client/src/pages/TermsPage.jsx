@@ -55,7 +55,7 @@ const TermsPage = () => {
               <span className="text-blue-400 font-mono">01.</span> Acceptance of Terms
             </h2>
             <p>
-              By accessing, browsing, registering for an account, or purchasing digital resources on <strong>MinoForge</strong> (accessible via <code>colasmp.net</code> and affiliated subdomains), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our platform.
+              By accessing, browsing, registering for an account, or purchasing digital resources on <strong>MinoForge</strong> (accessible via <code>minoforge.com</code> and affiliated subdomains), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our platform.
             </p>
           </section>
 
@@ -96,11 +96,35 @@ const TermsPage = () => {
           </section>
 
           <section className="space-y-3">
+            <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">
+              <span className="text-amber-400 font-mono">06.</span> Trademark Fair-Use &amp; Non-Affiliation Notice
+            </h2>
+            <p className="font-bold text-white">
+              !! Not affiliated with the official Miniforge project !!
+            </p>
+            <p>
+              MinoForge (<code>minoforge.com</code>) is an independent community marketplace. MinoForge is not affiliated with, endorsed by, sponsored by, or associated with the <em>conda-forge Miniforge</em> project, <em>Mojang AB</em>, <em>Microsoft Corporation</em>, <em>Rockstar Games</em>, <em>Take-Two Interactive</em>, <em>Roblox Corporation</em>, <em>Discord Inc.</em>, or any of their affiliates. 
+            </p>
+            <p>
+              All trademarks, product names, logos, and brands mentioned on this site are property of their respective owners. Their use on MinoForge is strictly descriptive and nominative to indicate software compatibility and game category under standard Fair Use doctrines.
+            </p>
+          </section>
+
+          <section className="space-y-3">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="text-blue-400 font-mono">06.</span> Contact &amp; Support
+              <span className="text-blue-400 font-mono">07.</span> DMCA &amp; Intellectual Property Takedowns
             </h2>
             <p>
-              For legal inquiries, copyright notices (DMCA), or billing support, please contact our administrative team at <a href="mailto:minoforge.requests@gmail.com" className="text-blue-400 hover:underline">minoforge.requests@gmail.com</a>.
+              MinoForge respects all intellectual property rights and adheres to the Digital Millennium Copyright Act (DMCA). If you believe any content or plugin hosted on our platform infringes upon your copyright, please submit an official Notice of Infringement to <a href="mailto:support@minoforge.com" className="text-cyan-400 font-bold hover:underline">support@minoforge.com</a> or <a href="mailto:minoforge.requests@gmail.com" className="text-blue-400 hover:underline">minoforge.requests@gmail.com</a> with the exact resource link and proof of ownership. We review and remove verified infringing materials within 24 business hours.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span className="text-blue-400 font-mono">08.</span> Contact &amp; Support
+            </h2>
+            <p>
+              For legal inquiries, billing questions, or security concerns, contact our team at <a href="mailto:support@minoforge.com" className="text-cyan-400 font-bold hover:underline">support@minoforge.com</a> or <a href="mailto:minoforge.requests@gmail.com" className="text-blue-400 hover:underline">minoforge.requests@gmail.com</a>.
             </p>
           </section>
 

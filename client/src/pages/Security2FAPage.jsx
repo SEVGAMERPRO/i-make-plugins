@@ -133,7 +133,7 @@ Keep these emergency recovery codes in a safe place. Each code can be used ONCE 
 
 ${setupData.backupCodes.map((code, idx) => `[${idx + 1}] ${code}`).join('\n')}
 
-MinoForge Security Engine • https://colasmp.net
+MinoForge Security Engine • https://minoforge.com
 `;
     const element = document.createElement('a');
     const file = new Blob([content], { type: 'text/plain' });
@@ -440,7 +440,7 @@ MinoForge Security Engine • https://colasmp.net
                 <span>Google Workspace Custom Email</span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Connect <code className="bg-slate-900 px-1 rounded text-cyan-300">support@minoforge.com</code> or <code className="bg-slate-900 px-1 rounded text-cyan-300">contact@colasmp.net</code> through Google Workspace with DKIM &amp; SPF to guarantee 100% inbox delivery for 2FA security codes.
+                Connect <code className="bg-slate-900 px-1 rounded text-cyan-300">noreply@minoforge.com</code> or <code className="bg-slate-900 px-1 rounded text-cyan-300">support@minoforge.com</code> through Google Workspace / Gmail SMTP to guarantee 100% inbox delivery for 2FA security codes.
               </p>
             </div>
 

@@ -159,7 +159,7 @@ Keep these emergency recovery codes in a safe place. Each code can be used ONCE 
 
 ${setupData.backupCodes.map((code, idx) => `[${idx + 1}] ${code}`).join('\n')}
 
-MinoForge Security Engine • https://colasmp.net
+MinoForge Security Engine • https://minoforge.com
 `;
     const element = document.createElement('a');
     const file = new Blob([content], { type: 'text/plain' });

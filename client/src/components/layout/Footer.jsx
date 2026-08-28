@@ -1,21 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles, ShieldCheck, AlertTriangle } from 'lucide-react';
 import CurrencySwitcher from '../ui/CurrencySwitcher';
 
 const Footer = () => {
   return (
     <footer className="bg-slate-950 border-t border-white/10 text-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-8">
           
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 text-xl font-black text-white tracking-tight group">
               <img 
-                src="/favicon.svg" 
+                src="/favicon.png" 
                 alt="MinoForge Logo" 
-                className="w-8 h-8 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform" 
+                className="w-8 h-8 rounded-xl object-cover shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform" 
               />
               <span className="group-hover:text-blue-300 transition-colors">MinoForge</span>
             </Link>
@@ -59,10 +59,24 @@ const Footer = () => {
               <li><Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
               <li><Link to="/network" className="hover:text-blue-400 transition-colors">Network Portal</Link></li>
-              <li><span className="text-slate-500">Official domain: colasmp.net</span></li>
+              <li><span className="text-slate-400 font-medium">Official domain: <span className="text-cyan-400 font-bold">minoforge.com</span></span></li>
             </ul>
           </div>
 
+        </div>
+
+        {/* Legal Disclaimer & Safe Harbor Notice */}
+        <div className="my-8 p-4 rounded-2xl bg-slate-900/70 border border-white/10 text-[11px] text-slate-400 leading-relaxed space-y-2">
+          <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wide">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Legal Disclaimer &amp; Non-Affiliation Notice</span>
+          </div>
+          <p className="font-bold text-amber-300 text-xs">
+            !! Not affiliated with the official Miniforge project !!
+          </p>
+          <p className="text-slate-400">
+            <strong>MinoForge (minoforge.com)</strong> is an independent community platform and marketplace for game plugins, server configs, and developer resources. MinoForge is not affiliated with, endorsed by, or associated with the <em>conda-forge Miniforge</em> distribution, <em>Mojang AB</em>, <em>Microsoft Corporation</em>, <em>Rockstar Games</em>, <em>Take-Two Interactive</em>, <em>Roblox Corporation</em>, <em>Discord Inc.</em>, or any other trademark holders. <em>Minecraft</em> is a registered trademark of Mojang AB / Microsoft. All game titles, trademarks, brand names, and logos referenced on this website remain the sole property of their respective copyright and trademark owners and are used purely for identification and compatibility purposes under Fair Use.
+          </p>
         </div>
 
         {/* Bottom copyright and Currency Switcher */}

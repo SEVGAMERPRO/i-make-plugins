@@ -62,8 +62,8 @@ export const MaintenanceScreen = () => {
       <div className="relative w-full max-w-lg z-10 space-y-6 text-center">
         
         {/* Emblem */}
-        <div className="mx-auto w-20 h-20 rounded-3xl bg-slate-950/90 border border-amber-400/40 p-3 flex items-center justify-center shadow-2xl shadow-amber-500/20 animate-pulse">
-          <img src="/favicon.svg" alt="MinoForge Mascot" className="w-full h-full object-contain" />
+        <div className="mx-auto w-20 h-20 rounded-3xl bg-slate-950/90 border border-amber-400/40 p-1 flex items-center justify-center shadow-2xl shadow-amber-500/20 animate-pulse overflow-hidden">
+          <img src="/favicon.png" alt="Mino on Anvil" className="w-full h-full object-cover rounded-2xl" />
         </div>
 
         {/* Maintenance Badge */}
@@ -115,12 +115,10 @@ export const MaintenanceScreen = () => {
           </button>
 
           <a
-            href="https://colasmp.net"
-            target="_blank"
-            rel="noreferrer"
+            href="https://minoforge.com/status"
             className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
-            <span>colasmp.net Network</span>
+            <span>Network Status</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>

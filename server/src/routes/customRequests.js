@@ -52,7 +52,7 @@ router.post('/custom', async (req, res) => {
     to: adminEmail, // STRICTLY ADMIN ONLY
     replyTo: cleanEmail,
     subject: `🚀 [NEW ORDER] Custom Plugin Request: ${game} (${budget || 'Flexible'})`,
-    text: `New Custom Plugin Order from colasmp.net
+    text: `New Custom Plugin Order from minoforge.com
 
 Client Email: ${cleanEmail}
 Client Phone: ${cleanPhone}
@@ -67,7 +67,7 @@ ${requestDetails}
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0b0f19; color: #ffffff; padding: 24px; border-radius: 16px;">
         <div style="text-align: center; margin-bottom: 20px;">
           <h1 style="color: #2196F3; margin: 0; font-size: 24px;">MinoForge Custom Plugin Request</h1>
-          <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">New incoming order from colasmp.net</p>
+          <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">New incoming order from minoforge.com</p>
         </div>
 
         <div style="background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
@@ -113,7 +113,7 @@ ${requestDetails}
 
 Best regards,
 MinoForge Engineering Team
-Official Marketplace: https://colasmp.net`,
+Official Marketplace: https://minoforge.com`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 580px; margin: 0 auto; background-color: #ffffff; color: #1e293b; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <div style="border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 16px;">
@@ -143,7 +143,7 @@ Official Marketplace: https://colasmp.net`,
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
         
         <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">
-          MinoForgeRequests • Official Platform: <a href="https://colasmp.net" style="color: #3b82f6; text-decoration: none;">colasmp.net</a>
+          MinoForgeRequests • Official Platform: <a href="https://minoforge.com" style="color: #3b82f6; text-decoration: none;">minoforge.com</a>
         </p>
       </div>
     `

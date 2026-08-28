@@ -175,7 +175,7 @@ const CreatorDashboard = () => {
   };
 
   const handleCopyRef = () => {
-    navigator.clipboard.writeText(`https://colasmp.net/ref/@${user?.username || 'creator'}`);
+    navigator.clipboard.writeText(`https://minoforge.com/ref/@${user?.username || 'creator'}`);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
@@ -845,7 +845,7 @@ const CreatorDashboard = () => {
                     <input
                       type="text"
                       readOnly
-                      value={`https://colasmp.net/ref/@${user?.username || 'creator'}`}
+                      value={`https://minoforge.com/ref/@${user?.username || 'creator'}`}
                       className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-cyan-300 font-mono"
                     />
                     <button
@@ -898,12 +898,12 @@ const CreatorDashboard = () => {
                     <input
                       type="text"
                       readOnly
-                      value={`https://colasmp.net/join-creator?ref=${user?.username || 'partner'}`}
+                      value={`https://minoforge.com/join-creator?ref=${user?.username || 'partner'}`}
                       className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-purple-300 font-mono"
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://colasmp.net/join-creator?ref=${user?.username || 'partner'}`);
+                        navigator.clipboard.writeText(`https://minoforge.com/join-creator?ref=${user?.username || 'partner'}`);
                         alert('✅ Creator invite link copied to clipboard!');
                       }}
                       className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
@@ -981,7 +981,7 @@ const CreatorDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="font-bold text-white block">Custom Storefront URL</span>
-                      <span className="text-xs font-mono text-cyan-400">colasmp.net/@{user?.username || 'yourbrand'}</span>
+                      <span className="text-xs font-mono text-cyan-400">minoforge.com/@{user?.username || 'yourbrand'}</span>
                     </div>
                     <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/30">
                       Active

@@ -10,7 +10,7 @@ const NODES = [
 ];
 
 const SERVICES = [
-  { name: 'colasmp.net Primary Network Gateway', type: 'Gateway', status: 'Healthy', latency: '14ms' },
+  { name: 'minoforge.com Primary Network Gateway', type: 'Gateway', status: 'Healthy', latency: '14ms' },
   { name: 'MinoShield Bytecode Security Scanner', type: 'Security AI', status: 'Active (100%)', latency: '45ms' },
   { name: 'Plugin Repository & Storage CDN', type: 'Storage Cluster', status: 'Healthy', latency: '19ms' },
   { name: 'Auth & 2FA Dispatch Mailer', type: 'API Service', status: 'Operational', latency: '120ms' },

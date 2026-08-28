@@ -373,7 +373,7 @@ tracks:
   
   premium_track:
     display_name: "&6&lPremium Pass"
-    store_url: "https://colasmp.net"
+    store_url: "https://minoforge.com"
     price_usd: 9.99
     xp_boost_multiplier: 1.5
 
