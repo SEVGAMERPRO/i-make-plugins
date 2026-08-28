@@ -6,8 +6,16 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('minoforge_user');
+      const token = localStorage.getItem('token');
+      return (savedUser && token) ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -15,10 +23,17 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await api.getMe();
-          setUser(res.data.user || res.data);
+          const fetchedUser = res.data.user || res.data;
+          setUser(fetchedUser);
+          localStorage.setItem('minoforge_user', JSON.stringify(fetchedUser));
         } catch (error) {
-          console.error('Failed to fetch user', error);
-          localStorage.removeItem('token');
+          // If token explicitly expired (401), logout. Otherwise keep cached user session
+          if (error.response?.status === 401) {
+            console.error('Session expired', error);
+            localStorage.removeItem('token');
+            localStorage.removeItem('minoforge_user');
+            setUser(null);
+          }
         }
       }
       setLoading(false);
@@ -29,6 +44,8 @@ export const AuthProvider = ({ children }) => {
     // Listen for unauthorized events from axios interceptor
     const handleUnauthorized = () => {
       setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('minoforge_user');
     };
     window.addEventListener('unauthorized', handleUnauthorized);
     return () => window.removeEventListener('unauthorized', handleUnauthorized);
@@ -38,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     const res = await api.login(email, password);
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
+    localStorage.setItem('minoforge_user', JSON.stringify(userData));
     setUser(userData);
     return userData;
   };
@@ -46,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     const res = await api.register(username, email, password);
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
+    localStorage.setItem('minoforge_user', JSON.stringify(userData));
     setUser(userData);
     return userData;
   };
@@ -54,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     const res = await api.googleLogin(credential);
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
+    localStorage.setItem('minoforge_user', JSON.stringify(userData));
     setUser(userData);
     return userData;
   };
@@ -62,12 +82,14 @@ export const AuthProvider = ({ children }) => {
     const res = await api.verifyCode(email, code, username);
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
+    localStorage.setItem('minoforge_user', JSON.stringify(userData));
     setUser(userData);
     return userData;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('minoforge_user');
     setUser(null);
   };
 

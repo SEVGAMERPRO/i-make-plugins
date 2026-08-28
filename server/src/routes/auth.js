@@ -346,18 +346,39 @@ router.post(
 // @desc    Google OAuth login & registration
 router.post('/google', async (req, res, next) => {
   try {
-    const { credential } = req.body;
-    if (!credential) {
-      return res.status(400).json({ message: 'Google credential is required' });
-    }
+    const { credential, accessToken, userInfo } = req.body;
+    let email, name, picture, sub;
 
-    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-    if (!response.ok) {
-      return res.status(401).json({ message: 'Invalid or expired Google token' });
+    if (userInfo && userInfo.email) {
+      email = userInfo.email;
+      name = userInfo.name;
+      picture = userInfo.picture;
+      sub = userInfo.sub || userInfo.id;
+    } else if (accessToken) {
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      if (!response.ok) {
+        return res.status(401).json({ message: 'Invalid or expired Google access token' });
+      }
+      const payload = await response.json();
+      email = payload.email;
+      name = payload.name;
+      picture = payload.picture;
+      sub = payload.sub;
+    } else if (credential) {
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      if (!response.ok) {
+        return res.status(401).json({ message: 'Invalid or expired Google token' });
+      }
+      const payload = await response.json();
+      email = payload.email;
+      name = payload.name;
+      picture = payload.picture;
+      sub = payload.sub;
+    } else {
+      return res.status(400).json({ message: 'Google token or credential is required' });
     }
-    
-    const payload = await response.json();
-    const { email, name, picture, sub } = payload;
 
     if (!email) {
       return res.status(400).json({ message: 'Google account has no associated email' });

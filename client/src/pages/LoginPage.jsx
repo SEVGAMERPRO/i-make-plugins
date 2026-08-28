@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { Sparkles, ArrowRight, Lock, Mail, KeyRound, Copy, Check, RefreshCw, AlertTriangle, ArrowLeft, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 
@@ -212,20 +212,13 @@ const LoginPage = () => {
               </span>
             </div>
 
-            {/* Google Sign-In Placed Underneath (Light / Outline Theme Matching Image 2) */}
+            {/* Google Sign-In Placed Underneath (Matches Image 2 Exactly with English Text) */}
             <div className="space-y-4">
-              <div className="flex justify-center w-full overflow-hidden rounded-xl bg-white p-0.5 shadow-lg border border-slate-200">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  shape="rectangular"
-                  size="large"
-                  width="360"
-                  text="continue_with"
-                  locale="en"
-                />
-              </div>
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                text="Continue with Google"
+              />
             </div>
 
             <div className="text-center text-xs text-slate-400 pt-2">

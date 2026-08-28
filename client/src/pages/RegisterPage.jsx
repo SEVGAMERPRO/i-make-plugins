@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { Sparkles, ArrowRight, Lock, Mail, User, ShieldAlert } from 'lucide-react';
 
 const RegisterPage = () => {
@@ -204,18 +204,11 @@ const RegisterPage = () => {
             </div>
 
             {/* Google Sign-In Option Underneath */}
-            <div className="flex justify-center w-full overflow-hidden rounded-xl bg-white p-0.5 shadow-lg border border-slate-200">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError('Google Sign-In failed')}
-                theme="outline"
-                shape="rectangular"
-                size="large"
-                width="360"
-                text="signup_with"
-                locale="en"
-              />
-            </div>
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google Sign-In failed')}
+              text="Continue with Google"
+            />
           </div>
         )}
 
