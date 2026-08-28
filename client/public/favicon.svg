@@ -94,6 +94,24 @@
         }
       }
 
+      @keyframes mynaFadeFloat {
+        0%, 100% {
+          opacity: 0.62;
+          transform: translateY(0px) scale(1);
+          filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.35));
+        }
+        50% {
+          opacity: 0.90;
+          transform: translateY(-7px) scale(1.02);
+          filter: drop-shadow(0 0 22px rgba(0, 242, 254, 0.65)) drop-shadow(0 0 32px rgba(250, 204, 21, 0.45));
+        }
+      }
+
+      .animated-myna {
+        animation: mynaFadeFloat 3.8s ease-in-out infinite;
+        transform-origin: 230px 140px;
+      }
+
       .animated-sword {
         animation: forgePulse 2.4s ease-in-out infinite;
         transform-origin: center;
@@ -119,8 +137,8 @@
   <circle cx="256" cy="260" r="160" fill="#ff6a00" opacity="0.08" filter="url(#forgeGlow)" />
   <circle cx="256" cy="330" r="120" fill="#00f2fe" opacity="0.12" filter="url(#forgeGlow)" />
 
-  <!-- ================= 1. MINO THE MYNA BIRD (Watching over the forge) ================= -->
-  <g transform="translate(10, -10)">
+  <!-- ================= 1. MINO THE MYNA BIRD (Animated & Faded Guardian) ================= -->
+  <g class="animated-myna" transform="translate(10, -10)">
     <!-- Bird Body & Crown -->
     <path d="M150 160 C 135 115, 170 65, 230 65 C 285 65, 310 115, 290 185 C 265 240, 185 245, 150 160 Z" fill="url(#mynaFeathers)" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.4" />
     
