@@ -137,8 +137,12 @@ https://minoforge.com`,
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`[MinoForge Verification 2FA] Verification code sent to ${cleanEmail}: ${code}`);
+    // Send email asynchronously and log result
+    transporter.sendMail(mailOptions).then(() => {
+      console.log(`[MinoForge Verification 2FA] Verification code delivered to ${cleanEmail}: ${code}`);
+    }).catch(err => {
+      console.error('[MinoForge 2FA Mailer Error]:', err);
+    });
 
     return res.status(200).json({
       success: true,
