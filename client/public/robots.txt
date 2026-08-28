@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /nimda/
+
+Sitemap: https://minoforge.com/sitemap.xml
