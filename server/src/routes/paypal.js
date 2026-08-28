@@ -186,8 +186,10 @@ router.post('/capture-order', async (req, res) => {
     const paidAmount = parseFloat(captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || '0');
     const currency = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || 'EUR';
 
-    // Calculate Marketplace Revenue Split
-    const platformFee = parseFloat((paidAmount * (PLATFORM_FEE_PERCENT / 100)).toFixed(2));
+    // Calculate Marketplace Revenue Split (5% for Ultimate Creators, 10% Standard)
+    const isUltimateCreator = req.body.isUltimate || (items && items.some(i => i.authorIsUltimate || i.isUltimate));
+    const appliedFeePercent = isUltimateCreator ? 5 : PLATFORM_FEE_PERCENT;
+    const platformFee = parseFloat((paidAmount * (appliedFeePercent / 100)).toFixed(2));
     const creatorEarnings = parseFloat((paidAmount - platformFee).toFixed(2));
 
     // Generate Official DRM Licenses for each purchased item

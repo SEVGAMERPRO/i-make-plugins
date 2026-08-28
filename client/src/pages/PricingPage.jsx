@@ -8,101 +8,101 @@ import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
 const TIERS = [
   {
     id: 'free',
-    name: 'Free Member',
-    badge: 'Standard',
+    name: 'Standard Creator',
+    badge: 'Starter',
     priceMonthly: 0,
     priceYearly: 0,
-    description: 'Essential access for browsing, purchasing, and standard selling on MinoForge.',
+    description: 'Essential toolkit for publishing, distributing, and standard selling on the MinoForge network.',
     buttonText: 'Current Plan',
     buttonVariant: 'outline',
     highlighted: false,
     features: [
-      'Standard marketplace fee: 10%',
-      '200MB maximum file upload size',
-      '5 maximum carousel images',
-      'Standard staff review queue (24-48h)',
-      '10 AI Config generations per day',
-      'Standard MinoShield security scan',
-      'Community Discord access',
+      'Standard marketplace processing fee: 10%',
+      '200MB maximum resource archive upload limit',
+      '5 gallery showcase screenshots per plugin',
+      'Standard staff review verification (24-48h)',
+      '10 daily Gemini AI Config generator requests',
+      'Continuous MinoShield™ malware protection',
+      'Official MinoForge Developer Discord access',
     ]
   },
   {
     id: 'ultimate',
     name: 'MinoForge Ultimate',
-    badge: 'Official BuiltByBit Style • Most Popular',
+    badge: 'Pro Creator Tier • Most Popular',
     priceMonthly: 19.99,
     priceYearly: 203.90, // 15% discount on yearly ($16.99/mo)
-    description: 'The definitive tier for serious creators. Keep 100% of your earnings, get $5/mo free ad credit, and full platform superpowers.',
-    buttonText: 'Get Ultimate Access',
+    description: 'The definitive tier for elite developers. Cut platform fees to just 5%, receive monthly sponsored ad credits, and unlock full Forge superpowers.',
+    buttonText: 'Unlock Ultimate Access',
     buttonVariant: 'gradient',
     highlighted: true,
     features: [
-      '🔥 0% Marketplace Sales Commission (Keep 100%)',
-      '📢 $5.00 Free Monthly Sponsored Ad Credits',
-      '⚡ Priority Instant Staff Approvals (< 2 hours)',
-      '🚀 Boosted Discovery Rankings & Search Visibility',
-      '📦 500MB Max File Upload Size (vs 200MB)',
-      '🖼️ 15 Carousel Images & 10 Addons per Resource',
-      '🤖 Unlimited Gemini AI Config & Code Generator',
-      '🛡️ Priority MinoShield Deep Security Scans',
-      '👑 Glowing Gold "ULTIMATE" Badge & Profile Banner',
-      '🎨 Animated Profile Picture & Custom Theme Accent',
-      '🔑 Automated Discord Customer Role Sync & Keys',
-      '💬 Dedicated 1-on-1 Staff Concierge Support',
+      '🔥 Only 5% Marketplace Platform Fee (Keep 95%)',
+      '📢 €5.00 Free Monthly Sponsored Showcase Credits',
+      '⚡ Express Staff Approvals & Fast-Track Queue (< 2 hours)',
+      '🚀 Algorithmic Discovery Boost & Search Ranking Priority',
+      '📦 500MB Expanded Package Upload Capacity (vs 200MB)',
+      '🖼️ 15 HD Gallery Slots & 10 Expansion Addons',
+      '🤖 Unlimited Gemini AI Config & Code Optimizer',
+      '🛡️ Priority MinoShield™ Deep Bytecode Malware Inspection',
+      '👑 Glowing Golden Crown Icon & Animated Profile Banner',
+      '🎨 Custom RGB Username Glow & Site Theme Accents',
+      '🔑 Automated Discord Customer Role Sync & DRM Licensing',
+      '💬 Dedicated 1-on-1 Staff Concierge Developer Support',
     ]
   }
 ];
 
 const SECTIONS = [
   {
-    title: 'Resources & Selling',
+    title: 'Marketplace & Sales Distribution',
     rows: [
-      { name: 'Marketplace Sales Commission', free: '10%', ultimate: '0% (Keep 100%)' },
-      { name: 'Free Ad Credit per Month', free: 'None', ultimate: '$5.00 / mo' },
-      { name: 'Maximum File Upload Size', free: '200MB', ultimate: '500MB' },
-      { name: 'Maximum Carousel Images', free: '5', ultimate: '15' },
-      { name: 'Maximum Addons per Resource', free: '5', ultimate: '10' },
-      { name: 'Boosted Discovery Rankings', free: false, ultimate: true },
-      { name: 'Create 2 Storefront Pages', free: false, ultimate: true },
-      { name: 'Resource Custom Vanity URLs', free: false, ultimate: true },
-      { name: 'Priority Resource Approvals', free: false, ultimate: true },
-      { name: 'Bypass Peer Review Wait Period', free: false, ultimate: true },
-      { name: 'Full Developer API Access', free: false, ultimate: true },
+      { name: 'Platform Processing Fee', free: '10%', ultimate: 'Only 5% (Keep 95%)' },
+      { name: 'Monthly Sponsored Showcase Credits', free: '—', ultimate: '€5.00 / mo included' },
+      { name: 'Resource Binary Upload Capacity', free: '200 MB', ultimate: '500 MB' },
+      { name: 'Media Gallery Showcase Slots', free: '5 slots', ultimate: '15 HD slots' },
+      { name: 'Add-on Expansion Packages per Resource', free: '5 packages', ultimate: '10 packages' },
+      { name: 'Algorithmic Discovery Boost & Search Priority', free: 'Standard', ultimate: 'Top Priority' },
+      { name: 'Multi-Brand Creator Storefronts', free: '1 storefront', ultimate: '2 custom storefronts' },
+      { name: 'Direct Vanity Resource URLs (/r/your-plugin)', free: false, ultimate: true },
+      { name: 'Express Staff Verification Queue', free: '24-48h queue', ultimate: 'Fast-track (< 2 hours)' },
+      { name: 'Instant Publishing (Skip Peer Review Wait)', free: false, ultimate: true },
+      { name: 'Full Developer REST & Webhook APIs', free: false, ultimate: true },
     ]
   },
   {
-    title: 'MinoForge AI & Security Tools',
+    title: 'MinoShield™ Security & AI Engine',
     rows: [
-      { name: 'MinoForge AI Config Generator', free: '2 / day', ultimate: 'Unlimited' },
-      { name: 'MinoShield Deep Bytecode Security Scans', free: 'Standard', ultimate: 'Priority Deep Scan' },
-      { name: 'Automated Discord Role Sync & DRM', free: false, ultimate: true },
-      { name: 'AI Code Optimization Suggestions', free: false, ultimate: true },
+      { name: 'Gemini AI Config & Optimization Engine', free: '2 / day', ultimate: 'Unlimited' },
+      { name: 'MinoShield™ Deep Bytecode Malware Inspection', free: 'Standard Heuristic', ultimate: 'Priority Deep Scan' },
+      { name: 'Automated Discord Customer Sync & DRM Licensing', free: false, ultimate: true },
+      { name: 'Automated Performance & Code Audit Insights', free: false, ultimate: true },
     ]
   },
   {
-    title: 'Profile & Customization',
+    title: 'Profile Branding & Creator Studio',
     rows: [
-      { name: 'Username Color', free: 'Default', ultimate: 'All custom colors' },
-      { name: 'Custom Profile Banner', free: 'None', ultimate: true },
-      { name: 'Ultimate Rocket Profile Icon', free: 'None', ultimate: true },
-      { name: 'Custom User Title & Badge', free: false, ultimate: true },
-      { name: 'Profile Cover Photo', free: false, ultimate: true },
-      { name: 'Animated Profile Picture (GIF)', free: false, ultimate: true },
-      { name: 'Change Username Frequency', free: 'Only once', ultimate: 'Every 14 days' },
-      { name: 'Access to 2-Character Usernames', free: false, ultimate: true },
-      { name: 'Profile Custom Vanity URL', free: false, ultimate: true },
-      { name: 'Change Site Accent Color', free: false, ultimate: true },
+      { name: 'Custom Name Glow & RGB Palette', free: 'Default', ultimate: 'Full RGB Palette' },
+      { name: 'Cinematic Animated Profile Header', free: 'Static', ultimate: 'Custom Animated Header' },
+      { name: 'Verified Golden Crown & Elite Creator Badge', free: 'None', ultimate: true },
+      { name: 'Custom User Title & Distinction Tag', free: false, ultimate: true },
+      { name: 'High-Res Profile Cover Banner', free: false, ultimate: true },
+      { name: 'Animated Profile Avatar (GIF)', free: false, ultimate: true },
+      { name: 'Username Change Frequency', free: 'Every 90 days', ultimate: 'Every 14 days' },
+      { name: 'Ultra-Short & Rare Handle Reservation', free: false, ultimate: true },
+      { name: 'Custom Creator Domain Handle (/@yourname)', free: false, ultimate: true },
+      { name: 'Personalized Platform UI Theme Accents', free: false, ultimate: true },
     ]
   },
   {
-    title: 'Discord & Community Perks',
+    title: 'Discord Community & Multipliers',
     rows: [
-      { name: 'Discord Point Multiplier', free: '1.0x', ultimate: '1.5x' },
-      { name: 'Free Daily Points with /daily', free: false, ultimate: true },
-      { name: 'Spend Points on Rewards & Raffles', free: false, ultimate: true },
-      { name: 'Access to Exclusive Ultimate-Only Channels', free: false, ultimate: true },
-      { name: 'See Who Has Viewed Your Resource', free: false, ultimate: true },
-      { name: 'Daily Feedback & Reviews Limit', free: '2', ultimate: '5' },
+      { name: 'Discord Community XP & Rewards Multiplier', free: '1.0x XP', ultimate: '1.5x XP Boost' },
+      { name: 'Daily Bonus Credits via Discord Bot', free: false, ultimate: true },
+      { name: 'Forge Vault Raffle & Giveaway Entries', free: 'Standard Entry', ultimate: 'Double Entry Weight' },
+      { name: 'Private Creator Lounge & Developer Council', free: false, ultimate: true },
+      { name: 'Real-time Visitor Analytics & Traffic Insights', free: false, ultimate: true },
+      { name: 'Daily Customer Review Engagement Capacity', free: '2 responses / day', ultimate: 'Unlimited' },
     ]
   }
 ];
@@ -119,15 +119,6 @@ const PricingPage = () => {
     setSelectedPlan(tier);
   };
 
-  const processPayment = () => {
-    setCheckoutSuccess(true);
-    setTimeout(() => {
-      alert(`🎉 Welcome to MinoForge Ultimate! Your account now has 0% platform fees, $5 free ad credit, and full Ultimate perks.`);
-      setSelectedPlan(null);
-      setCheckoutSuccess(false);
-    }, 1500);
-  };
-
   return (
     <div className="bg-[#0b0f19] min-h-screen text-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-16">
@@ -136,19 +127,19 @@ const PricingPage = () => {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 to-blue-500/20 rounded-full text-xs font-bold text-amber-300 border border-amber-500/30 shadow-lg shadow-amber-500/10">
             <Crown className="w-4 h-4 text-amber-400" />
-            <span>Official BuiltByBit Style Creator Membership</span>
+            <span>MinoForge Creator Subscriptions</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight">
-            Keep 100% of your earnings.
+            Keep 95% of your earnings.
             <br />
             <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent">
-              Built for Top Creators.
+              Built for Professional Creators.
             </span>
           </h1>
 
           <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            Upgrade to Ultimate to eliminate all platform fees, get $5/mo free ad credit, skip review queues, and unlock full profile & AI perks.
+            Upgrade to Ultimate to lower platform fees to just 5%, get €5/mo free sponsored ad credits, skip review queues, and unlock complete platform superpowers.
           </p>
 
           {/* Billing Switch */}
@@ -317,7 +308,7 @@ const PricingPage = () => {
                   </div>
                   <h4 className="text-xl font-black text-white">Welcome to MinoForge Ultimate!</h4>
                   <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
-                    Your membership is now active! You now enjoy <span className="text-amber-300 font-bold">0% marketplace fees</span>, $5.00 free monthly ad credits, and priority staff reviews.
+                    Your membership is now active! You now enjoy <span className="text-amber-300 font-bold">reduced 5% platform fees (keep 95%)</span>, €5.00 free monthly ad credits, and priority staff reviews.
                   </p>
                   <button
                     onClick={() => { setSelectedPlan(null); setCheckoutSuccess(false); }}
@@ -335,11 +326,11 @@ const PricingPage = () => {
                     </div>
                     <div className="flex justify-between text-slate-300">
                       <span>Platform Sales Fee:</span>
-                      <span className="font-bold text-emerald-400">0% (You keep 100%)</span>
+                      <span className="font-bold text-emerald-400">Only 5% (You keep 95%)</span>
                     </div>
                     <div className="flex justify-between text-slate-300">
                       <span>Free Monthly Ad Credits:</span>
-                      <span className="font-bold text-emerald-400">+$5.00 / mo Included</span>
+                      <span className="font-bold text-emerald-400">+€5.00 / mo Included</span>
                     </div>
                     <div className="flex justify-between font-bold text-amber-300 text-sm pt-2 border-t border-amber-500/20">
                       <span>Total Due Today:</span>
