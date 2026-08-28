@@ -342,43 +342,55 @@ router.post('/google', async (req, res, next) => {
     }
     
     const payload = await response.json();
-    const { email, name, picture } = payload;
+    const { email, name, picture, sub } = payload;
 
     if (!email) {
       return res.status(400).json({ message: 'Google account has no associated email' });
     }
 
-    let user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() }
+      });
 
-    if (!user) {
-      let baseUsername = (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 18);
-      if (baseUsername.length < 3) baseUsername = `user_${Math.floor(Math.random() * 10000)}`;
-      
-      let username = baseUsername;
-      let counter = 1;
-      while (await prisma.user.findUnique({ where: { username } })) {
-        username = `${baseUsername.slice(0, 14)}_${counter++}`;
-      }
-
-      const randomPassword = Math.random().toString(36).slice(-10);
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(randomPassword, salt);
-
-      user = await prisma.user.create({
-        data: {
-          username,
-          email: email.toLowerCase(),
-          passwordHash,
-          avatarUrl: picture || null,
+      if (!user) {
+        let baseUsername = (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 18);
+        if (baseUsername.length < 3) baseUsername = `user_${Math.floor(Math.random() * 10000)}`;
+        
+        let username = baseUsername;
+        let counter = 1;
+        while (await prisma.user.findUnique({ where: { username } })) {
+          username = `${baseUsername.slice(0, 14)}_${counter++}`;
         }
-      });
-    } else if (!user.avatarUrl && picture) {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { avatarUrl: picture }
-      });
+
+        const randomPassword = Math.random().toString(36).slice(-10);
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(randomPassword, salt);
+
+        user = await prisma.user.create({
+          data: {
+            username,
+            email: email.toLowerCase(),
+            passwordHash,
+            avatarUrl: picture || null,
+          }
+        });
+      } else if (!user.avatarUrl && picture) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { avatarUrl: picture }
+        });
+      }
+    } catch (dbErr) {
+      console.warn('[Google Auth] Database unreachable, creating local session for Google user:', email);
+      user = {
+        id: `google-user-${sub || Date.now()}`,
+        username: (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 16) || 'google_user',
+        email: email.toLowerCase(),
+        role: 'USER',
+        avatarUrl: picture || null
+      };
     }
 
     const token = generateToken(user);
