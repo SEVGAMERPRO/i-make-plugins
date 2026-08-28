@@ -245,6 +245,65 @@ async function sendCustomPluginRequestEmail({ adminEmail, requesterName, request
   });
 }
 
+/**
+ * 6. 💸 Send Creator Payout Request Notification to Admin & Creator
+ */
+async function sendPayoutRequestEmail({ creatorEmail, creatorUsername, paypalEmail, grossAmount, feeAmount, netAmount, payoutRef }) {
+  const adminEmail = process.env.ADMIN_PAYOUT_EMAIL || 'severinkaptein8@gmail.com';
+
+  const content = `
+    <h2 style="color: #ffffff; font-size: 20px; font-weight: 800; margin: 0 0 12px 0;">💸 Creator Payout Request Submitted</h2>
+    <p style="margin: 0 0 16px 0;">Hello <strong>${creatorUsername}</strong>, your withdrawal request has been received and logged into the MinoForge settlement queue.</p>
+
+    <div style="background-color: #0b0f19; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin: 20px 0; font-size: 13px;">
+      <p style="margin: 4px 0;"><strong style="color: #94a3b8;">Payout Reference:</strong> <span style="color: #38bdf8; font-family: monospace; font-weight: 700;">${payoutRef}</span></p>
+      <p style="margin: 4px 0;"><strong style="color: #94a3b8;">Destination PayPal:</strong> <span style="color: #ffffff;">${paypalEmail}</span></p>
+      <p style="margin: 4px 0;"><strong style="color: #94a3b8;">Gross Requested:</strong> <span style="color: #ffffff; font-weight: 700;">€${parseFloat(grossAmount).toFixed(2)}</span></p>
+      <p style="margin: 4px 0;"><strong style="color: #f59e0b;">8% Transaction &amp; Gateway Fee:</strong> <span style="color: #f59e0b; font-weight: 700;">-€${parseFloat(feeAmount).toFixed(2)}</span></p>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <strong style="color: #34d399; font-size: 15px;">Net PayPal Payout: €${parseFloat(netAmount).toFixed(2)}</strong>
+      </div>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 12px; margin-top: 16px;">
+      Payouts are dispatched directly via PayPal MassPay within 24-48 business hours. All 10% platform fees and 8% withdrawal processing fees are securely routed to MinoForge Treasury (<a href="mailto:severinkaptein8@gmail.com" style="color: #38bdf8;">severinkaptein8@gmail.com</a>).
+    </p>
+  `;
+
+  // Send to Creator
+  if (creatorEmail && creatorEmail.includes('@')) {
+    try {
+      await transporter.sendMail({
+        from: getFromAddress(),
+        to: creatorEmail,
+        subject: `💸 Payout Request Received: €${parseFloat(netAmount).toFixed(2)} (${payoutRef})`,
+        html: wrapInTemplate('MinoForge Payout Confirmation', content)
+      });
+    } catch (e) {
+      console.warn('Failed to send payout confirmation to creator:', e.message);
+    }
+  }
+
+  // Send notice to Admin Treasury (severinkaptein8@gmail.com)
+  return transporter.sendMail({
+    from: getFromAddress(),
+    to: adminEmail,
+    subject: `🚨 [Payout Action Required] €${parseFloat(netAmount).toFixed(2)} to ${paypalEmail} (${creatorUsername})`,
+    html: wrapInTemplate('MinoForge Admin Payout Notification', `
+      <h2 style="color: #ffffff; font-size: 20px; font-weight: 800;">New Payout Withdrawal Request</h2>
+      <p>A creator has requested a balance withdrawal from their MinoForge wallet:</p>
+      <div style="background-color: #0b0f19; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin: 20px 0;">
+        <p><strong>Creator:</strong> ${creatorUsername} (${creatorEmail})</p>
+        <p><strong>PayPal Email:</strong> ${paypalEmail}</p>
+        <p><strong>Gross Amount:</strong> €${parseFloat(grossAmount).toFixed(2)}</p>
+        <p><strong>Your 8% Transaction Cut (Treasury):</strong> <span style="color: #34d399; font-weight: 900;">+€${parseFloat(feeAmount).toFixed(2)}</span></p>
+        <p><strong>Net Amount to Send to Creator:</strong> €${parseFloat(netAmount).toFixed(2)}</p>
+        <p><strong>Payout Ref:</strong> ${payoutRef}</p>
+      </div>
+    `)
+  });
+}
+
 module.exports = {
   transporter,
   getFromAddress,
@@ -252,5 +311,6 @@ module.exports = {
   sendLoginAlertEmail,
   sendPluginSoldEmail,
   sendPurchaseReceiptEmail,
-  sendCustomPluginRequestEmail
+  sendCustomPluginRequestEmail,
+  sendPayoutRequestEmail
 };

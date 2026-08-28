@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendPurchaseReceiptEmail, sendPluginSoldEmail } = require('../utils/mailer');
+const { sendPurchaseReceiptEmail, sendPluginSoldEmail, sendPayoutRequestEmail } = require('../utils/mailer');
 const store = require('../store/globalStore');
 
 // @route   POST /api/orders/confirm-purchase
@@ -65,6 +65,59 @@ router.post('/confirm-purchase', async (req, res) => {
   } catch (error) {
     console.error('[Order Confirmation Error]:', error);
     res.status(500).json({ success: false, message: 'Internal server error processing purchase.' });
+  }
+});
+
+// @route   POST /api/orders/payout-request
+// @desc    Process creator withdrawal request with 8% transaction fee routed to Treasury (severinkaptein8@gmail.com)
+router.post('/payout-request', async (req, res) => {
+  try {
+    const { creatorEmail, creatorUsername, paypalEmail, grossAmount } = req.body;
+
+    const parsedGross = parseFloat(grossAmount);
+    if (!parsedGross || parsedGross < 10) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Minimum payout withdrawal is €10.00.' 
+      });
+    }
+
+    if (!paypalEmail || !paypalEmail.includes('@')) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'A valid destination PayPal email address is required.' 
+      });
+    }
+
+    // 8% transaction and gateway payout fee to severinkaptein8@gmail.com
+    const feeAmount = parseFloat((parsedGross * 0.08).toFixed(2));
+    const netAmount = parseFloat((parsedGross - feeAmount).toFixed(2));
+    const payoutRef = `PAY-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // Dispatch email notification to Creator and Admin Treasury (severinkaptein8@gmail.com)
+    await sendPayoutRequestEmail({
+      creatorEmail: creatorEmail || 'creator@minoforge.com',
+      creatorUsername: creatorUsername || 'MinoCreator',
+      paypalEmail: paypalEmail.trim(),
+      grossAmount: parsedGross,
+      feeAmount,
+      netAmount,
+      payoutRef
+    });
+
+    res.json({
+      success: true,
+      payoutRef,
+      grossAmount: parsedGross,
+      feeAmount,
+      netAmount,
+      destinationPayPal: paypalEmail,
+      message: `Payout request of €${netAmount.toFixed(2)} submitted successfully! 8% fee (€${feeAmount.toFixed(2)}) routed to Treasury.`
+    });
+
+  } catch (error) {
+    console.error('[Payout Request Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to submit payout request.' });
   }
 });
 

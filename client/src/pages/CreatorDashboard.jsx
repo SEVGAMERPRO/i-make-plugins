@@ -89,6 +89,36 @@ const CreatorDashboard = () => {
     obfuscateBytecode: true
   });
 
+  // Payout & Wallet State (8% Transaction fee to Treasury)
+  const [payoutHistory, setPayoutHistory] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('minoforge_payout_history') || '[]');
+      if (saved.length > 0) return saved;
+      return [
+        {
+          ref: 'PAY-2026-0801',
+          date: 'Aug 28, 2026',
+          destination: 'PayPal (severinkaptein8@gmail.com)',
+          gross: 50.00,
+          fee: 4.00,
+          amount: 46.00,
+          status: 'Completed'
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState('');
+  const [withdrawError, setWithdrawError] = useState('');
+  const [customWithdrawBalance, setCustomWithdrawBalance] = useState(() => {
+    return parseFloat(localStorage.getItem('minoforge_creator_wallet_balance') || '65.00');
+  });
+
   // Calculated Real Lifetime Metrics (Starting strictly at 0)
   const totalRevenue = resources.reduce((sum, res) => sum + ((parseFloat(res.price) || 0) * (parseInt(res.downloads) || 0)), 0);
   const totalDownloads = resources.reduce((sum, res) => sum + (parseInt(res.downloads) || 0), 0);
@@ -993,226 +1023,373 @@ const CreatorDashboard = () => {
             )}
 
             {/* SECTION 13: PAYOUT GATEWAYS & WALLET */}
-            {currentSection === 'tebex-stripe-wallet' && (
-              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-8 animate-fade-in">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
-                  <div>
-                    <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                      <CreditCard className="w-6 h-6 text-blue-400" />
-                      <span>Creator Payouts &amp; Earnings Wallet</span>
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-1">Official payout gateway for automatic withdrawals to PayPal, SEPA Bank Wire, or Stripe</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>Auto-Payout Active</span>
-                    </span>
-                  </div>
-                </div>
+            {currentSection === 'tebex-stripe-wallet' && (() => {
+              const currentTotalBalance = (totalRevenue * (user?.isUltimate ? 0.95 : 0.90)) + customWithdrawBalance;
+              const grossWithdrawNum = parseFloat(withdrawAmount) || 0;
+              const fee8Percent = parseFloat((grossWithdrawNum * 0.08).toFixed(2));
+              const netWithdrawNum = Math.max(0, parseFloat((grossWithdrawNum - fee8Percent).toFixed(2)));
 
-                {/* Balance Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-5 rounded-2xl bg-slate-950 border border-emerald-500/30 shadow-lg shadow-emerald-500/5 space-y-1">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Available for Payout</span>
-                    <span className="text-3xl font-black text-emerald-400 font-mono">€{(totalRevenue * 0.9).toFixed(2)}</span>
-                    <span className="text-[10px] text-slate-500 block">Available immediately for withdrawal</span>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pending Clearance</span>
-                    <span className="text-3xl font-black text-slate-300 font-mono">€0.00</span>
-                    <span className="text-[10px] text-slate-500 block">24h anti-fraud clearing hold</span>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Lifetime Paid Out</span>
-                    <span className="text-3xl font-black text-blue-400 font-mono">€0.00</span>
-                    <span className="text-[10px] text-slate-500 block">Transferred directly to your account</span>
-                  </div>
-                </div>
+              const handleWithdrawSubmit = async (e) => {
+                e.preventDefault();
+                setWithdrawError('');
+                setWithdrawSuccessMsg('');
+                const amount = parseFloat(withdrawAmount);
+                if (!amount || amount < 10) {
+                  setWithdrawError('Minimum payout withdrawal amount is €10.00.');
+                  return;
+                }
+                if (amount > currentTotalBalance) {
+                  setWithdrawError(`Requested withdrawal amount exceeds your available balance (€${currentTotalBalance.toFixed(2)}).`);
+                  return;
+                }
+                if (!payoutEmail || !payoutEmail.includes('@')) {
+                  setWithdrawError('Please enter a valid destination PayPal email address.');
+                  return;
+                }
 
-                {/* Payout Settings & Withdrawal Form */}
-                <div className="p-6 rounded-2xl bg-slate-950/90 border border-white/10 space-y-6">
-                  <h4 className="text-base font-bold text-white flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-emerald-400" />
-                    <span>Payout Destination Settings</span>
-                  </h4>
+                setWithdrawLoading(true);
+                try {
+                  const res = await axios.post('/api/orders/payout-request', {
+                    creatorEmail: user?.email || 'creator@minoforge.com',
+                    creatorUsername: user?.username || 'MinoCreator',
+                    paypalEmail: payoutEmail.trim(),
+                    grossAmount: amount
+                  });
 
-                  {/* Gateway Selector */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod('paypal')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        payoutMethod === 'paypal' 
-                          ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-500/10' 
-                          : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-sm text-white">PayPal Instant</span>
-                        <span className="text-[10px] font-bold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">0% Fee</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">Direct PayPal payout in EUR / USD.</p>
-                    </button>
+                  const fee8 = parseFloat((amount * 0.08).toFixed(2));
+                  const net = parseFloat((amount - fee8).toFixed(2));
+                  const newRef = res.data?.payoutRef || `PAY-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod('sepa')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        payoutMethod === 'sepa' 
-                          ? 'bg-emerald-600/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10' 
-                          : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-sm text-white">SEPA Bank Wire</span>
-                        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">Direct IBAN</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">Direct European bank wire transfer.</p>
-                    </button>
+                  const newRecord = {
+                    ref: newRef,
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    destination: `PayPal (${payoutEmail.trim()})`,
+                    gross: amount,
+                    fee: fee8,
+                    amount: net,
+                    status: 'Completed'
+                  };
 
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod('stripe')}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        payoutMethod === 'stripe' 
-                          ? 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-500/10' 
-                          : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-sm text-white">Stripe Connect</span>
-                        <span className="text-[10px] font-bold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">Express</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">Automatic daily rolling transfers.</p>
-                    </button>
-                  </div>
+                  const updatedHistory = [newRecord, ...payoutHistory];
+                  setPayoutHistory(updatedHistory);
+                  localStorage.setItem('minoforge_payout_history', JSON.stringify(updatedHistory));
 
-                  {/* Payout Input Fields */}
-                  {payoutMethod === 'paypal' && (
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                        PayPal Account Email
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="your-paypal-account@email.com"
-                        value={payoutEmail}
-                        onChange={(e) => setPayoutEmail(e.target.value)}
-                        className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
+                  const newBalance = Math.max(0, customWithdrawBalance - amount);
+                  setCustomWithdrawBalance(newBalance);
+                  localStorage.setItem('minoforge_creator_wallet_balance', newBalance.toFixed(2));
+
+                  setWithdrawSuccessMsg(`🎉 Payout of €${net.toFixed(2)} successfully sent to ${payoutEmail}! (8% fee of €${fee8.toFixed(2)} routed to Treasury: severinkaptein8@gmail.com)`);
+                  setTimeout(() => {
+                    setIsWithdrawModalOpen(false);
+                    setWithdrawAmount('');
+                    setWithdrawSuccessMsg('');
+                  }, 3000);
+                } catch (err) {
+                  console.error('Payout request error:', err);
+                  setWithdrawError(err.response?.data?.message || 'Failed to submit withdrawal request.');
+                } finally {
+                  setWithdrawLoading(false);
+                }
+              };
+
+              return (
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-8 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+                    <div>
+                      <h2 className="text-2xl font-black text-white flex items-center gap-2">
+                        <CreditCard className="w-6 h-6 text-blue-400" />
+                        <span>Creator Payouts &amp; Earnings Wallet</span>
+                      </h2>
+                      <p className="text-xs text-slate-400 mt-1">Official payout gateway for instant PayPal withdrawals (8% transaction fee routed to Treasury)</p>
                     </div>
-                  )}
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Treasury Auto-Routed</span>
+                      </span>
+                    </div>
+                  </div>
 
-                  {payoutMethod === 'sepa' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
+                  {/* Balance Metrics Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-5 rounded-2xl bg-slate-950 border border-emerald-500/30 shadow-lg shadow-emerald-500/5 space-y-1">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Available for Payout</span>
+                      <span className="text-3xl font-black text-emerald-400 font-mono">€{currentTotalBalance.toFixed(2)}</span>
+                      <span className="text-[10px] text-slate-500 block">Available immediately for withdrawal</span>
+                    </div>
+                    <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Platform Rate</span>
+                      <span className="text-3xl font-black text-amber-400 font-mono">{user?.isUltimate ? '95%' : '90%'}</span>
+                      <span className="text-[10px] text-slate-500 block">{user?.isUltimate ? '5% Ultimate commission' : '10% Standard commission'}</span>
+                    </div>
+                    <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Lifetime Paid Out</span>
+                      <span className="text-3xl font-black text-blue-400 font-mono">
+                        €{payoutHistory.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0).toFixed(2)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">Transferred directly to your PayPal</span>
+                    </div>
+                  </div>
+
+                  {/* Payout Settings & Withdrawal Trigger */}
+                  <div className="p-6 rounded-2xl bg-slate-950/90 border border-white/10 space-y-6">
+                    <h4 className="text-base font-bold text-white flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-emerald-400" />
+                      <span>Payout Destination Settings</span>
+                    </h4>
+
+                    {/* Gateway Selector */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPayoutMethod('paypal')}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                          payoutMethod === 'paypal' 
+                            ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-500/10' 
+                            : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm text-white">PayPal Instant</span>
+                          <span className="text-[10px] font-bold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">MassPay</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">Direct PayPal payout in EUR / USD.</p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPayoutMethod('sepa')}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                          payoutMethod === 'sepa' 
+                            ? 'bg-emerald-600/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10' 
+                            : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm text-white">SEPA Bank Wire</span>
+                          <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">Direct IBAN</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">Direct European bank wire transfer.</p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPayoutMethod('stripe')}
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                          payoutMethod === 'stripe' 
+                            ? 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-500/10' 
+                            : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm text-white">Stripe Connect</span>
+                          <span className="text-[10px] font-bold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">Express</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">Automatic daily rolling transfers.</p>
+                      </button>
+                    </div>
+
+                    {/* Payout Input Fields */}
+                    {payoutMethod === 'paypal' && (
+                      <div className="space-y-2">
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Bank Account IBAN
+                          PayPal Payout Account Email
                         </label>
                         <input
-                          type="text"
-                          placeholder="NL00 BANK 0123 4567 89"
-                          className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                          type="email"
+                          placeholder="your-paypal-account@email.com"
+                          value={payoutEmail}
+                          onChange={(e) => setPayoutEmail(e.target.value)}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                          BIC / SWIFT Code
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="ABNANL2A"
-                          className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
-                        />
-                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                      <button
+                        onClick={() => alert('✅ Payout preferences saved! Automatic weekly withdrawals will be routed to your destination.')}
+                        className="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold cursor-pointer shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Save Destination</span>
+                      </button>
+
+                      <button
+                        onClick={() => setIsWithdrawModalOpen(true)}
+                        className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-xl text-xs font-bold cursor-pointer shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                        <span>Request PayPal Withdrawal</span>
+                      </button>
                     </div>
-                  )}
-
-                  {payoutMethod === 'stripe' && (
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Stripe Connected Account ID / Email
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="acct_1NXXXXXXXXXXXXXX"
-                        className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white font-mono focus:outline-none focus:border-purple-500"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                    <button
-                      onClick={() => alert('✅ Payout preferences saved! Automatic weekly withdrawals will be routed to your destination.')}
-                      className="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold cursor-pointer shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
-                    >
-                      <Check className="w-4 h-4" />
-                      <span>Save Payout Settings</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const amount = totalRevenue * 0.9;
-                        if (amount < 10) {
-                          alert(`⚠️ Minimum payout amount is €10.00. Current available balance: €${amount.toFixed(2)}.`);
-                        } else {
-                          alert(`🎉 Payout request for €${amount.toFixed(2)} submitted successfully! Processing time: 1-2 business days.`);
-                        }
-                      }}
-                      className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-xl text-xs font-bold cursor-pointer shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
-                    >
-                      <ArrowUpRight className="w-4 h-4" />
-                      <span>Request Instant Withdrawal</span>
-                    </button>
                   </div>
-                </div>
 
-                {/* Official Payout History Ledger */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
-                    Recent Payout History
-                  </h4>
-                  
-                  <div className="overflow-x-auto rounded-2xl border border-white/10">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-white/10">
-                        <tr>
-                          <th className="py-3 px-4 font-bold">Payout Reference</th>
-                          <th className="py-3 px-4 font-bold">Date</th>
-                          <th className="py-3 px-4 font-bold">Destination</th>
-                          <th className="py-3 px-4 font-bold">Amount</th>
-                          <th className="py-3 px-4 font-bold text-center">Status</th>
-                          <th className="py-3 px-4 font-bold text-right">Receipt</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 bg-slate-900/40 text-slate-300">
-                        <tr>
-                          <td className="py-3.5 px-4 font-mono text-cyan-400">PAY-2026-0801</td>
-                          <td className="py-3.5 px-4 text-slate-400">Aug 28, 2026</td>
-                          <td className="py-3.5 px-4">PayPal ({payoutEmail || 'account@paypal.com'})</td>
-                          <td className="py-3.5 px-4 font-bold text-white">€45.00</td>
-                          <td className="py-3.5 px-4 text-center">
-                            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/20">
-                              Completed
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <button 
-                              onClick={() => alert('📄 Generating official MinoForge PDF payout receipt...')}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer"
+                  {/* Official Payout History Ledger */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+                      Recent Payout History &amp; Settlements
+                    </h4>
+                    
+                    <div className="overflow-x-auto rounded-2xl border border-white/10">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-white/10">
+                          <tr>
+                            <th className="py-3 px-4 font-bold">Payout Reference</th>
+                            <th className="py-3 px-4 font-bold">Date</th>
+                            <th className="py-3 px-4 font-bold">Destination</th>
+                            <th className="py-3 px-4 font-bold">Gross Requested</th>
+                            <th className="py-3 px-4 font-bold">8% Fee (Treasury)</th>
+                            <th className="py-3 px-4 font-bold">Net Deposited</th>
+                            <th className="py-3 px-4 font-bold text-center">Status</th>
+                            <th className="py-3 px-4 font-bold text-right">Receipt</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 bg-slate-900/40 text-slate-300">
+                          {payoutHistory.map((item, idx) => (
+                            <tr key={idx}>
+                              <td className="py-3.5 px-4 font-mono text-cyan-400">{item.ref}</td>
+                              <td className="py-3.5 px-4 text-slate-400">{item.date}</td>
+                              <td className="py-3.5 px-4">{item.destination}</td>
+                              <td className="py-3.5 px-4 font-mono text-slate-300">€{(item.gross || item.amount).toFixed(2)}</td>
+                              <td className="py-3.5 px-4 font-mono text-amber-400">-€{(item.fee || (item.gross ? item.gross * 0.08 : 4.00)).toFixed(2)}</td>
+                              <td className="py-3.5 px-4 font-bold text-emerald-400 font-mono">€{item.amount.toFixed(2)}</td>
+                              <td className="py-3.5 px-4 text-center">
+                                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/20">
+                                  {item.status || 'Completed'}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <button 
+                                  onClick={() => alert(`📄 Official Settlement Receipt\nReference: ${item.ref}\nGross: €${(item.gross || item.amount).toFixed(2)}\n8% Treasury Fee: €${(item.fee || 4.00).toFixed(2)}\nNet Paid: €${item.amount.toFixed(2)}\nDestination: ${item.destination}\nTreasury Account: severinkaptein8@gmail.com`)}
+                                  className="text-xs text-blue-400 hover:text-blue-300 font-bold underline cursor-pointer"
+                                >
+                                  Statement
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* WITHDRAWAL MODAL */}
+                  {isWithdrawModalOpen && (
+                    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+                      <div className="relative bg-slate-950 border border-white/20 w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-white">
+                        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                              <ArrowUpRight className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-black text-white">Request PayPal Withdrawal</h3>
+                              <p className="text-xs text-slate-400">Available Balance: <strong className="text-emerald-400 font-mono">€{currentTotalBalance.toFixed(2)}</strong></p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setIsWithdrawModalOpen(false)}
+                            className="text-slate-400 hover:text-white p-2"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+
+                        {withdrawError && (
+                          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300 font-medium">
+                            {withdrawError}
+                          </div>
+                        )}
+
+                        {withdrawSuccessMsg && (
+                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 font-bold">
+                            {withdrawSuccessMsg}
+                          </div>
+                        )}
+
+                        <form onSubmit={handleWithdrawSubmit} className="space-y-4">
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Withdrawal Amount (€ EUR)</label>
+                              <button
+                                type="button"
+                                onClick={() => setWithdrawAmount(currentTotalBalance.toFixed(2))}
+                                className="text-[11px] text-cyan-400 hover:underline font-bold"
+                              >
+                                Max (€{currentTotalBalance.toFixed(2)})
+                              </button>
+                            </div>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="10"
+                              max={currentTotalBalance}
+                              placeholder="Minimum €10.00"
+                              value={withdrawAmount}
+                              onChange={(e) => setWithdrawAmount(e.target.value)}
+                              className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-base font-mono font-bold text-white focus:outline-none focus:border-emerald-500"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                              Destination PayPal Email
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="your-paypal-email@example.com"
+                              value={payoutEmail}
+                              onChange={(e) => setPayoutEmail(e.target.value)}
+                              className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                              required
+                            />
+                          </div>
+
+                          {/* Live 8% Transaction Breakdown Box */}
+                          <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 space-y-2 text-xs">
+                            <div className="flex justify-between text-slate-300">
+                              <span>Gross Requested Amount:</span>
+                              <span className="font-mono font-bold text-white">€{grossWithdrawNum.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-amber-400">
+                              <span>8% MinoForge Transaction &amp; Treasury Fee:</span>
+                              <span className="font-mono font-bold">-€{fee8Percent.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-emerald-400 font-bold text-sm pt-2 border-t border-white/10">
+                              <span>Net Deposited into your PayPal:</span>
+                              <span className="font-mono">€{netWithdrawNum.toFixed(2)}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 pt-1">
+                              * All 10% platform cuts and 8% payout transaction fees are automatically dispatched to MinoForge Treasury (<code>severinkaptein8@gmail.com</code>).
+                            </p>
+                          </div>
+
+                          <div className="flex gap-3 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsWithdrawModalOpen(false)}
+                              className="w-1/2 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs"
                             >
-                              Download PDF
+                              Cancel
                             </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                            <button
+                              type="submit"
+                              disabled={withdrawLoading || grossWithdrawNum < 10}
+                              className="w-1/2 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-xl text-xs disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                            >
+                              {withdrawLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ArrowUpRight className="w-4 h-4" />}
+                              <span>Confirm Withdrawal</span>
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
 
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {/* SECTION 14: DISCORD BOT SYNC */}
             {currentSection === 'discord-bot-sync' && (
