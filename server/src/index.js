@@ -26,12 +26,16 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting
+// Rate limiting with localhost & development bypass
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 1000 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || req.path.startsWith('/api/auth/staff');
+  }
 });
 app.use(limiter);
 
