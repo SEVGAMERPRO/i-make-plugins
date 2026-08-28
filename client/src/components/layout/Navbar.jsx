@@ -98,9 +98,9 @@ const Navbar = ({ onMenuClick }) => {
             <Menu className="w-6 h-6" />
           </button>
           
-          <Link to="/" className="flex items-center gap-2 group py-1">
-            <div className="w-8 h-8 rounded-xl bg-slate-950/80 border border-cyan-400/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-500/10 group-hover:scale-105 group-hover:border-cyan-400 transition-all">
-              <img src="/favicon.svg" alt="MinoForge Bird" className="w-full h-full object-contain" />
+          <Link to="/" className="flex items-center gap-2.5 group py-1">
+            <div className="w-9 h-9 rounded-xl bg-slate-950/90 border border-white/15 p-0.5 overflow-hidden flex items-center justify-center shadow-lg shadow-blue-500/10 group-hover:scale-105 group-hover:border-cyan-400 transition-all">
+              <img src="/favicon.png" alt="Mino on Anvil" className="w-full h-full object-cover rounded-lg" />
             </div>
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-cyan-300 transition-all">
