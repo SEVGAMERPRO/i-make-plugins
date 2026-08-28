@@ -10,6 +10,7 @@ const userRoutes = require('./routes/users');
 const customRequestsRoutes = require('./routes/customRequests');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
+const ordersRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/requests', customRequestsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/orders', ordersRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

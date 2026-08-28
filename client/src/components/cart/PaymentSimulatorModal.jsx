@@ -88,8 +88,16 @@ const PaymentSimulatorModal = () => {
     setTimeout(async () => {
       setStatus('success');
       
-      // Track real purchase in backend store for live /nimda ledger
+      // Track real purchase in backend store for live /nimda ledger & send real transactional emails
       try {
+        await axios.post('/api/orders/confirm-purchase', {
+          buyerUsername: user?.username || 'GuestBuyer',
+          buyerEmail: user?.email || 'severinkaptein8@gmail.com',
+          items: cartItems,
+          totalAmount: total,
+          transactionId: generatedId
+        });
+
         for (const item of cartItems) {
           await axios.post('/api/admin/purchases', {
             buyerUsername: user?.username || 'GuestBuyer',
@@ -101,7 +109,7 @@ const PaymentSimulatorModal = () => {
           });
         }
       } catch (err) {
-        console.warn('Purchase logged locally');
+        console.warn('Purchase logged locally:', err);
       }
 
       clearCart();
