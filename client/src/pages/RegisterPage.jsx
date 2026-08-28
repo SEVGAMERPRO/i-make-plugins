@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
 import { GoogleLogin } from '@react-oauth/google';
-import { Sparkles, ArrowRight, Lock, Mail, User } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock, Mail, User, ShieldAlert } from 'lucide-react';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -13,6 +14,7 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   
   const { register, loginWithGoogle } = useAuth();
+  const { config } = useConfig();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -76,34 +78,45 @@ const RegisterPage = () => {
           </p>
         </div>
         
+        {config.registrationsEnabled === false && (
+          <div className="bg-amber-500/15 border border-amber-500/40 text-amber-200 p-4 rounded-2xl text-xs text-center space-y-1">
+            <div className="flex items-center justify-center gap-1.5 font-black text-amber-300">
+              <ShieldAlert className="w-4 h-4" />
+              <span>REGISTRATIONS PAUSED</span>
+            </div>
+            <p className="text-slate-300">New user sign-ups are temporarily closed by the platform administrator.</p>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3.5 rounded-xl text-sm text-center">
             {error}
           </div>
         )}
 
-        {/* Google Sign-In Option */}
-        <div className="space-y-4">
-          <div className="flex justify-center w-full overflow-hidden rounded-2xl bg-slate-950 p-1 border border-white/10 shadow-lg">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="filled_black"
-              shape="rectangular"
-              size="large"
-              width="360"
-              text="continue_with"
-              locale="en"
-            />
-          </div>
+        {config.registrationsEnabled !== false && (
+          <>
+            {/* Google Sign-In Option */}
+            <div className="space-y-4">
+              <div className="flex justify-center w-full overflow-hidden rounded-2xl bg-slate-950 p-1 border border-white/10 shadow-lg">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError('Google Sign-In failed')}
+                  theme="filled_black"
+                  shape="pill"
+                  size="large"
+                  text="signup_with"
+                />
+              </div>
 
-          <div className="relative flex items-center justify-center">
-            <div className="border-t border-white/10 w-full" />
-            <span className="bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 absolute">
-              or register with email
-            </span>
-          </div>
-        </div>
+              <div className="relative flex items-center justify-center">
+                <div className="border-t border-white/10 w-full" />
+                <span className="bg-slate-900 px-3 text-xs text-slate-400 uppercase font-mono tracking-wider">or continue with email</span>
+                <div className="border-t border-white/10 w-full" />
+              </div>
+            </div>
+          </>
+        )}
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>

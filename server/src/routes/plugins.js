@@ -6,42 +6,7 @@ const validate = require('../middleware/validate');
 
 const router = express.Router();
 const prisma = new PrismaClient();
-
-const FALLBACK_FEATURED_PLUGINS = [
-  {
-    id: 'p-mine-1',
-    title: 'Ultimate Economy & Multi-Currency Vault',
-    summary: 'High-performance multi-currency vault system with GUI ATMs, pin codes, and transaction logs.',
-    price: 4.99,
-    rating: 4.9,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/minecraft_economy_gui.svg',
-    author: { id: 'u-1', username: 'SevGamer', avatarUrl: '/images/avatars/default.png' },
-    game: { id: 'g-1', name: 'Minecraft', slug: 'minecraft' }
-  },
-  {
-    id: 'p-fivem-2',
-    title: 'Advanced Fuel & Electric Vehicle Charging Station',
-    summary: 'Realistic gas stations, EV charging, jerry cans, fuel nozzles, and synchronized UI for QBCore & ESX.',
-    price: 3.49,
-    rating: 4.8,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/gta_gas_station.svg',
-    author: { id: 'u-2', username: 'FiveMDev', avatarUrl: '/images/avatars/default.png' },
-    game: { id: 'g-2', name: 'FiveM', slug: 'fivem' }
-  },
-  {
-    id: 'p-bot-3',
-    title: 'Discord Automated Ticket & Transcript Archiver Bot',
-    summary: 'Automated button ticket creation, private claim channels, and clean HTML transcripts.',
-    price: 0.00,
-    rating: 5.0,
-    downloads: 0,
-    coverImageUrl: '/images/plugins/discord_ticket_panel.svg',
-    author: { id: 'u-3', username: 'BotMaster', avatarUrl: '/images/avatars/default.png' },
-    game: { id: 'g-4', name: 'Discord', slug: 'discord' }
-  }
-];
+const store = require('../store/globalStore');
 
 // @route   GET /api/plugins
 // @desc    List approved plugins with search, filter by game, sort, pagination
@@ -101,10 +66,11 @@ router.get('/', async (req, res, next) => {
       }
     });
   } catch (error) {
+    const fallbackList = store.getPlugins();
     res.json({
-      data: FALLBACK_FEATURED_PLUGINS,
+      data: fallbackList,
       meta: {
-        total: FALLBACK_FEATURED_PLUGINS.length,
+        total: fallbackList.length,
         page: 1,
         limit: 10,
         totalPages: 1
@@ -114,7 +80,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // @route   GET /api/plugins/featured
-// @desc    Get top 8 approved plugins
+// @desc    Get top approved featured/spotlight plugins
 router.get('/featured', async (req, res, next) => {
   try {
     const plugins = await prisma.plugin.findMany({
@@ -134,9 +100,9 @@ router.get('/featured', async (req, res, next) => {
       }
     });
 
-    res.json(plugins.length > 0 ? plugins : FALLBACK_FEATURED_PLUGINS);
+    res.json(plugins.length > 0 ? plugins : store.getFeaturedPlugins());
   } catch (error) {
-    res.json(FALLBACK_FEATURED_PLUGINS);
+    res.json(store.getFeaturedPlugins());
   }
 });
 

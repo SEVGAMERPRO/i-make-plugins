@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
 import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
-import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 
 const GAMES = [
@@ -27,6 +28,21 @@ const HomePage = () => {
   const { formatPrice } = useCurrency();
   const [bgIndex, setBgIndex] = useState(0);
   const [isCustomRequestOpen, setIsCustomRequestOpen] = useState(false);
+  const [featuredPlugins, setFeaturedPlugins] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await axios.get('/api/plugins/featured');
+        if (res.data && Array.isArray(res.data)) {
+          setFeaturedPlugins(res.data);
+        }
+      } catch (err) {}
+    };
+    fetchFeatured();
+    const interval = setInterval(fetchFeatured, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // 9-second cinematic hero background crossfade
@@ -158,62 +174,35 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div 
-            onClick={() => navigate('/plugins/p-mine-1')}
-            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
-                PROMOTED
-              </span>
-              <span className="text-xs font-bold text-emerald-400">{formatPrice(4.99)}</span>
+          {featuredPlugins.map(plugin => (
+            <div 
+              key={plugin.id}
+              onClick={() => navigate(`/plugins/${plugin.id}`)}
+              className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4 animate-fade-in"
+            >
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
+                  PROMOTED
+                </span>
+                <span className="text-xs font-bold text-emerald-400">{formatPrice(plugin.price)}</span>
+              </div>
+              <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
+                <img 
+                  src={plugin.coverImageUrl || '/images/plugins/minecraft_economy_gui.svg'} 
+                  alt={plugin.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors line-clamp-1">
+                  {plugin.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                  {plugin.summary || plugin.description}
+                </p>
+              </div>
             </div>
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/minecraft_economy_gui.svg" alt="Economy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Ultimate Economy & Vault System</h3>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2">High performance multi-currency vault system with GUI ATMs, pin codes, and instant transaction logs.</p>
-            </div>
-          </div>
-
-          <div 
-            onClick={() => navigate('/plugins/p-fivem-2')}
-            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
-                PROMOTED
-              </span>
-              <span className="text-xs font-bold text-emerald-400">{formatPrice(3.49)}</span>
-            </div>
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/gta_gas_station.svg" alt="FiveM Gas" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Advanced Fuel & Electric Charging</h3>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2">Realistic gas stations, EV chargers, jerry cans, and smooth 60fps UI for QBCore & ESX.</p>
-            </div>
-          </div>
-
-          <div 
-            onClick={() => navigate('/plugins/p-bot-3')}
-            className="rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border-2 border-amber-500/40 hover:border-amber-400 p-6 shadow-2xl transition-all duration-300 cursor-pointer group space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
-                PROMOTED
-              </span>
-              <span className="text-xs font-bold text-emerald-400">{formatPrice(0)}</span>
-            </div>
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 relative">
-              <img src="/images/plugins/discord_ticket_panel.svg" alt="Discord Bot" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">Discord Ticket & Transcripts Bot</h3>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2">Automated ticket buttons, transcript html archiving, and staff rating system.</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 

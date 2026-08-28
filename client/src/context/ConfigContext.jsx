@@ -68,7 +68,7 @@ export const ConfigProvider = ({ children }) => {
 
   useEffect(() => {
     fetchConfig();
-    const interval = setInterval(fetchConfig, 10000); // 10s live sync
+    const interval = setInterval(fetchConfig, 2000); // 2s ultra-fast live sync
     return () => clearInterval(interval);
   }, []);
 

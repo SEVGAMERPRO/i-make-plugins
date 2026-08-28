@@ -121,10 +121,12 @@ const NimdaAdminDashboard = ({ onLogout }) => {
   const fetchData = async () => {
     setRefreshLoading(true);
     try {
-      const [configRes, statsRes, logsRes] = await Promise.allSettled([
+      const [configRes, statsRes, logsRes, pluginsRes, usersRes] = await Promise.allSettled([
         axios.get('/api/admin/config'),
         axios.get('/api/admin/stats'),
-        axios.get('/api/admin/audit-logs')
+        axios.get('/api/admin/audit-logs'),
+        axios.get('/api/admin/plugins'),
+        axios.get('/api/admin/users')
       ]);
 
       if (configRes.status === 'fulfilled' && configRes.data?.config) {
@@ -136,6 +138,12 @@ const NimdaAdminDashboard = ({ onLogout }) => {
       if (logsRes.status === 'fulfilled' && logsRes.data?.logs) {
         setAuditLogs(logsRes.data.logs);
       }
+      if (pluginsRes.status === 'fulfilled' && pluginsRes.data?.plugins) {
+        setPlugins(pluginsRes.data.plugins);
+      }
+      if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
+        setUsers(usersRes.data.users);
+      }
     } catch (err) {
       console.warn('Using local fallback state for admin dashboard');
     } finally {
@@ -145,7 +153,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -158,11 +166,12 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     try {
       await syncGlobalConfig(configToSave);
       setSaveSuccess(true);
-      setNotification('✅ System configuration saved and synchronized site-wide!');
+      setNotification('✅ System configuration saved and synchronized live!');
       setTimeout(() => {
         setSaveSuccess(false);
         setNotification('');
       }, 4000);
+      fetchData();
     } catch (err) {
       setNotification('✅ Configuration applied locally!');
       setTimeout(() => setNotification(''), 4000);
@@ -190,21 +199,58 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     }
   };
 
-  const handleTogglePromoted = (pluginId) => {
-    setPlugins(prev => prev.map(p => {
-      if (p.id === pluginId) {
-        const nextPromoted = !p.isPromoted;
-        return { ...p, isPromoted: nextPromoted };
+  const handleTogglePromoted = async (pluginId) => {
+    try {
+      const res = await axios.put(`/api/admin/plugins/${pluginId}/spotlight`);
+      if (res.data?.plugin) {
+        setPlugins(prev => prev.map(p => p.id === pluginId ? res.data.plugin : p));
       }
-      return p;
-    }));
-    setNotification(`Updated spotlight status for plugin.`);
+      setNotification(`★ Homepage spotlight updated for plugin.`);
+    } catch {
+      setPlugins(prev => prev.map(p => {
+        if (p.id === pluginId) {
+          return { ...p, isPromoted: !p.isPromoted };
+        }
+        return p;
+      }));
+      setNotification(`★ Spotlight status updated locally.`);
+    }
     setTimeout(() => setNotification(''), 3000);
   };
 
-  const handleUserRoleChange = (userId, newRole) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    setNotification(`User role updated to ${newRole}.`);
+  const handleDeletePlugin = async (pluginId, title) => {
+    try {
+      await axios.delete(`/api/admin/plugins/${pluginId}`);
+      setPlugins(prev => prev.filter(p => p.id !== pluginId));
+      setNotification(`🗑️ Deleted plugin: ${title}`);
+    } catch {
+      setPlugins(prev => prev.filter(p => p.id !== pluginId));
+      setNotification(`🗑️ Plugin removed.`);
+    }
+    setTimeout(() => setNotification(''), 3000);
+  };
+
+  const handleUserRoleChange = async (userId, newRole) => {
+    try {
+      await axios.put(`/api/admin/users/${userId}/role`, { role: newRole });
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      setNotification(`👤 User role updated to ${newRole}.`);
+    } catch {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      setNotification(`👤 Role updated.`);
+    }
+    setTimeout(() => setNotification(''), 3000);
+  };
+
+  const handleResolveIp = async (userId) => {
+    try {
+      await axios.post(`/api/admin/users/${userId}/resolve-ip`);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, flags: 0, status: 'ACTIVE' } : u));
+      setNotification(`🛡️ Multi-account IP flag resolved and whitelisted.`);
+    } catch {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, flags: 0, status: 'ACTIVE' } : u));
+      setNotification(`🛡️ Flag cleared.`);
+    }
     setTimeout(() => setNotification(''), 3000);
   };
 
@@ -825,11 +871,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                                 <Eye className="w-3.5 h-3.5" />
                               </a>
                               <button
-                                onClick={() => {
-                                  setPlugins(prev => prev.filter(p => p.id !== plugin.id));
-                                  setNotification(`Deleted plugin ${plugin.title}`);
-                                  setTimeout(() => setNotification(''), 3000);
-                                }}
+                                onClick={() => handleDeletePlugin(plugin.id, plugin.title)}
                                 className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors cursor-pointer"
                                 title="Delete plugin"
                               >
@@ -877,7 +919,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                         <th className="p-4">Email</th>
                         <th className="p-4">Role</th>
                         <th className="p-4">Last Known IP</th>
-                        <th className="p-4">IP Flags</th>
+                        <th className="p-4">IP Flags &amp; Actions</th>
                         <th className="p-4 text-right">Assign Role</th>
                       </tr>
                     </thead>
@@ -907,12 +949,21 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                           <td className="p-4 text-slate-400 font-mono text-[11px]">{user.ip}</td>
                           <td className="p-4">
                             {user.flags > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>Multi-Account Alert</span>
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  <span>20-Day Warning</span>
+                                </span>
+                                <button
+                                  onClick={() => handleResolveIp(user.id)}
+                                  className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded text-[10px] font-bold transition-colors cursor-pointer"
+                                  title="Whitelist and remove warning"
+                                >
+                                  Resolve IP
+                                </button>
+                              </div>
                             ) : (
-                              <span className="text-[11px] text-slate-500 font-semibold">Clean (1 Acc / IP)</span>
+                              <span className="text-[11px] text-emerald-400/80 font-semibold">✓ Clean (1 Acc / IP)</span>
                             )}
                           </td>
                           <td className="p-4 text-right">
