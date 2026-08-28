@@ -1,0 +1,60 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Courier New', Courier, monospace">
+  <defs>
+    <linearGradient id="netherHell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b0707"/>
+      <stop offset="50%" stop-color="#1c0303"/>
+      <stop offset="100%" stop-color="#0a0101"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Nether Tunnel Background -->
+  <rect width="1280" height="720" fill="url(#netherHell)"/>
+
+  <!-- Obsidian Highway Perspective Lines -->
+  <line x1="0" y1="720" x2="640" y2="360" stroke="#581c87" stroke-width="8"/>
+  <line x1="1280" y1="720" x2="640" y2="360" stroke="#581c87" stroke-width="8"/>
+  <line x1="0" y1="0" x2="640" y2="360" stroke="#3b0764" stroke-width="4"/>
+  <line x1="1280" y1="0" x2="640" y2="360" stroke="#3b0764" stroke-width="4"/>
+
+  <!-- Baritone 3D Wireframe Excavation Box -->
+  <polygon points="540,310 740,310 780,410 500,410" fill="#06b6d4" fill-opacity="0.25" stroke="#06b6d4" stroke-width="3"/>
+  <text x="640" y="295" fill="#06b6d4" font-size="15" font-weight="900" text-anchor="middle">[Baritone Target: X+ Nether Highway Tunnel]</text>
+
+  <!-- Crosshair -->
+  <rect x="638" y="358" width="4" height="4" fill="#ffffff"/>
+
+  <!-- Minecraft Java Edition F3 Debug Screen (Top Left) -->
+  <g transform="translate(16, 20)">
+    <rect width="380" height="160" fill="#000000" opacity="0.65"/>
+    <text x="10" y="22" fill="#ffffff" font-size="12">Minecraft 1.20.4 (Fabric Client)</text>
+    <text x="10" y="42" fill="#ffffff" font-size="12">144 fps (120 min) / 60 chunks</text>
+    <text x="10" y="62" fill="#ffffff" font-size="12">XYZ: 1000002.45 / 120.00 / 0.00</text>
+    <text x="10" y="82" fill="#ffffff" font-size="12">Block: nether_bricks (Nether X+ Axis)</text>
+    <text x="10" y="102" fill="#ffffff" font-size="12">Facing: East (Towards positive X)</text>
+    <text x="10" y="122" fill="#55ff55" font-size="12">Server: 2b2t.org (GrimAC: Active)</text>
+    <text x="10" y="142" fill="#ffff55" font-size="12">TPS: 19.98 • Ping: 42ms</text>
+  </g>
+
+  <!-- Anarchy Utility Active Arraylist HUD (Top Right) -->
+  <g transform="translate(970, 20)">
+    <rect width="290" height="280" rx="4" fill="#000000" opacity="0.8" stroke="#a855f7" stroke-width="2"/>
+    <text x="145" y="28" fill="#c084fc" font-size="15" font-weight="900" text-anchor="middle">2B2T ANARCHY SUITE</text>
+    <line x1="10" y1="38" x2="280" y2="38" stroke="#a855f7" stroke-width="1"/>
+
+    <text x="16" y="64" fill="#06b6d4" font-size="13" font-weight="900">Baritone <tspan fill="#ffffff">[Auto-Highway]</tspan></text>
+    <text x="16" y="90" fill="#22c55e" font-size="13" font-weight="900">AutoTotem <tspan fill="#ffffff">[14 Totems]</tspan></text>
+    <text x="16" y="116" fill="#c084fc" font-size="13" font-weight="900">ElytraFly <tspan fill="#ffffff">[74.2 bps]</tspan></text>
+    <text x="16" y="142" fill="#eab308" font-size="13" font-weight="900">Surround <tspan fill="#ffffff">[Obsidian 100%]</tspan></text>
+    <text x="16" y="168" fill="#3b82f6" font-size="13" font-weight="900">PacketFly <tspan fill="#ffffff">[Grim Bypass]</tspan></text>
+    <text x="16" y="194" fill="#ef4444" font-size="13" font-weight="900">Anti-CevBreaker <tspan fill="#ffffff">[ON]</tspan></text>
+    <text x="16" y="220" fill="#10b981" font-size="13" font-weight="900">StashFinder <tspan fill="#ffffff">[Scanning 32ch]</tspan></text>
+    <text x="16" y="246" fill="#94a3b8" font-size="13">VisualRange <tspan fill="#ffffff">[0 Nearby]</tspan></text>
+  </g>
+
+  <!-- Bottom Baritone Status Progress Box -->
+  <g transform="translate(430, 640)">
+    <rect width="420" height="52" rx="8" fill="#000000" opacity="0.85" stroke="#06b6d4" stroke-width="2"/>
+    <text x="210" y="24" fill="#06b6d4" font-size="12" font-weight="900" text-anchor="middle">BARITONE HIGHWAY DIGGER ACTIVE</text>
+    <text x="210" y="44" fill="#ffffff" font-size="12" text-anchor="middle">Blocks Excavated: 8,420 • Speed: 18.4 bps</text>
+  </g>
+</svg>

@@ -1,0 +1,80 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Obsidian Gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Electric Cyan & Neon Blue Cyber Gradient -->
+    <linearGradient id="cyberBlue" x1="60" y1="100" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="45%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <!-- Vivid Golden Yellow Myna Beak & Eye Gradient -->
+    <linearGradient id="mynaGold" x1="200" y1="160" x2="380" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="30%" stop-color="#facc15" />
+      <stop offset="80%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+
+    <!-- Deep Feather Charcoal Gradient -->
+    <linearGradient id="featherDark" x1="150" y1="80" x2="360" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="40%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Ambient Cyber Glow -->
+    <filter id="cyanGlow" x="0" y="0" width="512" height="512" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="24" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Rounded Hexagon Container with Cyber Border -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#cyberBlue)" stroke-width="8" stroke-opacity="0.6" />
+
+  <!-- Ambient Center Glow -->
+  <circle cx="256" cy="240" r="140" fill="#00f2fe" opacity="0.15" filter="url(#cyanGlow)" />
+
+  <!-- ================= MINOFORGE MYNA BIRD CREST ================= -->
+
+  <!-- Left Dynamic Cyber Wing (Forming Left of 'M') -->
+  <path d="M80 380 C 70 270, 110 160, 195 110 L 225 210 L 145 400 Z" fill="url(#cyberBlue)" />
+  <path d="M120 370 C 130 260, 165 170, 220 140 L 235 220 L 175 385 Z" fill="#38bdf8" opacity="0.85" />
+
+  <!-- Right Dynamic Cyber Wing (Forming Right of 'M') -->
+  <path d="M432 380 C 442 270, 402 160, 317 110 L 287 210 L 367 400 Z" fill="url(#cyberBlue)" />
+  <path d="M392 370 C 382 260, 347 170, 292 140 L 277 220 L 337 385 Z" fill="#38bdf8" opacity="0.85" />
+
+  <!-- Main Myna Head & Crown Body -->
+  <path d="M165 390 C 150 280, 190 140, 256 95 C 322 140, 362 280, 347 390 C 310 430, 202 430, 165 390 Z" fill="url(#featherDark)" stroke="#00f2fe" stroke-width="4" stroke-opacity="0.6" />
+
+  <!-- Sharp Spiky Head Crest Feathers (Myna Identity) -->
+  <path d="M256 60 L 272 105 L 256 90 L 240 105 Z" fill="#00f2fe" />
+  <path d="M232 75 L 248 112 L 228 102 Z" fill="#38bdf8" />
+  <path d="M280 75 L 284 102 L 264 112 Z" fill="#38bdf8" />
+
+  <!-- Signature Myna Golden Eye Patch (Behind Eye) -->
+  <path d="M210 195 C 205 160, 307 160, 302 195 C 298 230, 215 230, 210 195 Z" fill="url(#mynaGold)" />
+
+  <!-- Myna Piercing Glowing Eye -->
+  <circle cx="236" cy="195" r="14" fill="#0f172a" stroke="#ffffff" stroke-width="2" />
+  <circle cx="233" cy="192" r="5" fill="#ffffff" />
+
+  <!-- Sharp Golden Myna Beak -->
+  <polygon points="256,190 350,225 256,255" fill="url(#mynaGold)" />
+  <polygon points="256,220 350,225 256,227" fill="#ca8a04" />
+
+  <!-- Lower Futuristic Throat Shield / Chest Plate (MinoForge Armor) -->
+  <path d="M215 285 L 256 345 L 297 285 L 256 265 Z" fill="url(#cyberBlue)" stroke="#ffffff" stroke-width="2" stroke-opacity="0.7" />
+
+  <!-- Forge Core Sparkle -->
+  <circle cx="256" cy="305" r="5" fill="#ffffff" />
+</svg>

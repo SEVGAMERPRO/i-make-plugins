@@ -93,7 +93,15 @@ app.get('/robots.txt', (req, res) => {
 });
 
 // Serve Frontend Static Assets (client/dist) in Production
-const clientDistPath = path.resolve(__dirname, '../../client/dist');
+const clientDistCandidates = [
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(__dirname, '../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(process.cwd(), 'dist')
+];
+const clientDistPath = clientDistCandidates.find(p => fs.existsSync(p)) || clientDistCandidates[0];
+console.log('[Server] Static Frontend Path:', clientDistPath, 'Exists:', fs.existsSync(clientDistPath));
+
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
   app.get('*', (req, res, next) => {

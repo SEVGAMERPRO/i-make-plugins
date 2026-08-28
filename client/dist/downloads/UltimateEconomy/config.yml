@@ -1,0 +1,48 @@
+# ========================================================
+#   UltimateEconomy & Vault System v2.4.0
+#   Official MinoForge Resource (colasmp.net)
+# ========================================================
+
+database:
+  type: "SQLITE" # Options: SQLITE, MYSQL, MARIADB, POSTGRESQL
+  host: "localhost"
+  port: 3306
+  database: "minecraft_eco"
+  username: "root"
+  password: "password123"
+  pool-size: 10
+  table-prefix: "mino_eco_"
+
+currencies:
+  primary:
+    name-singular: "Coin"
+    name-plural: "Coins"
+    symbol: "$"
+    symbol-position: "BEFORE" # BEFORE ($100) or AFTER (100$)
+    starting-balance: 250.00
+    allow-negative-balance: false
+    min-transfer: 1.00
+    max-transfer: 1000000.00
+  secondary:
+    enabled: true
+    name-singular: "Gem"
+    name-plural: "Gems"
+    symbol: "💎"
+    starting-balance: 10
+    allow-negative-balance: false
+
+atm-banking:
+  enabled: true
+  gui-title: "&8» &b&lCENTRAL ATM &8«"
+  pin-security: true
+  max-accounts-per-player: 3
+  daily-interest-rate: 0.015 # 1.5% daily interest
+  offline-interest: true
+  sound-effects: true
+
+transactions:
+  enable-logs: true
+  log-to-console: false
+  webhook-discord:
+    enabled: false
+    url: "https://discord.com/api/webhooks/..."

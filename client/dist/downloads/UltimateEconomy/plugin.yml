@@ -1,0 +1,30 @@
+name: UltimateEconomy
+version: 2.4.0
+main: net.colasmp.economy.UltimateEconomy
+api-version: 1.20
+author: MinoDeveloper
+description: High-performance multi-currency vault system with GUI ATMs, PIN codes, and instant transaction logs.
+softdepend: [Vault, PlaceholderAPI]
+commands:
+  balance:
+    description: View your or another player balance
+    aliases: [bal, money]
+    permission: mino.eco.balance
+  pay:
+    description: Send currency to another player
+    permission: mino.eco.pay
+  bank:
+    description: Open ATM & Banking GUI
+    permission: mino.bank.use
+  eco:
+    description: Admin economy management command
+    permission: mino.eco.admin
+permissions:
+  mino.eco.balance:
+    default: true
+  mino.eco.pay:
+    default: true
+  mino.bank.use:
+    default: true
+  mino.eco.admin:
+    default: op
