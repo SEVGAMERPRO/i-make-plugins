@@ -16,11 +16,20 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const { isBlockedByMaintenance } = useConfig();
 
-  // Always allow secret admin gateway (/nimda) even during maintenance mode
+  // Always treat secret admin gateway (/nimda) as an isolated, standalone portal
   const isNimdaRoute = location.pathname === '/nimda';
 
+  // If on /nimda, render pure standalone layout with zero public website headers/footers
+  if (isNimdaRoute) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#070a12]">
+        {children}
+      </div>
+    );
+  }
+
   // If maintenance mode is active and user is not an admin, show Maintenance Screen
-  if (isBlockedByMaintenance && !isNimdaRoute) {
+  if (isBlockedByMaintenance) {
     return <MaintenanceScreen />;
   }
 
