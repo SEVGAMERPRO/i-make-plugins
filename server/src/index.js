@@ -11,6 +11,8 @@ const customRequestsRoutes = require('./routes/customRequests');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const ordersRoutes = require('./routes/orders');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +25,8 @@ app.use(cors({
     'http://127.0.0.1:5173',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://minoforge.com',
+    'https://www.minoforge.com',
     process.env.CLIENT_URL || 'http://localhost:5173'
   ],
   credentials: true
@@ -41,7 +45,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/plugins', pluginRoutes);
@@ -50,6 +54,18 @@ app.use('/api/requests', customRequestsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/orders', ordersRoutes);
+
+// Serve Frontend Static Assets (client/dist) in Production
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
