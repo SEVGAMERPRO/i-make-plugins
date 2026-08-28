@@ -6,6 +6,7 @@ const { PrismaClient } = require('@prisma/client');
 const nodemailer = require('nodemailer');
 const validate = require('../middleware/validate');
 const { auth } = require('../middleware/auth');
+const store = require('../store/globalStore');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -217,6 +218,8 @@ router.post('/verify-code', async (req, res) => {
       avatarUrl: user.avatarUrl || null
     };
 
+    store.addUser(userResponse, req.ip);
+
     return res.status(200).json({
       success: true,
       token,
@@ -277,6 +280,8 @@ router.post(
         role: user.role,
         avatarUrl: user.avatarUrl
       };
+
+      store.addUser(userResponse, req.ip);
 
       res.status(201).json({ token, user: userResponse });
     } catch (error) {
@@ -401,6 +406,8 @@ router.post('/google', async (req, res, next) => {
       role: user.role,
       avatarUrl: user.avatarUrl
     };
+
+    store.addUser(userResponse, req.ip);
 
     res.json({ token, user: userResponse });
   } catch (error) {

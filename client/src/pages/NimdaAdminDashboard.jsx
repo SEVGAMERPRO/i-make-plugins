@@ -77,20 +77,14 @@ const SAMPLE_PLUGINS_ADMIN = [
   }
 ];
 
-const SAMPLE_USERS_ADMIN = [
-  { id: 'u-admin', username: 'SevGamerPro', email: 'admin@minoforge.net', role: 'ADMIN', registeredAt: 'Aug 2026', ip: '127.0.0.1', status: 'ACTIVE', flags: 0 },
-  { id: 'u-1', username: 'AlexDev', email: 'creator@example.com', role: 'CREATOR', registeredAt: 'Aug 2026', ip: '82.165.42.19', status: 'ACTIVE', flags: 0 },
-  { id: 'u-2', username: 'PixelCraft', email: 'pixel@example.com', role: 'USER', registeredAt: 'Aug 2026', ip: '192.168.1.102', status: 'FLAGGED_IP_MULTI', flags: 1 },
-];
-
 const NimdaAdminDashboard = ({ onLogout }) => {
   const { formatPrice } = useCurrency();
   const { config: globalConfig, updateConfig: syncGlobalConfig } = useConfig();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'config' | 'plugins' | 'users' | 'ai' | 'logs'
   const [config, setConfig] = useState(globalConfig || DEFAULT_CONFIG);
   const [stats, setStats] = useState({
-    uptime: '1h 42m 10s',
-    memoryHeapMB: '38.4',
+    uptime: '0h 0m 0s',
+    memoryHeapMB: '24.0',
     registeredUsers: 1,
     verifiedCreators: 0,
     activeSessions: 1,
@@ -101,7 +95,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     latencyMs: 12
   });
   const [plugins, setPlugins] = useState(SAMPLE_PLUGINS_ADMIN);
-  const [users, setUsers] = useState(SAMPLE_USERS_ADMIN);
+  const [users, setUsers] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -529,8 +523,8 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     <span>Registered Users</span>
                     <Users className="w-4 h-4 text-blue-400" />
                   </div>
-                  <div className="text-3xl font-black text-white">{stats.registeredUsers}</div>
-                  <p className="text-[11px] text-slate-400">Real verified accounts (from 0)</p>
+                  <div className="text-3xl font-black text-white">{users.length}</div>
+                  <p className="text-[11px] text-slate-400">Live verified accounts</p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-2">
@@ -538,7 +532,9 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     <span>Verified Creators</span>
                     <Sparkles className="w-4 h-4 text-cyan-400" />
                   </div>
-                  <div className="text-3xl font-black text-cyan-300">{stats.verifiedCreators}</div>
+                  <div className="text-3xl font-black text-cyan-300">
+                    {users.filter(u => u.role === 'CREATOR' || u.role === 'ADMIN').length}
+                  </div>
                   <p className="text-[11px] text-slate-400">Published resource authors</p>
                 </div>
 
@@ -547,7 +543,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     <span>Active Marketplace Plugins</span>
                     <Package className="w-4 h-4 text-purple-400" />
                   </div>
-                  <div className="text-3xl font-black text-purple-300">{stats.totalPlugins}</div>
+                  <div className="text-3xl font-black text-purple-300">{plugins.length}</div>
                   <p className="text-[11px] text-emerald-400 font-bold">100% MinoShield verified</p>
                 </div>
 
@@ -556,7 +552,9 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     <span>Multi-Account IP Alerts</span>
                     <ShieldAlert className="w-4 h-4 text-amber-400" />
                   </div>
-                  <div className="text-3xl font-black text-amber-400">{stats.ipFlagsCount}</div>
+                  <div className="text-3xl font-black text-amber-400">
+                    {users.filter(u => u.flags > 0).length}
+                  </div>
                   <p className="text-[11px] text-slate-400">20-day countdown rules active</p>
                 </div>
               </div>
@@ -924,62 +922,70 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {filteredUsers.map(user => (
-                        <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                          <td className="p-4 font-bold text-white flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-300 font-black flex items-center justify-center text-xs">
-                              {user.username.charAt(0)}
-                            </div>
-                            <span>{user.username}</span>
-                          </td>
-                          <td className="p-4 text-slate-300 font-mono text-[11px]">{user.email}</td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                              user.role === 'ADMIN'
-                                ? 'bg-red-500/20 text-red-300 border border-red-500/40'
-                                : user.role === 'STAFF'
-                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                                : user.role === 'CREATOR'
-                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                : 'bg-slate-800 text-slate-400 border border-white/10'
-                            }`}>
-                              {user.role}
-                            </span>
-                          </td>
-                          <td className="p-4 text-slate-400 font-mono text-[11px]">{user.ip}</td>
-                          <td className="p-4">
-                            {user.flags > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-                                  <AlertTriangle className="w-3 h-3" />
-                                  <span>20-Day Warning</span>
-                                </span>
-                                <button
-                                  onClick={() => handleResolveIp(user.id)}
-                                  className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded text-[10px] font-bold transition-colors cursor-pointer"
-                                  title="Whitelist and remove warning"
-                                >
-                                  Resolve IP
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-[11px] text-emerald-400/80 font-semibold">✓ Clean (1 Acc / IP)</span>
-                            )}
-                          </td>
-                          <td className="p-4 text-right">
-                            <select
-                              value={user.role}
-                              onChange={(e) => handleUserRoleChange(user.id, e.target.value)}
-                              className="bg-slate-950 border border-white/15 rounded-lg text-xs text-white px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                              <option value="USER">USER</option>
-                              <option value="CREATOR">CREATOR</option>
-                              <option value="STAFF">STAFF</option>
-                              <option value="ADMIN">ADMIN</option>
-                            </select>
+                      {filteredUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-slate-500 font-medium">
+                            No registered users found.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredUsers.map(user => (
+                          <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-4 font-bold text-white flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-300 font-black flex items-center justify-center text-xs">
+                                {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                              </div>
+                              <span>{user.username}</span>
+                            </td>
+                            <td className="p-4 text-slate-300 font-mono text-[11px]">{user.email}</td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                user.role === 'ADMIN'
+                                  ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                                  : user.role === 'STAFF'
+                                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                                  : user.role === 'CREATOR'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border border-white/10'
+                              }`}>
+                                {user.role}
+                              </span>
+                            </td>
+                            <td className="p-4 text-slate-400 font-mono text-[11px]">{user.ip}</td>
+                            <td className="p-4">
+                              {user.flags > 0 ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    <span>20-Day Warning</span>
+                                  </span>
+                                  <button
+                                    onClick={() => handleResolveIp(user.id)}
+                                    className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded text-[10px] font-bold transition-colors cursor-pointer"
+                                    title="Whitelist and remove warning"
+                                  >
+                                    Resolve IP
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-[11px] text-emerald-400/80 font-semibold">✓ Clean (1 Acc / IP)</span>
+                              )}
+                            </td>
+                            <td className="p-4 text-right">
+                              <select
+                                value={user.role}
+                                onChange={(e) => handleUserRoleChange(user.id, e.target.value)}
+                                className="bg-slate-950 border border-white/15 rounded-lg text-xs text-white px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="USER">USER</option>
+                                <option value="CREATOR">CREATOR</option>
+                                <option value="STAFF">STAFF</option>
+                                <option value="ADMIN">ADMIN</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

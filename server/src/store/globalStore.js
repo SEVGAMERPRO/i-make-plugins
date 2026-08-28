@@ -40,7 +40,7 @@ let plugins = [
     status: 'APPROVED',
     isPromoted: true,
     coverImageUrl: '/images/plugins/minecraft_economy_gui.svg',
-    author: { id: 'u-1', username: 'SevGamer', avatarUrl: '/images/avatars/default.png' },
+    author: { id: 'u-admin', username: 'SevGamerPro', avatarUrl: '/images/avatars/default.png' },
     game: { id: 'g-1', name: 'Minecraft', slug: 'minecraft' },
     minoShieldStatus: 'CLEAN_BYTECODE',
     tags: ['Economy', 'Vault', 'Banking', 'GUI'],
@@ -59,7 +59,7 @@ let plugins = [
     status: 'APPROVED',
     isPromoted: true,
     coverImageUrl: '/images/plugins/gta_gas_station.svg',
-    author: { id: 'u-2', username: 'FiveMDev', avatarUrl: '/images/avatars/default.png' },
+    author: { id: 'u-admin', username: 'SevGamerPro', avatarUrl: '/images/avatars/default.png' },
     game: { id: 'g-2', name: 'FiveM', slug: 'fivem' },
     minoShieldStatus: 'CLEAN_BYTECODE',
     tags: ['Fuel', 'Vehicles', 'QBCore', 'ESX'],
@@ -78,7 +78,7 @@ let plugins = [
     status: 'APPROVED',
     isPromoted: false,
     coverImageUrl: '/images/plugins/discord_ticket_panel.svg',
-    author: { id: 'u-3', username: 'BotMaster', avatarUrl: '/images/avatars/default.png' },
+    author: { id: 'u-admin', username: 'SevGamerPro', avatarUrl: '/images/avatars/default.png' },
     game: { id: 'g-4', name: 'Discord', slug: 'discord' },
     minoShieldStatus: 'CLEAN_BYTECODE',
     tags: ['Discord', 'Tickets', 'Moderation', 'Transcripts'],
@@ -86,16 +86,25 @@ let plugins = [
   }
 ];
 
+// Real Users Only — Zero fake dummy accounts!
 let users = [
-  { id: 'u-admin', username: 'SevGamerPro', email: 'admin@minoforge.net', role: 'ADMIN', registeredAt: 'Aug 2026', ip: '127.0.0.1', status: 'ACTIVE', flags: 0, avatarUrl: '/images/avatars/default.png' },
-  { id: 'u-1', username: 'AlexDev', email: 'creator@example.com', role: 'CREATOR', registeredAt: 'Aug 2026', ip: '82.165.42.19', status: 'ACTIVE', flags: 0, avatarUrl: '/images/avatars/default.png' },
-  { id: 'u-2', username: 'PixelCraft', email: 'pixel@example.com', role: 'USER', registeredAt: 'Aug 2026', ip: '192.168.1.102', status: 'FLAGGED_IP_MULTI', flags: 1, avatarUrl: '/images/avatars/default.png' },
+  { 
+    id: 'u-admin', 
+    username: 'SevGamerPro', 
+    email: 'severinkaptein8@gmail.com', 
+    role: 'ADMIN', 
+    registeredAt: 'Aug 2026', 
+    ip: '127.0.0.1', 
+    status: 'ACTIVE', 
+    flags: 0, 
+    avatarUrl: '/images/avatars/default.png' 
+  }
 ];
 
 let auditLogs = [
   { id: 'log-1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'AUTH_SUCCESS', actor: 'Master Administrator', details: 'Nimda Master 2FA Gateway Access Approved', ip: '127.0.0.1' },
   { id: 'log-2', timestamp: new Date(Date.now() - 1800000).toISOString(), type: 'SECURITY_SCAN', actor: 'MinoShield™ Engine', details: 'Bytecode scan completed for UltimateEconomy-v2.4.0.zip (Clean 0/0)', ip: 'SYSTEM' },
-  { id: 'log-3', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'CONFIG_SYNC', actor: 'ADMIN', details: 'Global currency registry initialized with USD default', ip: '127.0.0.1' },
+  { id: 'log-3', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'CONFIG_SYNC', actor: 'ADMIN', details: 'Global platform registry initialized', ip: '127.0.0.1' },
 ];
 
 module.exports = {
@@ -122,6 +131,25 @@ module.exports = {
   },
   getUsers: () => users,
   getUserById: (id) => users.find(u => u.id === id),
+  addUser: (userData, ip = '127.0.0.1') => {
+    const existing = users.find(u => u.id === userData.id || u.email === userData.email || u.username === userData.username);
+    if (!existing) {
+      const newUser = {
+        id: userData.id || `u-${Date.now()}`,
+        username: userData.username || 'User',
+        email: userData.email || 'user@example.com',
+        role: userData.role || 'USER',
+        registeredAt: 'Just now',
+        ip: ip || '127.0.0.1',
+        status: 'ACTIVE',
+        flags: 0,
+        avatarUrl: userData.avatarUrl || '/images/avatars/default.png'
+      };
+      users.push(newUser);
+      return newUser;
+    }
+    return existing;
+  },
   updateUserRole: (id, role) => {
     const idx = users.findIndex(u => u.id === id);
     if (idx !== -1) {
