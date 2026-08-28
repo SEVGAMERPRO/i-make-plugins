@@ -8,7 +8,7 @@
     "server"
   ],
   "scripts": {
-    "build": "npm run build --prefix client",
+    "build": "cd client && npm run build",
     "start": "node server/src/index.js",
     "server": "npm --prefix server run dev",
     "client": "npm --prefix client run dev"
