@@ -31,6 +31,10 @@ const RegisterPage = () => {
       return setError('Password must be at least 6 characters long');
     }
 
+    if (!recaptchaToken) {
+      return setError('Please check the "I\'m not a robot" box before creating an account.');
+    }
+
     setLoading(true);
     
     try {
@@ -185,13 +189,13 @@ const RegisterPage = () => {
           </div>
 
           {/* Google reCAPTCHA v2 Checkbox */}
-          <GoogleRecaptcha onVerify={(token) => setRecaptchaToken(token)} onExpired={() => setRecaptchaToken('')} />
+          <GoogleRecaptcha onVerify={(token) => { setRecaptchaToken(token); setError(''); }} onExpired={() => setRecaptchaToken('')} />
 
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading || !recaptchaToken}
-              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer ${loading || !recaptchaToken ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={loading}
+              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <span>{loading ? 'Creating account...' : 'Create Account'}</span>
               <ArrowRight className="w-4 h-4" />

@@ -71,12 +71,18 @@ const LoginPage = () => {
       return;
     }
 
+    if (!recaptchaToken) {
+      setError('Please check the "I\'m not a robot" box to verify you are human.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
       const res = await axios.post('/api/auth/send-verification-code', {
-        email: email.trim()
+        email: email.trim(),
+        recaptchaToken
       });
 
       if (res.data && res.data.success) {
@@ -197,12 +203,12 @@ const LoginPage = () => {
               </div>
 
               {/* Google reCAPTCHA v2 Checkbox */}
-              <GoogleRecaptcha onVerify={(token) => setRecaptchaToken(token)} onExpired={() => setRecaptchaToken('')} />
+              <GoogleRecaptcha onVerify={(token) => { setRecaptchaToken(token); setError(''); }} onExpired={() => setRecaptchaToken('')} />
 
               <button
                 type="submit"
-                disabled={loading || !recaptchaToken}
-                className={`w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group cursor-pointer ${loading || !recaptchaToken ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading}
+                className={`w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group cursor-pointer ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 <span>{loading ? 'Sending 9-Digit Code...' : 'Send 9-Digit Security Code'}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
