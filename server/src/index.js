@@ -55,6 +55,23 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/orders', ordersRoutes);
 
+// SEO Sitemaps & Robots
+app.get('/sitemap.xml', (req, res) => {
+  const p1 = path.resolve(__dirname, '../../client/dist/sitemap.xml');
+  const p2 = path.resolve(__dirname, '../../client/public/sitemap.xml');
+  const target = fs.existsSync(p1) ? p1 : p2;
+  res.header('Content-Type', 'application/xml');
+  res.sendFile(target);
+});
+
+app.get('/robots.txt', (req, res) => {
+  const p1 = path.resolve(__dirname, '../../client/dist/robots.txt');
+  const p2 = path.resolve(__dirname, '../../client/public/robots.txt');
+  const target = fs.existsSync(p1) ? p1 : p2;
+  res.header('Content-Type', 'text/plain');
+  res.sendFile(target);
+});
+
 // Serve Frontend Static Assets (client/dist) in Production
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 if (fs.existsSync(clientDistPath)) {
