@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle } from 'lucide-react';
+import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle, Bell, BellOff, Users, GitFork, PackageCheck, AlertTriangle, FileArchive } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { useCart } from '../context/CartContext';
@@ -526,6 +526,33 @@ const PluginDetailPage = () => {
 
   const isFree = parseFloat(plugin.price) === 0 || plugin.price === '0.00' || plugin.price === 'Free';
 
+  const [isWatched, setIsWatched] = useState(() => {
+    try {
+      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
+      return watched.includes(id);
+    } catch {
+      return false;
+    }
+  });
+  const [watchToast, setWatchToast] = useState(false);
+
+  const toggleWatch = () => {
+    try {
+      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
+      let updated;
+      if (watched.includes(id)) {
+        updated = watched.filter(item => item !== id);
+        setIsWatched(false);
+      } else {
+        updated = [...watched, id];
+        setIsWatched(true);
+        setWatchToast(true);
+        setTimeout(() => setWatchToast(false), 3000);
+      }
+      localStorage.setItem('minoforge_watched_plugins', JSON.stringify(updated));
+    } catch {}
+  };
+
   return (
     <div className="bg-[#0b0f19] min-h-screen text-white py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -538,6 +565,14 @@ const PluginDetailPage = () => {
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-white font-medium truncate">{plugin.title}</span>
         </div>
+
+        {/* Watch Alert Toast */}
+        {watchToast && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-blue-600/30 to-cyan-500/30 border border-blue-500/40 text-xs font-bold text-cyan-200 flex items-center gap-2 shadow-xl animate-fade-in">
+            <Bell className="w-4 h-4 text-cyan-400 animate-bounce" />
+            <span>🔔 You are now watching <strong>{plugin.title}</strong>! You will receive email &amp; Discord alerts for new patches.</span>
+          </div>
+        )}
 
         {/* Flash Sale Banner */}
         <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-red-500/20 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/10">
@@ -592,15 +627,31 @@ const PluginDetailPage = () => {
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
                       {plugin.title}
                     </h1>
-                    <div className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
-                      <span>Developed by</span>
-                      <Link to={`/users/${plugin.authorName}`} className="text-blue-400 font-bold hover:underline">
-                        {plugin.authorName}
-                      </Link>
-                      <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 text-[10px] font-bold border border-blue-500/20 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-cyan-400" />
-                        <span>Verified Creator</span>
-                      </span>
+                    
+                    {/* Multi-Author Collaborations & Revenue Split Info */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
+                        <span className="text-xs text-slate-400">Primary Author:</span>
+                        <Link to={`/users/${plugin.authorName}`} className="text-blue-400 font-bold hover:underline">
+                          {plugin.authorName}
+                        </Link>
+                        <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 text-[10px] font-bold border border-blue-500/20 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                          <span>Verified Creator (70% Split)</span>
+                        </span>
+                      </div>
+
+                      {/* Co-Authors Team */}
+                      <div className="flex items-center gap-2 text-xs text-slate-400 flex-wrap">
+                        <Users className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Co-Author / Art:</span>
+                        <Link to="/users/PixelCraft_Art" className="text-purple-300 font-bold hover:underline">
+                          PixelCraft_Art
+                        </Link>
+                        <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 text-[10px] font-mono border border-purple-500/20">
+                          30% Revenue Share
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
@@ -635,9 +686,10 @@ const PluginDetailPage = () => {
               <div className="flex flex-wrap gap-2 pb-6 border-b border-white/10">
                 {[
                   { id: 'overview', label: 'Overview' },
+                  { id: 'dependencies', label: '📦 Dependencies & Hooks' },
                   { id: 'compatibility', label: '🎮 Compatibility Matrix' },
                   { id: 'screenshots', label: '📸 In-Game Visuals' },
-                  { id: 'changelog', label: '📜 Version Changelog' },
+                  { id: 'changelog', label: '📜 Changelog & Version Archive' },
                   { id: 'commands', label: 'Commands & Perms' },
                   { id: 'config', label: 'Sample Config' },
                   { id: 'minoshield', label: '🛡️ MinoShield™ Scan' },
@@ -721,18 +773,203 @@ const PluginDetailPage = () => {
                   </div>
                 )}
 
-                {/* Changelog Tab */}
+                {/* Dependencies & Hooks Tab */}
+                {activeTab === 'dependencies' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div>
+                      <h3 className="text-base font-black text-white flex items-center gap-2">
+                        <PackageCheck className="w-5 h-5 text-emerald-400" />
+                        <span>Resource Dependencies &amp; Plugin Hooks</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">Prerequisites and optional soft-dependencies for optimal performance.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Required Core Dependencies */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-red-500/30 space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wide">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>Required Core Dependencies (Must Install)</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">Vault (Core API)</strong>
+                              <span className="text-[11px] text-slate-400">v1.7.3 or newer</span>
+                            </div>
+                            <a
+                              href="https://www.spigotmc.org/resources/vault.34315/"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-xs font-bold border border-blue-500/30 flex items-center gap-1"
+                            >
+                              <span>Get Vault</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">ProtocolLib</strong>
+                              <span className="text-[11px] text-slate-400">v5.3+ (Packet Manager)</span>
+                            </div>
+                            <a
+                              href="https://www.spigotmc.org/resources/protocollib.1997/"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-xs font-bold border border-blue-500/30 flex items-center gap-1"
+                            >
+                              <span>Get ProtocolLib</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Optional Soft Hooks */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-cyan-500/30 space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wide">
+                          <GitFork className="w-4 h-4" />
+                          <span>Optional Supported Integrations &amp; Hooks</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">PlaceholderAPI (PAPI)</strong>
+                              <span className="text-[11px] text-emerald-400 font-medium">✓ 15+ Custom Placeholders</span>
+                            </div>
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-bold rounded">Supported</span>
+                          </div>
+
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">DiscordSRV</strong>
+                              <span className="text-[11px] text-emerald-400 font-medium">✓ Live Discord Sync</span>
+                            </div>
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-bold rounded">Supported</span>
+                          </div>
+
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">WorldGuard &amp; WorldEdit</strong>
+                              <span className="text-[11px] text-emerald-400 font-medium">✓ Region Bank Flag Protection</span>
+                            </div>
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-bold rounded">Supported</span>
+                          </div>
+
+                          <div className="p-3.5 bg-slate-900/80 border border-white/10 rounded-xl flex items-center justify-between">
+                            <div>
+                              <strong className="text-xs font-bold text-white block">LuckPerms</strong>
+                              <span className="text-[11px] text-emerald-400 font-medium">✓ Dynamic Permission Groups</span>
+                            </div>
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-bold rounded">Supported</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Changelog & Legacy Version Archive Tab */}
                 {activeTab === 'changelog' && (
                   <div className="space-y-6 animate-fade-in">
                     <div>
                       <h3 className="text-base font-black text-white flex items-center gap-2">
                         <History className="w-5 h-5 text-purple-400" />
-                        <span>Release History &amp; Changelogs</span>
+                        <span>Release History &amp; Legacy Version Archive</span>
                       </h3>
-                      <p className="text-xs text-slate-400">All published updates and improvements for this plugin.</p>
+                      <p className="text-xs text-slate-400">Download current builds or rollback to legacy server versions.</p>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Version Download Table */}
+                    <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-900 text-slate-400 font-bold border-b border-white/10">
+                          <tr>
+                            <th className="p-3.5">Version</th>
+                            <th className="p-3.5">Target Game</th>
+                            <th className="p-3.5">Release Date</th>
+                            <th className="p-3.5">Size</th>
+                            <th className="p-3.5 text-right">Archive Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          <tr className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 font-bold font-mono text-cyan-300 flex items-center gap-1.5">
+                              <span>v2.4.0</span>
+                              <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-300 text-[9px] uppercase rounded">Latest</span>
+                            </td>
+                            <td className="p-3.5 text-white font-medium">Minecraft 1.20.4 - 1.21.x</td>
+                            <td className="p-3.5 text-slate-400">2 days ago</td>
+                            <td className="p-3.5 font-mono">4.2 MB</td>
+                            <td className="p-3.5 text-right">
+                              <button 
+                                onClick={handleDownload}
+                                className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-xs inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <Download className="w-3 h-3" />
+                                <span>Download</span>
+                              </button>
+                            </td>
+                          </tr>
+
+                          <tr className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 font-bold font-mono text-white">v2.3.0</td>
+                            <td className="p-3.5 text-white font-medium">Minecraft 1.20.1 - 1.20.4</td>
+                            <td className="p-3.5 text-slate-400">3 weeks ago</td>
+                            <td className="p-3.5 font-mono">3.9 MB</td>
+                            <td className="p-3.5 text-right">
+                              <button 
+                                onClick={handleDownload}
+                                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-xs inline-flex items-center gap-1 cursor-pointer border border-white/10"
+                              >
+                                <Download className="w-3 h-3" />
+                                <span>Rollback .zip</span>
+                              </button>
+                            </td>
+                          </tr>
+
+                          <tr className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 font-bold font-mono text-white">v2.0.0</td>
+                            <td className="p-3.5 text-white font-medium">Minecraft 1.18.2 - 1.19.4</td>
+                            <td className="p-3.5 text-slate-400">2 months ago</td>
+                            <td className="p-3.5 font-mono">3.5 MB</td>
+                            <td className="p-3.5 text-right">
+                              <button 
+                                onClick={handleDownload}
+                                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-semibold text-xs inline-flex items-center gap-1 cursor-pointer border border-white/10"
+                              >
+                                <Download className="w-3 h-3" />
+                                <span>Rollback .zip</span>
+                              </button>
+                            </td>
+                          </tr>
+
+                          <tr className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 font-bold font-mono text-amber-300">v1.5.0 (Legacy)</td>
+                            <td className="p-3.5 text-white font-medium">Minecraft 1.8.8 - 1.12.2</td>
+                            <td className="p-3.5 text-slate-400">6 months ago</td>
+                            <td className="p-3.5 font-mono">2.8 MB</td>
+                            <td className="p-3.5 text-right">
+                              <button 
+                                onClick={handleDownload}
+                                className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg font-bold text-xs inline-flex items-center gap-1 cursor-pointer border border-amber-500/30"
+                              >
+                                <FileArchive className="w-3 h-3" />
+                                <span>Legacy 1.12</span>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Changelog Notes */}
+                    <div className="space-y-4 pt-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase">Detailed Patch Notes</h4>
+                      
                       {/* Latest Release */}
                       <div className="p-5 rounded-2xl bg-slate-950 border border-purple-500/30 space-y-3">
                         <div className="flex items-center justify-between">
@@ -756,26 +993,6 @@ const PluginDetailPage = () => {
                           <li className="flex items-start gap-2">
                             <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold">BUGFIX</span>
                             <span>Fixed decimal rounding discrepancy during cross-proxy server transfers.</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      {/* v2.3.0 */}
-                      <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-black text-white font-mono">v2.3.0</span>
-                          </div>
-                          <span className="text-xs text-slate-500">Released 3 weeks ago</span>
-                        </div>
-                        <ul className="space-y-2 text-xs text-slate-300">
-                          <li className="flex items-start gap-2">
-                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">FEATURE</span>
-                            <span>Integrated global player Auction House with sales tax deduction.</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold">BUGFIX</span>
-                            <span>Resolved SQLite lock conflict during concurrent server restarts.</span>
                           </li>
                         </ul>
                       </div>
@@ -949,6 +1166,28 @@ const PluginDetailPage = () => {
                 <MessageSquare className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
                 <span>Chat with Owner (Support &amp; Refunds)</span>
               </Link>
+
+              {/* Watch Resource Updates Button */}
+              <button
+                onClick={toggleWatch}
+                className={`w-full py-2.5 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  isWatched
+                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30'
+                    : 'bg-slate-800 hover:bg-slate-700 border-white/10 text-slate-300 hover:text-white'
+                }`}
+              >
+                {isWatched ? (
+                  <>
+                    <BellOff className="w-4 h-4 text-amber-400" />
+                    <span>Watching (Pings Enabled)</span>
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4 text-slate-400" />
+                    <span>Watch Resource (Get Update Alerts)</span>
+                  </>
+                )}
+              </button>
 
               {/* Details table */}
               <div className="space-y-3 pt-4 border-t border-white/5 text-xs">
