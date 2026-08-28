@@ -4,7 +4,8 @@ import {
   Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign, Download, Star, 
   ExternalLink, Key, Tag, Bell, ShieldCheck, Crown, Rocket, ChevronDown, 
   HelpCircle, Check, X, ArrowUpRight, TrendingUp, Users, Calendar, Percent,
-  PackageOpen, AlertCircle
+  PackageOpen, AlertCircle, Share2, Copy, Gift, UserPlus, Sliders, Bot,
+  Lock, Globe, CreditCard, Sparkles, Filter, RefreshCw, Eye, MousePointer
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,21 +14,32 @@ import MinoShieldBadge from '../components/security/MinoShieldBadge';
 const CreatorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [currentSection, setCurrentSection] = useState('overview'); // 'overview', 'resources', 'advertising', 'licenses', 'coupons', 'settings'
+  const [currentSection, setCurrentSection] = useState('overview');
 
   // Time filters
   const [timeRange, setTimeRange] = useState('Past 30 days');
-  const [chartMetric, setChartMetric] = useState('Impressions');
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  // Ad Modals State
+  // Modals State
   const [showCreateAdModal, setShowCreateAdModal] = useState(false);
-  const [showEditAdModal, setShowEditAdModal] = useState(false);
+  const [showCreateBundleModal, setShowCreateBundleModal] = useState(false);
+  const [showCreateCouponModal, setShowCreateCouponModal] = useState(false);
+  const [showScheduleSaleModal, setShowScheduleSaleModal] = useState(false);
+  const [showIssueLicenseModal, setShowIssueLicenseModal] = useState(false);
 
-  // Ad Configuration State
-  const [adScope, setAdScope] = useState('all');
+  // Forms State
   const [featuredRate, setFeaturedRate] = useState('10');
+  const [bundleTitle, setBundleTitle] = useState('');
+  const [bundleDiscount, setBundleDiscount] = useState('20');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState('25');
+  const [saleEventName, setSaleEventName] = useState('');
+  const [saleDiscount, setSaleDiscount] = useState('20');
+  const [licenseBuyer, setLicenseBuyer] = useState('');
+  const [payoutEmail, setPayoutEmail] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState('paypal');
 
-  // Real Dynamic Resources (starting from user uploaded plugins or empty)
+  // Dynamic Stores & Data from LocalStorage
   const [resources, setResources] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('minoforge_uploaded_plugins') || '[]');
@@ -36,13 +48,45 @@ const CreatorDashboard = () => {
     }
   });
 
-  // Real Dynamic Licenses (starting empty)
+  const [bundles, setBundles] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('minoforge_bundles') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [coupons, setCoupons] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('minoforge_coupons') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [saleEvents, setSaleEvents] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('minoforge_sale_events') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
   const [licenses, setLicenses] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('minoforge_issued_licenses') || '[]');
     } catch {
       return [];
     }
+  });
+
+  // Placeholder Anti-Leak Settings
+  const [placeholderSettings, setPlaceholderSettings] = useState({
+    watermarkBuyerId: true,
+    watermarkOrderId: true,
+    ipLocking: false,
+    autoBanLeakers: true,
+    obfuscateBytecode: true
   });
 
   // Calculated Real Lifetime Metrics (Starting strictly at 0)
@@ -54,10 +98,86 @@ const CreatorDashboard = () => {
     : '0.0';
   const totalReviewsCount = resources.reduce((sum, res) => sum + (parseInt(res.ratingCount) || 0), 0);
 
-  const handleSaveAds = () => {
-    alert(`🎉 Advertising updated! Featured rate set to ${featuredRate}%. Your resources will receive priority spotlight impressions across MinoForge.`);
-    setShowCreateAdModal(false);
-    setShowEditAdModal(false);
+  // Handlers
+  const handleCreateBundle = (e) => {
+    e.preventDefault();
+    if (!bundleTitle.trim()) return;
+    const newBundle = {
+      id: `bundle-${Date.now()}`,
+      title: bundleTitle.trim(),
+      discount: parseInt(bundleDiscount) || 20,
+      pluginsCount: resources.length > 0 ? Math.min(3, resources.length) : 2,
+      price: (24.99 * (1 - (parseInt(bundleDiscount) || 20) / 100)).toFixed(2),
+      status: 'ACTIVE',
+      createdAt: new Date().toLocaleDateString()
+    };
+    const updated = [newBundle, ...bundles];
+    setBundles(updated);
+    localStorage.setItem('minoforge_bundles', JSON.stringify(updated));
+    setShowCreateBundleModal(false);
+    setBundleTitle('');
+  };
+
+  const handleCreateCoupon = (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    const newCoupon = {
+      id: `cpn-${Date.now()}`,
+      code: couponCode.trim().toUpperCase(),
+      discount: parseInt(couponDiscount) || 25,
+      uses: 0,
+      maxUses: 100,
+      status: 'ACTIVE',
+      createdAt: new Date().toLocaleDateString()
+    };
+    const updated = [newCoupon, ...coupons];
+    setCoupons(updated);
+    localStorage.setItem('minoforge_coupons', JSON.stringify(updated));
+    setShowCreateCouponModal(false);
+    setCouponCode('');
+  };
+
+  const handleScheduleSale = (e) => {
+    e.preventDefault();
+    if (!saleEventName.trim()) return;
+    const newSale = {
+      id: `sale-${Date.now()}`,
+      title: saleEventName.trim(),
+      discount: parseInt(saleDiscount) || 20,
+      startDate: new Date().toLocaleDateString(),
+      endDate: 'In 7 days',
+      status: 'ACTIVE'
+    };
+    const updated = [newSale, ...saleEvents];
+    setSaleEvents(updated);
+    localStorage.setItem('minoforge_sale_events', JSON.stringify(updated));
+    setShowScheduleSaleModal(false);
+    setSaleEventName('');
+  };
+
+  const handleIssueLicense = (e) => {
+    e.preventDefault();
+    if (!licenseBuyer.trim()) return;
+    const newLicense = {
+      id: `lic-${Date.now()}`,
+      buyerName: licenseBuyer.trim(),
+      key: `KEY-${Math.floor(1000 + Math.random() * 9000)}-MINE-${Math.floor(1000 + Math.random() * 9000)}`,
+      plugin: resources[0]?.title || 'Custom Plugin',
+      ipBinding: '127.0.0.1 (Unbound)',
+      status: 'ACTIVE',
+      issuedAt: new Date().toLocaleDateString()
+    };
+    const updated = [newLicense, ...licenses];
+    setLicenses(updated);
+    localStorage.setItem('minoforge_issued_licenses', JSON.stringify(updated));
+    setShowIssueLicenseModal(false);
+    setLicenseBuyer('');
+  };
+
+  const handleCopyRef = () => {
+    navigator.clipboard.writeText(`https://colasmp.net/ref/@${user?.username || 'creator'}`);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   return (
@@ -71,7 +191,7 @@ const CreatorDashboard = () => {
             <span>&gt;</span>
             <span className="text-white font-medium capitalize">Creator Portal</span>
             <span>&gt;</span>
-            <span className="text-blue-400 font-semibold capitalize">{currentSection}</span>
+            <span className="text-blue-400 font-semibold capitalize">{currentSection.replace('-', ' ')}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -88,10 +208,10 @@ const CreatorDashboard = () => {
         {/* Dashboard Main Grid with Left Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Sidebar Navigation */}
+          {/* Exact BuiltByBit Sidebar Navigation */}
           <div className="lg:col-span-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-xl space-y-6">
             
-            {/* Analytics */}
+            {/* 1. Analytics */}
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-2 px-3">
                 Analytics
@@ -99,20 +219,20 @@ const CreatorDashboard = () => {
               <div className="space-y-0.5 text-xs font-semibold">
                 <button
                   onClick={() => setCurrentSection('overview')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'overview' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'overview' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Overview
                 </button>
                 <button
                   onClick={() => setCurrentSection('product-analytics')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'product-analytics' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'product-analytics' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Product analytics
                 </button>
               </div>
             </div>
 
-            {/* Products */}
+            {/* 2. Products */}
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-2 px-3">
                 Products
@@ -120,21 +240,22 @@ const CreatorDashboard = () => {
               <div className="space-y-0.5 text-xs font-semibold">
                 <button
                   onClick={() => setCurrentSection('resources')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between ${currentSection === 'resources' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'resources' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   <span>Resources</span>
                   <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{resources.length}</span>
                 </button>
                 <button
                   onClick={() => setCurrentSection('bundles')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'bundles' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'bundles' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
-                  Bundles
+                  <span>Bundles</span>
+                  <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{bundles.length}</span>
                 </button>
               </div>
             </div>
 
-            {/* Purchases */}
+            {/* 3. Purchases */}
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-2 px-3">
                 Purchases
@@ -142,20 +263,21 @@ const CreatorDashboard = () => {
               <div className="space-y-0.5 text-xs font-semibold">
                 <button
                   onClick={() => setCurrentSection('transactions')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'transactions' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'transactions' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Transactions
                 </button>
                 <button
                   onClick={() => setCurrentSection('licenses')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'licenses' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'licenses' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
-                  Licenses
+                  <span>Licenses</span>
+                  <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{licenses.length}</span>
                 </button>
               </div>
             </div>
 
-            {/* Engagement */}
+            {/* 4. Engagement */}
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-2 px-3">
                 Engagement
@@ -163,38 +285,40 @@ const CreatorDashboard = () => {
               <div className="space-y-0.5 text-xs font-semibold">
                 <button
                   onClick={() => setCurrentSection('advertising')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between ${currentSection === 'advertising' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'advertising' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   <span>Advertising</span>
                   <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold">PRO</span>
                 </button>
                 <button
                   onClick={() => setCurrentSection('sale-events')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'sale-events' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'sale-events' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
-                  Sale events
+                  <span>Sale events</span>
+                  <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{saleEvents.length}</span>
                 </button>
                 <button
                   onClick={() => setCurrentSection('referrals')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'referrals' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'referrals' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Referrals
                 </button>
                 <button
                   onClick={() => setCurrentSection('invite-a-creator')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'invite-a-creator' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'invite-a-creator' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Invite a creator
                 </button>
                 <button
                   onClick={() => setCurrentSection('coupon-codes')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'coupon-codes' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'coupon-codes' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
-                  Coupon codes
+                  <span>Coupon codes</span>
+                  <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{coupons.length}</span>
                 </button>
                 <button
                   onClick={() => setCurrentSection('stores')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between ${currentSection === 'stores' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'stores' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   <span>Stores</span>
                   <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-bold flex items-center gap-1">
@@ -204,17 +328,29 @@ const CreatorDashboard = () => {
               </div>
             </div>
 
-            {/* Settings */}
+            {/* 5. Settings */}
             <div>
               <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-2 px-3">
                 Settings
               </h3>
               <div className="space-y-0.5 text-xs font-semibold">
                 <button
-                  onClick={() => setCurrentSection('settings')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all ${currentSection === 'settings' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  onClick={() => setCurrentSection('tebex-stripe-wallet')}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'tebex-stripe-wallet' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
-                  Payout &amp; Payment Settings
+                  Tebex / Stripe wallet
+                </button>
+                <button
+                  onClick={() => setCurrentSection('discord-bot-sync')}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'discord-bot-sync' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                >
+                  Discord bot sync
+                </button>
+                <button
+                  onClick={() => setCurrentSection('placeholders')}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'placeholders' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                >
+                  Placeholders
                 </button>
               </div>
             </div>
@@ -224,7 +360,7 @@ const CreatorDashboard = () => {
           {/* Right Main Content Panel */}
           <div className="lg:col-span-9 space-y-6">
 
-            {/* SECTION: OVERVIEW (100% Real Calculated Metrics) */}
+            {/* SECTION 1: OVERVIEW */}
             {currentSection === 'overview' && (
               <div className="space-y-6 animate-fade-in">
                 
@@ -247,7 +383,46 @@ const CreatorDashboard = () => {
                   </div>
                 </div>
 
-                {/* Quick Upload CTA or Resource List */}
+                {/* Quick Action Shortcuts */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <button 
+                    onClick={() => navigate('/upload')}
+                    className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-blue-500/40 text-left transition-all group cursor-pointer"
+                  >
+                    <Package className="w-5 h-5 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-white block">Upload Plugin</span>
+                    <span className="text-[10px] text-slate-400">List new resource</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setCurrentSection('bundles')}
+                    className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-cyan-500/40 text-left transition-all group cursor-pointer"
+                  >
+                    <Gift className="w-5 h-5 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-white block">Create Bundle</span>
+                    <span className="text-[10px] text-slate-400">Package deals</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setCurrentSection('advertising')}
+                    className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-amber-500/40 text-left transition-all group cursor-pointer"
+                  >
+                    <Megaphone className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-white block">Promote Ads</span>
+                    <span className="text-[10px] text-slate-400">$5 Free Credit</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setCurrentSection('discord-bot-sync')}
+                    className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-indigo-500/40 text-left transition-all group cursor-pointer"
+                  >
+                    <Bot className="w-5 h-5 text-indigo-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-white block">Discord Roles</span>
+                    <span className="text-[10px] text-slate-400">Sync buyers</span>
+                  </button>
+                </div>
+
+                {/* Listed Plugins Overview */}
                 {resources.length === 0 ? (
                   <div className="p-10 rounded-3xl bg-slate-900/80 border border-white/10 text-center space-y-4 shadow-xl">
                     <div className="w-16 h-16 rounded-3xl bg-slate-950 border border-white/10 mx-auto flex items-center justify-center text-slate-500">
@@ -293,68 +468,54 @@ const CreatorDashboard = () => {
               </div>
             )}
 
-            {/* SECTION: ADVERTISING (Real Ad Metrics Starting at 0) */}
-            {currentSection === 'advertising' && (
+            {/* SECTION 2: PRODUCT ANALYTICS */}
+            {currentSection === 'product-analytics' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
-                
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/10 gap-4">
                   <div>
-                    <h2 className="text-2xl font-black text-white">Advertising Performance</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Track real impressions, clicks, and sales from sponsored placements</p>
+                    <h2 className="text-2xl font-black text-white">Product Performance Analytics</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Page views, conversion rates, and regional traffic breakdown</p>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setShowCreateAdModal(true)}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-amber-500/20 hover:brightness-110 transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Create Ad</span>
-                    </button>
+                  <select 
+                    value={timeRange} 
+                    onChange={(e) => setTimeRange(e.target.value)}
+                    className="bg-slate-800 border border-white/10 text-xs text-white rounded-xl px-3 py-2"
+                  >
+                    <option value="Past 7 days">Past 7 days</option>
+                    <option value="Past 30 days">Past 30 days</option>
+                    <option value="All Time">All Time</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5 space-y-1">
+                    <span className="text-xs text-slate-400 font-bold">Total Page Views</span>
+                    <p className="text-2xl font-black text-white">0</p>
+                    <span className="text-[10px] text-slate-500">From verified users</span>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5 space-y-1">
+                    <span className="text-xs text-slate-400 font-bold">Checkout Conversion</span>
+                    <p className="text-2xl font-black text-emerald-400">0.00%</p>
+                    <span className="text-[10px] text-slate-500">View to purchase ratio</span>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5 space-y-1">
+                    <span className="text-xs text-slate-400 font-bold">Top Traffic Source</span>
+                    <p className="text-2xl font-black text-cyan-400">Direct</p>
+                    <span className="text-[10px] text-slate-500">Marketplace Search</span>
                   </div>
                 </div>
 
-                {/* 5 Real Metrics Starting at 0 */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
-                    <span className="text-2xl font-black text-white">0</span>
-                    <p className="text-[11px] text-slate-400 mt-1">Impressions past 30 days</p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
-                    <span className="text-2xl font-black text-white">0</span>
-                    <p className="text-[11px] text-slate-400 mt-1">Purchases past 30 days</p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
-                    <span className="text-2xl font-black text-white">$0.00</span>
-                    <p className="text-[11px] text-slate-400 mt-1">Revenue past 30 days</p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
-                    <span className="text-2xl font-black text-white">$0.00</span>
-                    <p className="text-[11px] text-slate-400 mt-1">Ad fees paid</p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
-                    <span className="text-2xl font-black text-white">$0.00</span>
-                    <p className="text-[11px] text-slate-400 mt-1">Gross profit</p>
-                  </div>
-                </div>
-
-                {/* Analytics Empty Notice */}
                 <div className="p-8 rounded-2xl bg-slate-950/60 border border-white/5 text-center space-y-2">
-                  <p className="text-xs font-bold text-slate-300">No Advertising Impressions Recorded</p>
+                  <BarChart3 className="w-10 h-10 text-slate-600 mx-auto" />
+                  <p className="text-xs font-bold text-slate-300">No Analytics Data in This Timeframe</p>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    When you promote your plugin with featured ads, real impression counts and conversion graphs will be charted here daily.
+                    When visitors view your plugins or purchase licenses, real-time conversion rates and referral logs will be graphed here.
                   </p>
                 </div>
-
               </div>
             )}
 
-            {/* SECTION: RESOURCES (Portfolio Table) */}
+            {/* SECTION 3: RESOURCES */}
             {currentSection === 'resources' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
                 <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -418,12 +579,86 @@ const CreatorDashboard = () => {
               </div>
             )}
 
-            {/* SECTION: LICENSES */}
-            {currentSection === 'licenses' && (
+            {/* SECTION 4: BUNDLES */}
+            {currentSection === 'bundles' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div>
+                    <h2 className="text-2xl font-black text-white">Plugin Bundles ({bundles.length})</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Package multiple plugins together at a discounted rate to boost total sales volume</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateBundleModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Bundle</span>
+                  </button>
+                </div>
+
+                {bundles.length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <Gift className="w-12 h-12 text-slate-600 mx-auto" />
+                    <h4 className="text-base font-bold text-white">No Bundles Created Yet</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Combine 2 or more of your plugins (e.g. Economy + Vault + ATM) into a discounted starter package.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {bundles.map((bundle, idx) => (
+                      <div key={idx} className="p-5 rounded-2xl bg-slate-950/60 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-white text-base">{bundle.title}</h4>
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold text-xs rounded">
+                            {bundle.discount}% OFF
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400">Includes {bundle.pluginsCount} plugins in this bundle.</p>
+                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                          <span className="text-lg font-black text-emerald-400">${bundle.price}</span>
+                          <span className="text-xs text-slate-400">Created {bundle.createdAt}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 5: TRANSACTIONS */}
+            {currentSection === 'transactions' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
                 <div className="pb-4 border-b border-white/10">
-                  <h2 className="text-2xl font-black text-white">License Keys &amp; DRM</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Automated customer key generation and anti-leak IP binding</p>
+                  <h2 className="text-2xl font-black text-white">Sales Transactions</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Real-time payment audit log, customer receipts, and payouts</p>
+                </div>
+
+                <div className="text-center py-12 space-y-3">
+                  <ShoppingCart className="w-12 h-12 text-slate-600 mx-auto" />
+                  <h4 className="text-base font-bold text-white">No Transactions Yet</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    All customer purchases, payouts, and automated invoice receipts will appear here in chronological order.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 6: LICENSES */}
+            {currentSection === 'licenses' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div>
+                    <h2 className="text-2xl font-black text-white">License Keys &amp; DRM ({licenses.length})</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Automated customer key generation and anti-leak IP binding</p>
+                  </div>
+                  <button
+                    onClick={() => setShowIssueLicenseModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Issue License</span>
+                  </button>
                 </div>
 
                 {licenses.length === 0 ? (
@@ -440,9 +675,12 @@ const CreatorDashboard = () => {
                       <div key={idx} className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-between">
                         <div>
                           <span className="font-bold text-white block text-sm">{lic.buyerName}</span>
-                          <span className="text-xs font-mono text-slate-400">{lic.key}</span>
+                          <span className="text-xs font-mono text-cyan-300">{lic.key}</span>
+                          <span className="text-[10px] text-slate-500 block">{lic.plugin} • {lic.ipBinding}</span>
                         </div>
-                        <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">Active</span>
+                        <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                          ✓ Active
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -450,13 +688,241 @@ const CreatorDashboard = () => {
               </div>
             )}
 
-            {/* SECTION: STORES (ULTIMATE FEATURE) */}
+            {/* SECTION 7: ADVERTISING */}
+            {currentSection === 'advertising' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/10 gap-4">
+                  <div>
+                    <h2 className="text-2xl font-black text-white">Advertising Performance</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Track real impressions, clicks, and sales from sponsored placements</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateAdModal(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-amber-500/20 hover:brightness-110 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Ad</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-2xl font-black text-white">0</span>
+                    <p className="text-[11px] text-slate-400 mt-1">Impressions past 30 days</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-2xl font-black text-white">0</span>
+                    <p className="text-[11px] text-slate-400 mt-1">Purchases past 30 days</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-2xl font-black text-white">$0.00</span>
+                    <p className="text-[11px] text-slate-400 mt-1">Revenue past 30 days</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-2xl font-black text-white">$0.00</span>
+                    <p className="text-[11px] text-slate-400 mt-1">Ad fees paid</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-2xl font-black text-white">$0.00</span>
+                    <p className="text-[11px] text-slate-400 mt-1">Gross profit</p>
+                  </div>
+                </div>
+
+                <div className="p-8 rounded-2xl bg-slate-950/60 border border-white/5 text-center space-y-2">
+                  <Megaphone className="w-10 h-10 text-slate-600 mx-auto" />
+                  <p className="text-xs font-bold text-slate-300">No Advertising Impressions Recorded</p>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    When you promote your plugin with featured ads, real impression counts and conversion graphs will be charted here daily.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 8: SALE EVENTS */}
+            {currentSection === 'sale-events' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div>
+                    <h2 className="text-2xl font-black text-white">Sale Events &amp; Discounts ({saleEvents.length})</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Schedule seasonal store-wide flash sales with custom banner badges</p>
+                  </div>
+                  <button
+                    onClick={() => setShowScheduleSaleModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Schedule Sale</span>
+                  </button>
+                </div>
+
+                {saleEvents.length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <Percent className="w-12 h-12 text-slate-600 mx-auto" />
+                    <h4 className="text-base font-bold text-white">No Active Sale Events</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Schedule a discount event (e.g. 20% OFF Summer Weekend Sale) to boost conversion rates across your products.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {saleEvents.map((sale, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-white block text-sm">{sale.title}</span>
+                          <span className="text-xs text-slate-400">{sale.startDate} to {sale.endDate}</span>
+                        </div>
+                        <span className="px-2.5 py-1 bg-amber-500/20 text-amber-300 font-bold text-xs rounded-full">
+                          🔥 {sale.discount}% OFF
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 9: REFERRALS */}
+            {currentSection === 'referrals' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="pb-4 border-b border-white/10">
+                  <h2 className="text-2xl font-black text-white">Affiliate &amp; Referrals</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Share your link and earn 5% on every purchase made by referred users</p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Your Unique Referral Link
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`https://colasmp.net/ref/@${user?.username || 'creator'}`}
+                      className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-cyan-300 font-mono"
+                    />
+                    <button
+                      onClick={handleCopyRef}
+                      className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+                    >
+                      {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-xs text-slate-400 font-bold">Referred Clicks</span>
+                    <p className="text-2xl font-black text-white mt-1">0</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-xs text-slate-400 font-bold">Referred Signups</span>
+                    <p className="text-2xl font-black text-white mt-1">0</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                    <span className="text-xs text-slate-400 font-bold">Referral Earnings</span>
+                    <p className="text-2xl font-black text-emerald-400 mt-1">$0.00</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 10: INVITE A CREATOR */}
+            {currentSection === 'invite-a-creator' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="pb-4 border-b border-white/10">
+                  <h2 className="text-2xl font-black text-white">Invite a Creator</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Invite fellow plugin developers and earn $10 bonus credits when they publish their first plugin</p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                      <UserPlus className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Creator Partner Program</h4>
+                      <p className="text-xs text-slate-400">Share your invite link with developers on Discord, SpigotMC, or GitHub.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`https://colasmp.net/join-creator?ref=${user?.username || 'partner'}`}
+                      className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-xs text-purple-300 font-mono"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://colasmp.net/join-creator?ref=${user?.username || 'partner'}`);
+                        alert('✅ Creator invite link copied to clipboard!');
+                      }}
+                      className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+                    >
+                      <Copy className="w-4 h-4" />
+                      <span>Copy Invite</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 11: COUPON CODES */}
+            {currentSection === 'coupon-codes' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div>
+                    <h2 className="text-2xl font-black text-white">Coupon &amp; Promo Codes ({coupons.length})</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Create discount codes for your customers or Discord community giveaways</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateCouponModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Coupon</span>
+                  </button>
+                </div>
+
+                {coupons.length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <Tag className="w-12 h-12 text-slate-600 mx-auto" />
+                    <h4 className="text-base font-bold text-white">No Coupon Codes Created</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Create promotional codes (e.g. <code>LAUNCH50</code>) to give customers instant discounts at checkout.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {coupons.map((c, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-black text-cyan-300 text-sm bg-slate-900 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                            {c.code}
+                          </span>
+                          <div>
+                            <span className="text-xs font-bold text-white block">{c.discount}% Discount</span>
+                            <span className="text-[10px] text-slate-400">{c.uses} of {c.maxUses} uses</span>
+                          </div>
+                        </div>
+                        <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                          Active
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 12: STORES */}
             {currentSection === 'stores' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
                 <div className="pb-4 border-b border-white/10 flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-black text-white">Custom Storefronts</h2>
+                      <h2 className="text-2xl font-black text-white">Custom Brand Storefront</h2>
                       <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded">Ultimate Feature</span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">Create branded portal storefronts with your own vanity URLs</p>
@@ -464,30 +930,180 @@ const CreatorDashboard = () => {
                 </div>
 
                 <div className="p-6 rounded-2xl bg-slate-950 border border-white/10 space-y-4">
-                  <span className="font-bold text-white block">Custom Brand Storefront</span>
-                  <p className="text-xs text-slate-400">Build your unique creator portal with custom banners, color accents, and plugin bundles.</p>
-                  <Link to="/upgrade" className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:underline">
-                    <span>Activate with MinoForge Ultimate</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-white block">Custom Storefront URL</span>
+                      <span className="text-xs font-mono text-cyan-400">colasmp.net/@{user?.username || 'yourbrand'}</span>
+                    </div>
+                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/30">
+                      Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">Customize header cover banners, curated plugin bundles, and Discord embeds.</p>
                 </div>
               </div>
             )}
 
-            {/* SECTION: TRANSACTIONS */}
-            {currentSection === 'transactions' && (
+            {/* SECTION 13: TEBEX / STRIPE WALLET */}
+            {currentSection === 'tebex-stripe-wallet' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
                 <div className="pb-4 border-b border-white/10">
-                  <h2 className="text-2xl font-black text-white">Sales Transactions</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Real-time payment audit log and payouts</p>
+                  <h2 className="text-2xl font-black text-white">Payout Gateways &amp; Wallet</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Configure your PayPal, Stripe Express, or Tebex merchant accounts for automatic earnings transfers</p>
                 </div>
 
-                <div className="text-center py-12 space-y-3">
-                  <ShoppingCart className="w-12 h-12 text-slate-600 mx-auto" />
-                  <h4 className="text-base font-bold text-white">No Transactions Yet</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    All customer purchases, payouts, and automated invoice receipts will appear here in chronological order.
-                  </p>
+                <div className="space-y-4">
+                  <div className="p-6 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="w-6 h-6 text-blue-400" />
+                      <h4 className="text-sm font-bold text-white">Payout Method</h4>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPayoutMethod('paypal')}
+                        className={`p-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          payoutMethod === 'paypal' ? 'bg-blue-600/30 border-blue-400 text-white' : 'bg-slate-900 border-white/10 text-slate-400'
+                        }`}
+                      >
+                        PayPal Business
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayoutMethod('stripe')}
+                        className={`p-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          payoutMethod === 'stripe' ? 'bg-blue-600/30 border-blue-400 text-white' : 'bg-slate-900 border-white/10 text-slate-400'
+                        }`}
+                      >
+                        Stripe Connect / Card
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                        {payoutMethod === 'paypal' ? 'PayPal Payout Email' : 'Stripe Account ID / Email'}
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="your-payout-email@example.com"
+                        value={payoutEmail}
+                        onChange={(e) => setPayoutEmail(e.target.value)}
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-white"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => alert('✅ Payout preferences saved successfully!')}
+                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold cursor-pointer shadow-md"
+                    >
+                      Save Payout Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 14: DISCORD BOT SYNC */}
+            {currentSection === 'discord-bot-sync' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="pb-4 border-b border-white/10">
+                  <h2 className="text-2xl font-black text-white">Discord Bot Synchronization</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Automatically grant buyer roles and send purchase logs in your Discord server</p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Bot className="w-8 h-8 text-[#5865F2]" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white">MinoForge Discord Sync Bot</h4>
+                      <p className="text-xs text-slate-400">Assigns customer roles instantly upon verified purchase.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                        Discord Guild Server ID
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 123456789012345678"
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-white font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                        Customer Role ID to Assign
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 987654321098765432"
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => alert('✅ Discord Bot connected and role mapping active!')}
+                    className="px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl text-xs font-bold cursor-pointer shadow-md flex items-center gap-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Save Discord Integration</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 15: PLACEHOLDERS (ANTI-LEAK WATERMARKING) */}
+            {currentSection === 'placeholders' && (
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+                <div className="pb-4 border-b border-white/10">
+                  <h2 className="text-2xl font-black text-white">Anti-Leak Placeholder Injection</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Proprietary bytecode watermarking that embeds buyer IDs directly into downloaded plugin binaries</p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-950/80 border border-white/10 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-6 h-6 text-emerald-400" />
+                    <h4 className="text-sm font-bold text-white">MinoShield Bytecode Watermark</h4>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <label className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-white/5 cursor-pointer">
+                      <div>
+                        <span className="text-xs font-bold text-white block">Inject Buyer ID in JAR/ZIP Manifest</span>
+                        <span className="text-[10px] text-slate-400">Identifies origin buyer if file is leaked</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={placeholderSettings.watermarkBuyerId}
+                        onChange={(e) => setPlaceholderSettings({ ...placeholderSettings, watermarkBuyerId: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 rounded"
+                      />
+                    </label>
+
+                    <label className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-white/5 cursor-pointer">
+                      <div>
+                        <span className="text-xs font-bold text-white block">Automatic Leaker Detection &amp; Ban</span>
+                        <span className="text-[10px] text-slate-400">Revokes licenses automatically when leaked hashes match</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={placeholderSettings.autoBanLeakers}
+                        onChange={(e) => setPlaceholderSettings({ ...placeholderSettings, autoBanLeakers: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 rounded"
+                      />
+                    </label>
+                  </div>
+
+                  <button
+                    onClick={() => alert('✅ Anti-theft placeholder settings updated!')}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold cursor-pointer shadow-md"
+                  >
+                    Save Security Settings
+                  </button>
                 </div>
               </div>
             )}
@@ -496,25 +1112,167 @@ const CreatorDashboard = () => {
 
         </div>
 
-        {/* MODAL 1: CREATE AD */}
+        {/* MODAL: CREATE BUNDLE */}
+        {showCreateBundleModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white">Create New Plugin Bundle</h3>
+                <button onClick={() => setShowCreateBundleModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <form onSubmit={handleCreateBundle} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Bundle Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Complete Survival SMP Starter Kit"
+                    value={bundleTitle}
+                    onChange={(e) => setBundleTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="60"
+                    value={bundleDiscount}
+                    onChange={(e) => setBundleDiscount(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                  <button type="button" onClick={() => setShowCreateBundleModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Create Bundle</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: CREATE COUPON */}
+        {showCreateCouponModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white">Create Promo Coupon Code</h3>
+                <button onClick={() => setShowCreateCouponModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <form onSubmit={handleCreateCoupon} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Coupon Code</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. SUMMER25"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white uppercase font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="90"
+                    value={couponDiscount}
+                    onChange={(e) => setCouponDiscount(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                  <button type="button" onClick={() => setShowCreateCouponModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Create Coupon</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: SCHEDULE SALE */}
+        {showScheduleSaleModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white">Schedule Sale Event</h3>
+                <button onClick={() => setShowScheduleSaleModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <form onSubmit={handleScheduleSale} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Event Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Summer Weekend Flash Sale"
+                    value={saleEventName}
+                    onChange={(e) => setSaleEventName(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="70"
+                    value={saleDiscount}
+                    onChange={(e) => setSaleDiscount(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                  <button type="button" onClick={() => setShowScheduleSaleModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Activate Sale</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: ISSUE LICENSE */}
+        {showIssueLicenseModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white">Issue Manual License Key</h3>
+                <button onClick={() => setShowIssueLicenseModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <form onSubmit={handleIssueLicense} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Buyer Username / Server</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Hypixel_Staff"
+                    value={licenseBuyer}
+                    onChange={(e) => setLicenseBuyer(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                  <button type="button" onClick={() => setShowIssueLicenseModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Generate Key</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: CREATE AD */}
         {showCreateAdModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <h3 className="text-xl font-bold text-white">Create Featured Ad</h3>
-                <button 
-                  onClick={() => setShowCreateAdModal(false)}
-                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 cursor-pointer"
-                >
-                  ✕
-                </button>
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="text-lg font-bold text-white">Create Featured Ad</h3>
+                <button onClick={() => setShowCreateAdModal(false)} className="text-slate-400 hover:text-white">✕</button>
               </div>
-
-              <div className="space-y-4 text-xs text-slate-300">
-                <p>Set a featured promotion rate for your resources to gain priority discovery impressions across MinoForge search and category pages.</p>
-                
+              <div className="space-y-4 text-xs">
+                <p className="text-slate-300">Set a featured promotion rate for your resources to gain priority discovery impressions across search and category listings.</p>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Featured Rate (% of sale)</label>
+                  <label className="block text-xs font-bold text-slate-400 mb-1">Featured Rate (% of sale)</label>
                   <input
                     type="number"
                     min="1"
@@ -524,20 +1282,9 @@ const CreatorDashboard = () => {
                     className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white font-mono"
                   />
                 </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                  <button
-                    onClick={() => setShowCreateAdModal(false)}
-                    className="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl hover:bg-slate-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveAds}
-                    className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg"
-                  >
-                    Save &amp; Activate Ad
-                  </button>
+                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                  <button onClick={() => setShowCreateAdModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
+                  <button onClick={() => { setShowCreateAdModal(false); alert('🎉 Ad campaign activated!'); }} className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Save Ad</button>
                 </div>
               </div>
             </div>
