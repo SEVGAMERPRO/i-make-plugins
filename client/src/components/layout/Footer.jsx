@@ -75,14 +75,38 @@ const Footer = () => {
           </Link>
         </div>
 
-        {/* Bottom copyright and Currency Switcher */}
-        <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} MinoForge. All rights reserved. Built for server creators worldwide.</p>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-slate-400">Display Currency:</span>
+        {/* Supported Payment Gateways Strip */}
+        <div className="pt-6 pb-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span className="font-semibold">Supported Payments:</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-1 bg-pink-500/10 border border-pink-500/30 text-pink-400 text-[11px] font-black rounded-lg">
+                iDEAL
+              </span>
+              <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[11px] font-black rounded-lg">
+                PayPal
+              </span>
+              <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-bold rounded-lg">
+                Visa / Mastercard
+              </span>
+              <span className="px-2.5 py-1 bg-slate-800 border border-white/10 text-slate-300 text-[11px] font-bold rounded-lg">
+                Apple Pay &amp; Google Pay
+              </span>
+              <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold rounded-lg">
+                Bancontact
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-slate-400">Currency:</span>
             <CurrencySwitcher compact={true} />
           </div>
+        </div>
+
+        {/* Bottom copyright */}
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <p>© {new Date().getFullYear()} MinoForge. All rights reserved. Built for server creators worldwide.</p>
         </div>
       </div>
     </footer>

@@ -220,21 +220,33 @@ const CartDrawer = () => {
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                <button
-                  onClick={handleProceedToCheckout}
-                  className="w-full py-3 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
-                >
-                  <span>Pay with</span>
-                  <span className="font-black text-base tracking-tight italic">
-                    <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
-                  </span>
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={handleProceedToCheckout}
+                    className="py-3 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-xs rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
+                  >
+                    <span>Pay with</span>
+                    <span className="font-black text-sm tracking-tight italic">
+                      <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={handleProceedToCheckout}
+                    className="py-3 bg-[#cc0066] hover:bg-[#b30059] active:scale-[0.99] text-white font-black text-xs rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-pink-500/10 transition-all cursor-pointer"
+                  >
+                    <span>Pay with</span>
+                    <span className="font-black text-xs tracking-tight uppercase bg-white text-[#cc0066] px-1.5 py-0.5 rounded font-mono">
+                      iDEAL
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 pt-1">
                 <span>🔒 256-Bit SSL</span>
                 <span>•</span>
-                <span>🛡️ PayPal Buyer Protection</span>
+                <span>🏦 iDEAL &amp; PayPal</span>
                 <span>•</span>
                 <span>⚡ Instant DRM Key</span>
               </div>

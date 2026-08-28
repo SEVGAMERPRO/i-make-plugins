@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink } from 'lucide-react';
+import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -7,16 +7,32 @@ import { useAuth } from '../../context/AuthContext';
 import PayPalSmartButtons from './PayPalSmartButtons';
 
 const PAYMENT_METHODS = [
+  { id: 'ideal', name: 'iDEAL & Bank', icon: Building2, subtitle: 'Direct Dutch Online Banking (ING, Rabo, ABN)' },
   { id: 'paypal', name: 'PayPal & Cards', icon: Wallet, subtitle: 'Official 1-Click PayPal Gateway' },
   { id: 'card', name: 'Credit / Debit Card', icon: CreditCard, subtitle: 'Visa, Mastercard, Amex, Apple Pay' },
   { id: 'crypto', name: 'Web3 Crypto Gateway', icon: QrCode, subtitle: 'Bitcoin, Ethereum, Solana, USDT' },
   { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Creator Earnings Balance' }
 ];
 
+const IDEAL_BANKS = [
+  { id: 'ing', name: 'ING Bank' },
+  { id: 'rabo', name: 'Rabobank' },
+  { id: 'abn', name: 'ABN AMRO' },
+  { id: 'sns', name: 'SNS Bank' },
+  { id: 'asn', name: 'ASN Bank' },
+  { id: 'regio', name: 'RegioBank' },
+  { id: 'knab', name: 'Knab' },
+  { id: 'bunq', name: 'Bunq' },
+  { id: 'revolut', name: 'Revolut' },
+  { id: 'triodos', name: 'Triodos Bank' },
+  { id: 'n26', name: 'N26' }
+];
+
 const PaymentSimulatorModal = () => {
   const { isCheckoutOpen, setIsCheckoutOpen, cartItems, total, clearCart } = useCart();
   const { formatPrice, activeCurrency } = useCurrency();
-  const [selectedMethod, setSelectedMethod] = useState('paypal');
+  const [selectedMethod, setSelectedMethod] = useState('ideal');
+  const [selectedBank, setSelectedBank] = useState('ING Bank');
   const [status, setStatus] = useState('idle'); // 'idle' | 'processing' | 'success'
   const [processingStep, setProcessingStep] = useState(0);
   const [transactionId, setTransactionId] = useState('');
@@ -225,6 +241,47 @@ const PaymentSimulatorModal = () => {
               </div>
 
               {/* Method Specific Form */}
+              {selectedMethod === 'ideal' && (
+                <div className="p-5 bg-slate-900/80 rounded-2xl border border-pink-500/30 space-y-4 shadow-xl shadow-pink-500/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-black text-xs">
+                        iDEAL
+                      </div>
+                      <span className="text-xs font-bold text-slate-200">Online Bankieren (Nederland)</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      Directe Afrekening
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1.5 font-bold uppercase tracking-wider">
+                      Kies jouw Bank
+                    </label>
+                    <select
+                      value={selectedBank}
+                      onChange={(e) => setSelectedBank(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-3 text-xs text-white focus:outline-none focus:border-pink-500 cursor-pointer"
+                    >
+                      {IDEAL_BANKS.map((b) => (
+                        <option key={b.id} value={b.name} className="bg-slate-950 text-white">
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5 flex items-center justify-between text-xs text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Veilig betalen via je eigen bankapp (QR of Web)</span>
+                    </div>
+                    <span className="text-[11px] font-mono font-bold text-white">0% Extra Kosten</span>
+                  </div>
+                </div>
+              )}
+
               {selectedMethod === 'card' && (
                 <div className="p-5 bg-slate-900/60 rounded-2xl border border-white/10 space-y-4">
                   <div className="flex items-center justify-between">
@@ -333,14 +390,22 @@ const PaymentSimulatorModal = () => {
                 </div>
               )}
 
-              {/* Submit Pay Button for Card/Crypto/Credits */}
+              {/* Submit Pay Button for iDEAL / Card / Crypto / Credits */}
               {selectedMethod !== 'paypal' && (
                 <button
                   onClick={handleSimulatePayment}
-                  className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl shadow-blue-500/30 cursor-pointer"
+                  className={`btn-shimmer btn-animated w-full py-4 text-white font-black text-base rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl cursor-pointer ${
+                    selectedMethod === 'ideal' 
+                      ? 'bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 hover:from-pink-500 hover:via-rose-400 hover:to-pink-500 shadow-pink-500/30' 
+                      : 'btn-glow-blue bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 shadow-blue-500/30'
+                  }`}
                 >
                   <Lock className="w-4 h-4" />
-                  <span>Complete Order of {formatPrice(total, true)}</span>
+                  <span>
+                    {selectedMethod === 'ideal' 
+                      ? `Pay ${formatPrice(total, true)} with iDEAL (${selectedBank})` 
+                      : `Complete Order of ${formatPrice(total, true)}`}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
