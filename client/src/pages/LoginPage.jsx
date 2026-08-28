@@ -154,8 +154,8 @@ const LoginPage = () => {
         {/* Header with MinoForge Myna Bird Mascot */}
         <div className="text-center">
           <Link to="/" className="inline-block group mb-3">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-400/40 p-2.5 flex items-center justify-center shadow-xl shadow-cyan-500/20 group-hover:scale-105 group-hover:border-cyan-400 transition-all">
-              <img src="/favicon.svg" alt="MinoForge Myna Bird" className="w-full h-full object-contain" />
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-400/40 p-1 flex items-center justify-center shadow-xl shadow-cyan-500/20 group-hover:scale-105 group-hover:border-cyan-400 transition-all overflow-hidden">
+              <img src="/favicon.png" alt="MinoForge Myna Bird" className="w-full h-full object-cover rounded-xl" />
             </div>
           </Link>
           <h2 className="text-3xl font-black text-white tracking-tight">
