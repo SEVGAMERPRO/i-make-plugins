@@ -3,12 +3,14 @@ import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, Arr
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useAuth } from '../../context/AuthContext';
+import PayPalSmartButtons from './PayPalSmartButtons';
 
 const PAYMENT_METHODS = [
+  { id: 'paypal', name: 'PayPal Checkout', icon: Wallet, subtitle: 'Official PayPal & Card Gateway' },
   { id: 'card', name: 'Credit / Debit Card', icon: CreditCard, subtitle: 'Visa, Mastercard, Amex, Discover' },
-  { id: 'paypal', name: 'PayPal Sandbox', icon: Wallet, subtitle: 'Instant 1-Click PayPal Checkout' },
   { id: 'crypto', name: 'Crypto Simulator', icon: QrCode, subtitle: 'Bitcoin, Ethereum, Solana, USDT' },
-  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Test Credits Balance Available' }
+  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Creator Credits Balance' }
 ];
 
 const PaymentSimulatorModal = () => {
@@ -273,38 +275,29 @@ const PaymentSimulatorModal = () => {
               )}
 
               {selectedMethod === 'paypal' && (
-                <div className="p-6 bg-slate-900/80 rounded-2xl border border-amber-500/30 text-center space-y-4 shadow-xl shadow-amber-500/5">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mx-auto text-amber-400">
-                    <span className="font-black text-2xl tracking-tighter text-[#003087]">
-                      <span className="text-[#0079C1]">P</span>P
-                    </span>
-                  </div>
-                  <div>
+                <div className="p-6 bg-slate-900/80 rounded-2xl border border-amber-500/30 space-y-4 shadow-xl shadow-amber-500/5">
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mx-auto text-amber-400">
+                      <span className="font-black text-xl tracking-tighter text-[#003087]">
+                        <span className="text-[#0079C1]">P</span>P
+                      </span>
+                    </div>
                     <h4 className="font-black text-white text-base flex items-center justify-center gap-2">
-                      <span>PayPal Instant Checkout</span>
-                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">Verified</span>
+                      <span>PayPal Official Gateway</span>
+                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/30">Live 1-Click</span>
                     </h4>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
-                      Pay securely with your PayPal account or linked debit/credit card. Includes 180-day buyer protection and instant DRM license activation.
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                      Click below to checkout directly via your PayPal balance, linked bank account, or debit/credit card.
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleSimulatePayment}
-                    className="w-full py-3.5 px-6 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-base rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 transition-all cursor-pointer group"
-                  >
-                    <span>Pay with</span>
-                    <span className="font-black text-lg tracking-tight italic">
-                      <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
-                    </span>
-                    <span className="text-sm font-bold text-slate-800 ml-1">({formatPrice(total, true)})</span>
-                  </button>
-
-                  <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400 pt-1">
-                    <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Buyer Protection</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5 text-blue-400" /> SSL Encrypted</span>
+                  <div className="pt-2">
+                    <PayPalSmartButtons
+                      items={cartItems}
+                      totalAmount={total}
+                      onSuccess={handlePayPalSuccess}
+                      onError={(err) => console.error('PayPal checkout error', err)}
+                    />
                   </div>
                 </div>
               )}

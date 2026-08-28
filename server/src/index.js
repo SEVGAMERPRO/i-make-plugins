@@ -11,6 +11,7 @@ const customRequestsRoutes = require('./routes/customRequests');
 const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const ordersRoutes = require('./routes/orders');
+const paypalRoutes = require('./routes/paypal');
 const path = require('path');
 const fs = require('fs');
 
@@ -72,6 +73,7 @@ app.use('/api/requests', customRequestsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/orders', ordersRoutes);
+app.use('/api/paypal', paypalRoutes);
 
 // SEO Sitemaps & Robots
 app.get('/sitemap.xml', (req, res) => {
