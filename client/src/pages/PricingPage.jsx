@@ -3,6 +3,7 @@ import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSi
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link } from 'react-router-dom';
+import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
 
 const TIERS = [
   {
@@ -30,7 +31,7 @@ const TIERS = [
     name: 'MinoForge Ultimate',
     badge: 'Official BuiltByBit Style • Most Popular',
     priceMonthly: 19.99,
-    priceYearly: 179,
+    priceYearly: 203.90, // 15% discount on yearly ($16.99/mo)
     description: 'The definitive tier for serious creators. Keep 100% of your earnings, get $5/mo free ad credit, and full platform superpowers.',
     buttonText: 'Get Ultimate Access',
     buttonVariant: 'gradient',
@@ -164,7 +165,7 @@ const PricingPage = () => {
             <span className={`flex items-center gap-1.5 ${annualBilling ? 'text-white' : 'text-slate-500'}`}>
               <span>Yearly</span>
               <span className="text-[10px] uppercase font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                Save 25%
+                Save 15%
               </span>
             </span>
           </div>
@@ -228,7 +229,7 @@ const PricingPage = () => {
                 {/* CTA Button */}
                 <button
                   onClick={() => handleCheckout(tier)}
-                  className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     tier.highlighted
                       ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/30'
                       : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10'
@@ -302,49 +303,83 @@ const PricingPage = () => {
                   <h3 className="text-xl font-bold text-white">Upgrade to {selectedPlan.name}</h3>
                 </div>
                 <button 
-                  onClick={() => setSelectedPlan(null)}
-                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5"
+                  onClick={() => { setSelectedPlan(null); setCheckoutSuccess(false); }}
+                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
-                <div className="flex justify-between font-bold text-white">
-                  <span>Membership:</span>
-                  <span>{selectedPlan.name} ({annualBilling ? 'Annual' : 'Monthly'})</span>
+              {checkoutSuccess ? (
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto animate-bounce">
+                    <Check className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-xl font-black text-white">Welcome to MinoForge Ultimate!</h4>
+                  <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
+                    Your membership is now active! You now enjoy <span className="text-amber-300 font-bold">0% marketplace fees</span>, $5.00 free monthly ad credits, and priority staff reviews.
+                  </p>
+                  <button
+                    onClick={() => { setSelectedPlan(null); setCheckoutSuccess(false); }}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg cursor-pointer"
+                  >
+                    Go to Creator Hub
+                  </button>
                 </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Bonus Free Ad Credits:</span>
-                  <span className="font-bold text-emerald-400">+$5.00 Included</span>
-                </div>
-                <div className="flex justify-between font-bold text-amber-300 text-sm pt-2 border-t border-amber-500/20">
-                  <span>Total Due Today:</span>
-                  <span>${annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly} USD</span>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
+                    <div className="flex justify-between font-bold text-white">
+                      <span>Membership Tier:</span>
+                      <span>{selectedPlan.name} ({annualBilling ? 'Yearly (15% Saved)' : 'Monthly'})</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Platform Sales Fee:</span>
+                      <span className="font-bold text-emerald-400">0% (You keep 100%)</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Free Monthly Ad Credits:</span>
+                      <span className="font-bold text-emerald-400">+$5.00 / mo Included</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-amber-300 text-sm pt-2 border-t border-amber-500/20">
+                      <span>Total Due Today:</span>
+                      <span>{formatPrice(annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly)}</span>
+                    </div>
+                  </div>
 
-              <div className="space-y-3">
-                <button
-                  onClick={processPayment}
-                  disabled={checkoutSuccess}
-                  className="w-full py-3.5 px-4 bg-[#635BFF] hover:bg-[#534be0] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
-                >
-                  <span>{checkoutSuccess ? 'Processing...' : 'Pay with Stripe (Cards / Apple Pay)'}</span>
-                </button>
+                  {/* Real PayPal Smart Buttons Gateway */}
+                  <div className="space-y-3 pt-2">
+                    <div className="text-center pb-1">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        Official Checkout Gateway
+                      </span>
+                    </div>
 
-                <button
-                  onClick={processPayment}
-                  disabled={checkoutSuccess}
-                  className="w-full py-3.5 px-4 bg-[#0070BA] hover:bg-[#005ea6] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
-                >
-                  <span>{checkoutSuccess ? 'Processing...' : 'Pay with PayPal'}</span>
-                </button>
-              </div>
+                    <PayPalSmartButtons
+                      items={[{
+                        id: `membership_${selectedPlan.id}_${annualBilling ? 'yearly' : 'monthly'}`,
+                        title: `MinoForge ${selectedPlan.name} (${annualBilling ? 'Annual Plan - 15% Off' : 'Monthly Plan'})`,
+                        price: annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly
+                      }]}
+                      totalAmount={annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly}
+                      onSuccess={(data) => {
+                        setCheckoutSuccess(true);
+                        try {
+                          const updatedUser = { ...(user || {}), role: 'CREATOR', isUltimate: true };
+                          localStorage.setItem('minoforge_user', JSON.stringify(updatedUser));
+                          const curCredits = parseFloat(localStorage.getItem('minoforge_ad_credits') || '0');
+                          localStorage.setItem('minoforge_ad_credits', (curCredits + 5.0).toFixed(2));
+                        } catch (e) {}
+                      }}
+                      onError={(err) => console.error('Ultimate checkout error:', err)}
+                    />
+                  </div>
 
-              <p className="text-[11px] text-slate-500 text-center">
-                Instant activation. Cancel anytime from your account settings.
-              </p>
+                  <p className="text-[11px] text-slate-500 text-center pt-2">
+                    Instant activation. Includes 180-day Buyer Protection and direct receipt delivery to your email.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         )}
