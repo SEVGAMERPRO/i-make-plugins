@@ -278,7 +278,7 @@ const HomePage = () => {
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-white text-lg mb-2">Active Community</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">Connect with thousands of server admins, exchange configs, and get support.</p>
+              <p className="text-slate-400 text-sm leading-relaxed">Connect with server admins, exchange configs, and get direct author support.</p>
             </div>
           </div>
         </div>
@@ -321,7 +321,7 @@ const HomePage = () => {
             Are you a Plugin Developer?
           </h2>
           <p className="text-base md:text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">
-            Monetize your code and reach thousands of server owners looking for premium plugins and custom development.
+            Monetize your code and connect directly with server owners looking for premium plugins and custom development.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button

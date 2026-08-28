@@ -103,13 +103,6 @@ const Navbar = ({ onMenuClick }) => {
               <span>Bounties</span>
             </Link>
             <Link
-              to="/staff/tickets"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/staff/tickets') ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' : 'text-slate-300 hover:text-purple-300 hover:bg-white/5'}`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
-              <span>Tickets</span>
-            </Link>
-            <Link
               to="/ai-config"
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/ai-config') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
             >
@@ -155,15 +148,6 @@ const Navbar = ({ onMenuClick }) => {
               </span>
             )}
           </button>
-
-          {/* Mobile Quick Tickets shortcut */}
-          <Link
-            to="/staff/tickets"
-            className="md:hidden p-2 text-slate-300 hover:text-purple-300 hover:bg-white/10 active:scale-95 rounded-xl transition-all"
-            title="Support & Community Tickets"
-          >
-            <MessageSquare className="w-5 h-5 text-purple-400" />
-          </Link>
 
           {/* Mobile Quick Marketplace icon shortcut */}
           <Link
