@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Copy, Check, Download, RefreshCw, Code, CheckCircle, Terminal, 
-  HelpCircle, ArrowRight, Sliders, Layers, FileText, Bot, Key, ExternalLink, 
-  Flame, Skull, Zap, Shield, Crown, Swords, Coins, Heart, MessageSquare
+  HelpCircle, ArrowRight, Sliders, Layers, FileText, Bot, Crown, Rocket,
+  Flame, Skull, Zap, Shield, Swords, Coins, Heart, MessageSquare, Lock, Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const INSPIRATION_TAGS = [
@@ -21,11 +21,12 @@ const INSPIRATION_TAGS = [
 
 const AiConfigPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedGame, setSelectedGame] = useState('Minecraft');
-  const [format, setFormat] = useState('YAML'); // 'YAML' | 'JSON' | 'Lua' | 'TOML'
+  const [format, setFormat] = useState('YAML');
   const [prompt, setPrompt] = useState('');
   
-  // STARTS BLANK AS REQUESTED!
+  // Starts 100% blank
   const [output, setOutput] = useState('');
   
   const [loading, setLoading] = useState(false);
@@ -33,33 +34,56 @@ const AiConfigPage = () => {
   const [generationSource, setGenerationSource] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Daily Free Quota vs Paid Ultimate
+  const [remainingGenerations, setRemainingGenerations] = useState(() => {
+    try {
+      const saved = localStorage.getItem('minoforge_config_quota_today');
+      if (saved !== null) return parseInt(saved);
+      return 2; // 2 free trial generations per day for free users
+    } catch {
+      return 2;
+    }
+  });
+
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
+  const isUltimate = user?.role === 'ADMIN' || user?.isUltimate || false;
+
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+
+    // If free user has exhausted daily quota, show paywall modal
+    if (!isUltimate && remainingGenerations <= 0) {
+      setShowPaywallModal(true);
+      return;
+    }
 
     setLoading(true);
     setErrorMsg('');
     setGenerationSource('');
 
-    const savedApiKey = localStorage.getItem('minoforge_gemini_api_key');
-
     try {
-      // Send to server AI generator (which uses Gemini Pro or domain-specific smart rules)
+      // Backend automatically uses your Gemini API key
       const res = await axios.post('/api/ai/generate-config', {
         prompt: prompt.trim(),
         game: selectedGame,
-        format: format.toLowerCase(),
-        apiKey: savedApiKey || undefined
+        format: format.toLowerCase()
       });
 
       if (res.data && res.data.config) {
         setOutput(res.data.config);
-        setGenerationSource(res.data.source || 'AI Config Engine');
+        setGenerationSource('Gemini Pro Engine');
+
+        // Deduct trial quota for free users
+        if (!isUltimate) {
+          const updated = Math.max(0, remainingGenerations - 1);
+          setRemainingGenerations(updated);
+          localStorage.setItem('minoforge_config_quota_today', updated.toString());
+        }
       } else {
         throw new Error('No configuration generated');
       }
     } catch (err) {
-      console.warn('AI generation error, generating local contextual fallback:', err);
-      // Client-side fallback
+      console.warn('Config generation error:', err);
       setErrorMsg('Failed to generate configuration. Please try again.');
     } finally {
       setLoading(false);
@@ -102,20 +126,32 @@ const AiConfigPage = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Plugin Config Generator</h1>
-                <p className="text-xs text-slate-400">Generates unique, smart, production-ready configurations tailored to any plugin idea.</p>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Config Generator</h1>
+                <p className="text-xs text-slate-400">Generates unique, production-ready configurations tailored to any plugin idea.</p>
               </div>
             </div>
           </div>
 
           <div className="relative z-10 flex items-center gap-3">
-            <Link
-              to="/settings?tab=integrations"
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-white/10 flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Key className="w-3.5 h-3.5 text-amber-400" />
-              <span>Connect Gemini Pro Key</span>
-            </Link>
+            {isUltimate ? (
+              <span className="px-3.5 py-1.5 bg-amber-500/20 text-amber-300 text-xs font-black rounded-xl border border-amber-500/30 flex items-center gap-1.5">
+                <Crown className="w-4 h-4 text-amber-400" />
+                <span>Unlimited Ultimate Generations</span>
+              </span>
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-white/10">
+                  Free Quota: <strong className="text-cyan-300">{remainingGenerations} / 2</strong> left today
+                </span>
+                <Link
+                  to="/upgrade"
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:brightness-110 text-slate-950 text-xs font-black rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Get Unlimited ($19.99/mo)</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -223,7 +259,7 @@ const AiConfigPage = () => {
                 {loading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>AI is Architecting Config...</span>
+                    <span>Generating Custom Config...</span>
                   </>
                 ) : (
                   <>
@@ -303,6 +339,67 @@ const AiConfigPage = () => {
           </div>
 
         </div>
+
+        {/* PAYWALL UPGRADE MODAL */}
+        {showPaywallModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-8 shadow-2xl relative text-white space-y-6 text-center">
+              <button 
+                onClick={() => setShowPaywallModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-2"
+              >
+                ✕
+              </button>
+
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 mx-auto shadow-xl shadow-amber-500/20">
+                <div className="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-amber-400">
+                  <Crown className="w-8 h-8 animate-bounce" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-2xl font-black text-white">Daily Quota Reached</h3>
+                <p className="text-xs text-slate-300">
+                  You have used all <strong>2 free trial generations</strong> for today.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/10 text-left text-xs space-y-2.5">
+                <span className="font-black uppercase tracking-wider text-amber-400 block">
+                  Unlock MinoForge Ultimate:
+                </span>
+                <div className="flex items-center gap-2 text-slate-200">
+                  <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span><strong>Unlimited</strong> Config Generations with zero daily limits</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-200">
+                  <Star className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span><strong>0% Sales Commission</strong> (Keep 100% of plugin sales)</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-200">
+                  <Rocket className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span><strong>$5.00 Free Monthly</strong> Sponsored Ad Credits</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <Link
+                  to="/upgrade"
+                  className="w-full py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all block"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Upgrade to Ultimate — $19.99/mo</span>
+                </Link>
+                <button
+                  onClick={() => setShowPaywallModal(false)}
+                  className="text-xs text-slate-400 hover:text-white font-medium block mx-auto pt-1 cursor-pointer"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

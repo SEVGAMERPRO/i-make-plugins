@@ -20,13 +20,6 @@ const Security2FAPage = () => {
   const [copiedSecret, setCopiedSecret] = useState(false);
   const [copiedBackup, setCopiedBackup] = useState(false);
 
-  // Gemini API Key State
-  const [geminiApiKey, setGeminiApiKey] = useState(() => {
-    return localStorage.getItem('minoforge_gemini_api_key') || '';
-  });
-  const [geminiStatus, setGeminiStatus] = useState(geminiApiKey ? 'CONNECTED' : 'NOT_CONFIGURED');
-  const [geminiSuccess, setGeminiSuccess] = useState('');
-
   const email = user?.email || 'user@example.com';
   const username = user?.username || 'MinoUser';
 
@@ -149,19 +142,6 @@ MinoForge Security Engine • https://colasmp.net
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-  };
-
-  const handleSaveGeminiKey = () => {
-    if (!geminiApiKey.trim()) {
-      localStorage.removeItem('minoforge_gemini_api_key');
-      setGeminiStatus('NOT_CONFIGURED');
-      setGeminiSuccess('Gemini API key removed.');
-    } else {
-      localStorage.setItem('minoforge_gemini_api_key', geminiApiKey.trim());
-      setGeminiStatus('CONNECTED');
-      setGeminiSuccess('Gemini Pro API Key saved! AI tools unlocked with unlimited quota.');
-    }
-    setTimeout(() => setGeminiSuccess(''), 4000);
   };
 
   return (
@@ -438,62 +418,16 @@ MinoForge Security Engine • https://colasmp.net
           )}
         </div>
 
-        {/* Section 2: Google Pro & Gemini API Integration Suite */}
+        {/* Section 2: Google Workspace & Cloud Infrastructure Details */}
         <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6">
           <div>
-            <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-400" />
-              <span>Google Pro Benefits &amp; Gemini 2.0 Pro Integration</span>
-            </h2>
+            <h3 className="text-lg font-black text-white flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-blue-400" />
+              <span>Platform Cloud Infrastructure &amp; Security</span>
+            </h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Connect your Google AI Studio Gemini API Key to unlock unlimited high-speed AI config generation and automated MinoShield bytecode security decompilation.
+              MinoForge runs on high-performance cloud infrastructure with DKIM verified emails and edge CDN downloads.
             </p>
-          </div>
-
-          {geminiSuccess && (
-            <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>{geminiSuccess}</span>
-            </div>
-          )}
-
-          {/* Gemini API Key Input Card */}
-          <div className="p-6 rounded-2xl bg-slate-950 border border-white/10 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <label className="text-xs font-bold text-slate-300 block">
-                  Google Gemini API Key (Google AI Studio)
-                </label>
-                <span className="text-[11px] text-slate-400">
-                  Get your free high-quota key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline font-bold inline-flex items-center gap-1">Google AI Studio <ExternalLink className="w-3 h-3" /></a>
-                </span>
-              </div>
-
-              <span className={`px-3 py-1 text-xs font-bold rounded-xl flex items-center gap-1.5 flex-shrink-0 ${
-                geminiStatus === 'CONNECTED' 
-                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' 
-                  : 'bg-slate-800 text-slate-400 border border-white/10'
-              }`}>
-                {geminiStatus === 'CONNECTED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Key className="w-3.5 h-3.5" />}
-                <span>{geminiStatus === 'CONNECTED' ? 'Gemini Pro Connected' : 'No Key Set'}</span>
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="password"
-                placeholder="AIzaSy..."
-                value={geminiApiKey}
-                onChange={(e) => setGeminiApiKey(e.target.value)}
-                className="flex-1 bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-cyan-300 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleSaveGeminiKey}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-all flex-shrink-0"
-              >
-                Save &amp; Connect Key
-              </button>
-            </div>
           </div>
 
           {/* Google Workspace & Cloud Infrastructure Setup Guide */}

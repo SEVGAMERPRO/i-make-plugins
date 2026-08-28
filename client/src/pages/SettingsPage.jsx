@@ -43,12 +43,6 @@ const SettingsPage = () => {
   const [profileSuccess, setProfileSuccess] = useState('');
 
   // ================= INTEGRATIONS STATE =================
-  const [geminiApiKey, setGeminiApiKey] = useState(() => {
-    return localStorage.getItem('minoforge_gemini_api_key') || '';
-  });
-  const [geminiStatus, setGeminiStatus] = useState(geminiApiKey ? 'CONNECTED' : 'NOT_CONFIGURED');
-  const [geminiSuccess, setGeminiSuccess] = useState('');
-
   const [discordLinked, setDiscordLinked] = useState(() => {
     try {
       return !!localStorage.getItem('minoforge_discord_link');
@@ -177,19 +171,6 @@ MinoForge Security Engine • https://colasmp.net
     e.preventDefault();
     setProfileSuccess('Profile settings saved successfully!');
     setTimeout(() => setProfileSuccess(''), 3000);
-  };
-
-  const handleSaveGeminiKey = () => {
-    if (!geminiApiKey.trim()) {
-      localStorage.removeItem('minoforge_gemini_api_key');
-      setGeminiStatus('NOT_CONFIGURED');
-      setGeminiSuccess('Gemini API key removed.');
-    } else {
-      localStorage.setItem('minoforge_gemini_api_key', geminiApiKey.trim());
-      setGeminiStatus('CONNECTED');
-      setGeminiSuccess('Gemini Pro API Key saved! AI tools unlocked with unlimited quota.');
-    }
-    setTimeout(() => setGeminiSuccess(''), 4000);
   };
 
   const handleTabChange = (tabId) => {
@@ -573,70 +554,24 @@ MinoForge Security Engine • https://colasmp.net
           </form>
         )}
 
-        {/* TAB 3: INTEGRATIONS & GOOGLE PRO */}
+        {/* TAB 3: DISCORD & INTEGRATIONS */}
         {activeTab === 'integrations' && (
           <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6 animate-fade-in">
             <div>
               <h2 className="text-lg font-black text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <span>Google Pro &amp; API Integrations</span>
+                <Bot className="w-5 h-5 text-[#5865F2]" />
+                <span>Discord &amp; Platform Integrations</span>
               </h2>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Connect your Google AI Studio Gemini Pro API Key and Discord account to unlock automated workflows.
+                Connect your Discord account to sync buyer roles, automate ticket channels, and receive purchase alerts.
               </p>
-            </div>
-
-            {geminiSuccess && (
-              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{geminiSuccess}</span>
-              </div>
-            )}
-
-            {/* Gemini API Key Box */}
-            <div className="p-6 rounded-2xl bg-slate-950 border border-white/10 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block">
-                    Google Gemini API Key (Google AI Studio)
-                  </label>
-                  <span className="text-[11px] text-slate-400">
-                    Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline font-bold inline-flex items-center gap-1">Google AI Studio <ExternalLink className="w-3 h-3" /></a>
-                  </span>
-                </div>
-
-                <span className={`px-3 py-1 text-xs font-bold rounded-xl flex items-center gap-1.5 flex-shrink-0 ${
-                  geminiStatus === 'CONNECTED' 
-                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' 
-                    : 'bg-slate-800 text-slate-400 border border-white/10'
-                }`}>
-                  {geminiStatus === 'CONNECTED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Key className="w-3.5 h-3.5" />}
-                  <span>{geminiStatus === 'CONNECTED' ? 'Gemini Pro Connected' : 'No Key Set'}</span>
-                </span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="password"
-                  placeholder="AIzaSy..."
-                  value={geminiApiKey}
-                  onChange={(e) => setGeminiApiKey(e.target.value)}
-                  className="flex-1 bg-slate-900 border border-white/10 rounded-xl p-3 text-xs text-cyan-300 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={handleSaveGeminiKey}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-all flex-shrink-0"
-                >
-                  Save &amp; Connect Key
-                </button>
-              </div>
             </div>
 
             {/* Discord Connection Snapshot */}
             <div className="p-6 rounded-2xl bg-slate-950 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center text-[#5865F2]">
-                  <Bot className="w-5 h-5" />
+                <div className="w-12 h-12 rounded-2xl bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center text-[#5865F2]">
+                  <Bot className="w-6 h-6" />
                 </div>
                 <div>
                   <strong className="text-sm font-bold text-white block">Discord Role Sync &amp; Webhooks</strong>

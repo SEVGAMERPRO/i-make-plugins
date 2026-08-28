@@ -68,7 +68,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <Briefcase className="w-4 h-4 text-amber-400" /> Bounties & Requests
             </Link>
             <Link to="/ai-config" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/ai-config')}`}>
-              <Sparkles className="w-4 h-4 text-cyan-400" /> AI Config Tool
+              <Sparkles className="w-4 h-4 text-cyan-400" /> Config Generator
             </Link>
 
             <div className="pt-5 pb-2 px-3">

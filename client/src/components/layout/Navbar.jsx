@@ -129,7 +129,7 @@ const Navbar = ({ onMenuClick }) => {
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-colors ${isActive('/ai-config') ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>AI Config</span>
+              <span>Config Generator</span>
             </Link>
             <Link
               to="/dashboard"
@@ -363,12 +363,12 @@ const Navbar = ({ onMenuClick }) => {
                         </Link>
 
                         <Link 
-                          to="/settings?tab=integrations" 
+                          to="/ai-config" 
                           className="flex items-center gap-2 px-2.5 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-xl transition-colors font-medium"
                           onClick={() => setDropdownOpen(false)}
                         >
-                          <Key className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                          <span className="truncate">Google Pro AI</span>
+                          <Sparkles className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                          <span className="truncate">Config Generator</span>
                         </Link>
 
                         <Link 
