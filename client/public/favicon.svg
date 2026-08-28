@@ -1,80 +1,202 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Background Obsidian Gradient -->
+    <!-- Background Obsidian Metal Gradient -->
     <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="50%" stop-color="#090d16" />
-      <stop offset="100%" stop-color="#020617" />
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="50%" stop-color="#060911" />
+      <stop offset="100%" stop-color="#020408" />
     </linearGradient>
 
-    <!-- Electric Cyan & Neon Blue Cyber Gradient -->
-    <linearGradient id="cyberBlue" x1="60" y1="100" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+    <!-- Forge Lava Heat Gradient -->
+    <linearGradient id="lavaForge" x1="180" y1="200" x2="380" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff3b00" />
+      <stop offset="35%" stop-color="#ff8c00" />
+      <stop offset="70%" stop-color="#ffd000" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+
+    <!-- Cyan Plasma Arc Gradient -->
+    <linearGradient id="plasmaCyan" x1="100" y1="100" x2="420" y2="420" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#00f2fe" />
-      <stop offset="45%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#0284c7" />
       <stop offset="100%" stop-color="#2563eb" />
     </linearGradient>
 
-    <!-- Vivid Golden Yellow Myna Beak & Eye Gradient -->
-    <linearGradient id="mynaGold" x1="200" y1="160" x2="380" y2="340" gradientUnits="userSpaceOnUse">
+    <!-- Anvil Heavy Steel Gradient -->
+    <linearGradient id="anvilSteel" x1="160" y1="320" x2="360" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="30%" stop-color="#1e293b" />
+      <stop offset="70%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Myna Bird Beak & Eye Patch Gold -->
+    <linearGradient id="mynaGold" x1="260" y1="120" x2="360" y2="220" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#fef08a" />
-      <stop offset="30%" stop-color="#facc15" />
-      <stop offset="80%" stop-color="#eab308" />
+      <stop offset="40%" stop-color="#facc15" />
       <stop offset="100%" stop-color="#ca8a04" />
     </linearGradient>
 
-    <!-- Deep Feather Charcoal Gradient -->
-    <linearGradient id="featherDark" x1="150" y1="80" x2="360" y2="450" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#334155" />
-      <stop offset="40%" stop-color="#1e293b" />
-      <stop offset="100%" stop-color="#0f172a" />
+    <!-- Myna Dark Feather Gradient -->
+    <linearGradient id="mynaFeathers" x1="140" y1="90" x2="280" y2="280" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#27272a" />
+      <stop offset="50%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
     </linearGradient>
 
-    <!-- Ambient Cyber Glow -->
-    <filter id="cyanGlow" x="0" y="0" width="512" height="512" filterUnits="userSpaceOnUse">
-      <feGaussianBlur stdDeviation="24" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <!-- Forge Glow Filter -->
+    <filter id="forgeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur1" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
+
+    <style>
+      @keyframes forgePulse {
+        0%, 100% {
+          filter: drop-shadow(0 0 12px rgba(255, 140, 0, 0.8)) drop-shadow(0 0 24px rgba(0, 242, 254, 0.6));
+          opacity: 0.95;
+        }
+        50% {
+          filter: drop-shadow(0 0 25px rgba(255, 60, 0, 1)) drop-shadow(0 0 45px rgba(255, 215, 0, 0.9));
+          opacity: 1;
+        }
+      }
+
+      @keyframes hammerStrike {
+        0%, 85%, 100% {
+          transform: rotate(0deg) translate(0, 0);
+        }
+        90% {
+          transform: rotate(-25deg) translate(-20px, -30px);
+        }
+        95% {
+          transform: rotate(15deg) translate(10px, 15px);
+        }
+      }
+
+      @keyframes sparkBurst {
+        0%, 90% {
+          opacity: 0;
+          transform: scale(0.2) translate(0, 0);
+        }
+        93% {
+          opacity: 1;
+          transform: scale(1.4) translate(-15px, -25px);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(2) translate(25px, -50px);
+        }
+      }
+
+      .animated-sword {
+        animation: forgePulse 2.4s ease-in-out infinite;
+        transform-origin: center;
+      }
+
+      .animated-sparks {
+        animation: sparkBurst 2.4s ease-in-out infinite;
+        transform-origin: 256px 330px;
+      }
+
+      .animated-hammer {
+        animation: hammerStrike 2.4s ease-in-out infinite;
+        transform-origin: 370px 220px;
+      }
+    </style>
   </defs>
 
-  <!-- Squircle Rounded Hexagon Container with Cyber Border -->
+  <!-- Base Rounded Container with Cyber Cyber Border -->
   <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
-  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#cyberBlue)" stroke-width="8" stroke-opacity="0.6" />
+  <rect x="8" y="8" width="496" height="496" rx="120" stroke="url(#plasmaCyan)" stroke-width="6" stroke-opacity="0.5" />
 
-  <!-- Ambient Center Glow -->
-  <circle cx="256" cy="240" r="140" fill="#00f2fe" opacity="0.15" filter="url(#cyanGlow)" />
+  <!-- Ambient Blue/Orange Core Flare -->
+  <circle cx="256" cy="260" r="160" fill="#ff6a00" opacity="0.08" filter="url(#forgeGlow)" />
+  <circle cx="256" cy="330" r="120" fill="#00f2fe" opacity="0.12" filter="url(#forgeGlow)" />
 
-  <!-- ================= MINOFORGE MYNA BIRD CREST ================= -->
+  <!-- ================= 1. MINO THE MYNA BIRD (Watching over the forge) ================= -->
+  <g transform="translate(10, -10)">
+    <!-- Bird Body & Crown -->
+    <path d="M150 160 C 135 115, 170 65, 230 65 C 285 65, 310 115, 290 185 C 265 240, 185 245, 150 160 Z" fill="url(#mynaFeathers)" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.4" />
+    
+    <!-- Crest Feathers atop head -->
+    <path d="M225 45 L 240 70 L 220 68 Z" fill="#38bdf8" />
+    <path d="M245 40 L 255 72 L 235 68 Z" fill="#00f2fe" />
+    <path d="M260 48 L 268 75 L 250 72 Z" fill="#0284c7" />
 
-  <!-- Left Dynamic Cyber Wing (Forming Left of 'M') -->
-  <path d="M80 380 C 70 270, 110 160, 195 110 L 225 210 L 145 400 Z" fill="url(#cyberBlue)" />
-  <path d="M120 370 C 130 260, 165 170, 220 140 L 235 220 L 175 385 Z" fill="#38bdf8" opacity="0.85" />
+    <!-- White Wing Primary Streak (Authentic Myna Trait) -->
+    <path d="M165 160 Q 185 190 230 210 L 210 215 Q 170 190 155 165 Z" fill="#ffffff" opacity="0.9" />
 
-  <!-- Right Dynamic Cyber Wing (Forming Right of 'M') -->
-  <path d="M432 380 C 442 270, 402 160, 317 110 L 287 210 L 367 400 Z" fill="url(#cyberBlue)" />
-  <path d="M392 370 C 382 260, 347 170, 292 140 L 277 220 L 337 385 Z" fill="#38bdf8" opacity="0.85" />
+    <!-- Signature Golden Yellow Eye Patch Behind Eye -->
+    <path d="M250 105 C 275 95, 295 110, 290 128 C 285 140, 260 142, 245 130 Z" fill="url(#mynaGold)" />
 
-  <!-- Main Myna Head & Crown Body -->
-  <path d="M165 390 C 150 280, 190 140, 256 95 C 322 140, 362 280, 347 390 C 310 430, 202 430, 165 390 Z" fill="url(#featherDark)" stroke="#00f2fe" stroke-width="4" stroke-opacity="0.6" />
+    <!-- Sharp Eye with white catchlight -->
+    <circle cx="260" cy="116" r="9" fill="#09090b" stroke="#facc15" stroke-width="2" />
+    <circle cx="258" cy="113" r="3" fill="#ffffff" />
 
-  <!-- Sharp Spiky Head Crest Feathers (Myna Identity) -->
-  <path d="M256 60 L 272 105 L 256 90 L 240 105 Z" fill="#00f2fe" />
-  <path d="M232 75 L 248 112 L 228 102 Z" fill="#38bdf8" />
-  <path d="M280 75 L 284 102 L 264 112 Z" fill="#38bdf8" />
+    <!-- Sharp Golden Beak -->
+    <polygon points="275,108 340,126 275,138" fill="url(#mynaGold)" />
+    <line x1="275" y1="124" x2="335" y2="126" stroke="#92400e" stroke-width="2" />
+  </g>
 
-  <!-- Signature Myna Golden Eye Patch (Behind Eye) -->
-  <path d="M210 195 C 205 160, 307 160, 302 195 C 298 230, 215 230, 210 195 Z" fill="url(#mynaGold)" />
+  <!-- ================= 2. THE BLACKSMITH ANVIL ================= -->
+  <g id="Anvil">
+    <!-- Base Foundation Feet -->
+    <path d="M120 440 L 392 440 L 360 390 L 152 390 Z" fill="url(#anvilSteel)" stroke="#00f2fe" stroke-width="2" stroke-opacity="0.3" />
+    
+    <!-- Anvil Waist / Stem -->
+    <path d="M180 390 L 332 390 L 310 330 L 202 330 Z" fill="url(#anvilSteel)" />
 
-  <!-- Myna Piercing Glowing Eye -->
-  <circle cx="236" cy="195" r="14" fill="#0f172a" stroke="#ffffff" stroke-width="2" />
-  <circle cx="233" cy="192" r="5" fill="#ffffff" />
+    <!-- Main Anvil Body & Horn -->
+    <!-- Left Horn pointing left, flat work table in center, right step heel -->
+    <path d="M90 310 Q 140 315 170 330 L 342 330 Q 380 330 422 300 L 422 280 L 170 280 Q 110 280 90 310 Z" fill="url(#anvilSteel)" stroke="#38bdf8" stroke-width="3" />
+    
+    <!-- Glowing Anvil Top Work Surface -->
+    <rect x="170" y="276" width="180" height="8" rx="3" fill="#00f2fe" opacity="0.8" />
+  </g>
 
-  <!-- Sharp Golden Myna Beak -->
-  <polygon points="256,190 350,225 256,255" fill="url(#mynaGold)" />
-  <polygon points="256,220 350,225 256,227" fill="#ca8a04" />
+  <!-- ================= 3. THE RED-HOT FORGED SWORD ON ANVIL ================= -->
+  <g class="animated-sword" id="ForgedSword">
+    <!-- Diagonal Sword Blade Resting Across Anvil -->
+    <g transform="rotate(-30 256 310)">
+      <!-- Sword Pommel & Grip -->
+      <circle cx="90" cy="310" r="14" fill="#00f2fe" stroke="#ffffff" stroke-width="2" />
+      <rect x="104" y="304" width="46" height="12" rx="4" fill="#0f172a" stroke="#00f2fe" stroke-width="2" />
+      
+      <!-- Futuristic Crossguard with Power Core -->
+      <path d="M150 270 L 170 270 L 170 350 L 150 350 Z" fill="url(#plasmaCyan)" stroke="#ffffff" stroke-width="2" />
+      <circle cx="160" cy="310" r="6" fill="#ffffff" />
 
-  <!-- Lower Futuristic Throat Shield / Chest Plate (MinoForge Armor) -->
-  <path d="M215 285 L 256 345 L 297 285 L 256 265 Z" fill="url(#cyberBlue)" stroke="#ffffff" stroke-width="2" stroke-opacity="0.7" />
+      <!-- Glowing Heated Blade (Gradient from Molten Orange to Fiery Cyan Tip) -->
+      <path d="M170 296 L 390 296 L 440 310 L 390 324 L 170 324 Z" fill="url(#lavaForge)" stroke="#ffffff" stroke-width="3" filter="url(#forgeGlow)" />
+      
+      <!-- Center Fuller / Plasma Runeline -->
+      <line x1="175" y1="310" x2="385" y2="310" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+    </g>
+  </g>
 
-  <!-- Forge Core Sparkle -->
-  <circle cx="256" cy="305" r="5" fill="#ffffff" />
+  <!-- ================= 4. BLACKSMITH HAMMER IN MOTION ================= -->
+  <g class="animated-hammer" id="Hammer">
+    <!-- Hammer Handle -->
+    <rect x="360" y="110" width="12" height="130" rx="4" fill="#78350f" stroke="#d97706" stroke-width="2" transform="rotate(35 360 110)" />
+    <!-- Heavy Steel Hammer Head -->
+    <path d="M390 210 L 450 170 L 430 140 L 370 180 Z" fill="url(#anvilSteel)" stroke="#00f2fe" stroke-width="3" />
+    <rect x="425" y="150" width="10" height="25" fill="#00f2fe" opacity="0.8" transform="rotate(35 425 150)" />
+  </g>
+
+  <!-- ================= 5. FLYING FORGE SPARKS & IMPACT BURSTS ================= -->
+  <g class="animated-sparks" id="Sparks">
+    <circle cx="230" cy="270" r="6" fill="#ffffff" filter="url(#forgeGlow)" />
+    <circle cx="210" cy="240" r="4" fill="#ffd000" />
+    <circle cx="260" cy="230" r="5" fill="#ff3b00" />
+    <circle cx="290" cy="250" r="4" fill="#00f2fe" filter="url(#forgeGlow)" />
+    <circle cx="180" cy="290" r="3" fill="#ffffff" />
+    <circle cx="310" cy="280" r="4" fill="#ffd000" />
+    <polygon points="250,270 258,250 252,275 270,265 254,280" fill="#ffffff" />
+  </g>
 </svg>

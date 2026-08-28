@@ -24,8 +24,8 @@ const transporter = createTransporter();
 
 // Sender Identity
 const getFromAddress = () => {
-  const name = process.env.EMAIL_FROM_NAME || 'MinoForge Security & Marketplace';
-  const email = process.env.EMAIL_USER || 'severinkaptein8@gmail.com';
+  const name = process.env.EMAIL_FROM_NAME || 'MinoForge Official';
+  const email = process.env.EMAIL_FROM_ADDRESS || 'noreply@minoforge.com';
   return `"${name}" <${email}>`;
 };
 
