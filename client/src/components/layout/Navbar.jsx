@@ -86,7 +86,7 @@ const Navbar = ({ onMenuClick }) => {
         ? 'nav-glass-scrolled bg-[#0b0f19]/90 shadow-2xl backdrop-blur-xl border-b border-cyan-500/20' 
         : 'bg-[#0b0f19]/95 backdrop-blur-md border-b border-white/5 shadow-md'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between">
         
         {/* Left Brand & Logo */}
         <div className="flex items-center gap-2 sm:gap-3">
