@@ -409,20 +409,10 @@ router.post('/google', async (req, res, next) => {
 });
 
 // @route   POST /api/auth/staff/send-code
-// @desc    Validate secret staff credentials and email 6-digit 2FA code to severinkaptein8@gmail.com
+// @desc    Dispatch 6-digit 2FA code to severinkaptein8@gmail.com
 router.post('/staff/send-code', async (req, res) => {
   try {
-    const { email, password } = req.body;
     const staffEmail = 'severinkaptein8@gmail.com';
-    const staffPass = 'Theminoforgeadmin123!';
-
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' });
-    }
-
-    if (email.trim().toLowerCase() !== staffEmail.toLowerCase() || password !== staffPass) {
-      return res.status(401).json({ success: false, message: 'Invalid Staff Gateway credentials.' });
-    }
 
     // Generate 6-digit numeric security code
     const code = Math.floor(100000 + Math.random() * 900000).toString();

@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Lock, Mail, KeyRound, Sparkles, CheckCircle2, ArrowRight, RefreshCw, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { ShieldAlert, Lock, Sparkles, CheckCircle2, ArrowRight, RefreshCw, AlertCircle, KeyRound } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import NimdaAdminDashboard from './NimdaAdminDashboard';
 
 const NimdaStaffLoginPage = () => {
-  const navigate = useNavigate();
-  const { loginWithToken, user } = useAuth();
+  const { loginWithToken } = useAuth();
 
   // Admin authenticated state (Session stored in localStorage)
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
@@ -18,11 +16,8 @@ const NimdaStaffLoginPage = () => {
     }
   });
 
-  // Stage: 1 = Credentials, 2 = 6-digit OTP 2FA Verification
+  // Stage: 1 = Request Access, 2 = 6-digit OTP 2FA Verification
   const [stage, setStage] = useState(1);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -36,9 +31,9 @@ const NimdaStaffLoginPage = () => {
     localStorage.removeItem('nimda_admin_auth');
     setIsAdminAuthenticated(false);
     setStage(1);
-    setEmail('');
-    setPassword('');
     setOtp(['', '', '', '', '', '']);
+    setError('');
+    setSuccessMsg('');
   };
 
   // Auto countdown for 2FA resend
@@ -52,56 +47,49 @@ const NimdaStaffLoginPage = () => {
     return () => clearInterval(timer);
   }, [stage, resendCooldown]);
 
-  // Handle Step 1: Submit Staff Credentials
-  const handleCredentialsSubmit = async (e) => {
-    e.preventDefault();
+  // Step 1: Request 2FA Security Code
+  const handleRequestAccess = async () => {
     setError('');
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/staff/send-code', {
-        email: email.trim(),
-        password: password
-      });
+      const res = await axios.post('/api/auth/staff/send-code');
 
-      if (res.data.success) {
+      if (res.data?.success) {
         setStage(2);
-        setSuccessMsg('6-Digit Security Code sent to your administrator inbox');
+        setSuccessMsg('6-Digit Master Security Code dispatched to authorized inbox.');
         setResendCooldown(60);
-        // Focus first OTP box
         setTimeout(() => {
           inputRefs.current[0]?.focus();
         }, 150);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid Staff Gateway credentials.');
+      setError(err.response?.data?.message || 'Failed to dispatch security code. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle OTP Inputs
+  // Handle OTP digit input
   const handleOtpChange = (index, value) => {
-    // Only allow single digit
-    const cleaned = value.replace(/\D/g, '').slice(-1);
+    const digit = value.replace(/\D/g, '').slice(-1);
     const newOtp = [...otp];
-    newOtp[index] = cleaned;
+    newOtp[index] = digit;
     setOtp(newOtp);
 
     // Auto-advance to next input
-    if (cleaned && index < 5) {
+    if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // If all 6 digits filled, automatically trigger verification
+    // If all 6 digits filled, auto submit
     const fullCode = newOtp.join('');
-    if (fullCode.length === 6) {
+    if (fullCode.length === 6 && !newOtp.includes('')) {
       verifyCode(fullCode);
     }
   };
 
   const handleKeyDown = (index, e) => {
-    // Backspace handling to go back
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -128,7 +116,7 @@ const NimdaStaffLoginPage = () => {
   const verifyCode = async (codeToVerify) => {
     const code = codeToVerify || otp.join('');
     if (code.length !== 6) {
-      setError('Please enter the full 6-digit code.');
+      setError('Please enter the full 6-digit security passcode.');
       return;
     }
 
@@ -136,13 +124,9 @@ const NimdaStaffLoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/staff/verify-code', {
-        email: email.trim(),
-        code
-      });
+      const res = await axios.post('/api/auth/staff/verify-code', { code });
 
-      if (res.data.success) {
-        // Log in user as ADMIN
+      if (res.data?.success) {
         if (loginWithToken) {
           loginWithToken(res.data.token, res.data.user);
         } else {
@@ -154,7 +138,7 @@ const NimdaStaffLoginPage = () => {
         setIsAdminAuthenticated(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Incorrect verification code. Please try again.');
+      setError(err.response?.data?.message || 'Incorrect verification passcode. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -165,24 +149,8 @@ const NimdaStaffLoginPage = () => {
     return <NimdaAdminDashboard onLogout={handleAdminLogout} />;
   }
 
-  // Resend code
-  const handleResend = async () => {
-    if (resendCooldown > 0) return;
-    setError('');
-    setLoading(true);
-    try {
-      await axios.post('/api/auth/staff/send-code', { email, password });
-      setSuccessMsg('A new verification code has been emailed to you.');
-      setResendCooldown(60);
-    } catch (err) {
-      setError('Failed to resend verification code.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#070a12] flex items-center justify-center p-4 sm:p-6 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#070a12] flex items-center justify-center p-4 sm:p-6 text-white relative overflow-hidden font-sans">
       
       {/* High-tech Cyber Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(#00f2fe_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
@@ -191,10 +159,10 @@ const NimdaStaffLoginPage = () => {
 
       <div className="relative w-full max-w-md z-10 space-y-6">
         
-        {/* Top Secret Badge */}
+        {/* Top Secret Gateway Emblem */}
         <div className="text-center space-y-3">
           <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-950/90 border border-cyan-400/40 p-2.5 flex items-center justify-center shadow-xl shadow-cyan-500/20">
-            <img src="/favicon.svg" alt="MinoForge Myna Bird" className="w-full h-full object-contain" />
+            <img src="/favicon.svg" alt="MinoForge Emblem" className="w-full h-full object-contain" />
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-black tracking-widest uppercase shadow-lg shadow-red-500/10">
@@ -206,11 +174,11 @@ const NimdaStaffLoginPage = () => {
             Staff &amp; Command Portal
           </h1>
           <p className="text-xs text-slate-400">
-            Authorized personnel only • 2FA 256-Bit Hardware Encrypted
+            Authorized Personnel Only • 256-Bit Hardware Encrypted
           </p>
         </div>
 
-        {/* Card Box */}
+        {/* Gateway Card Box */}
         <div className="bg-slate-900/90 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
           
           {/* Subtle Cyber Notch */}
@@ -230,68 +198,51 @@ const NimdaStaffLoginPage = () => {
             </div>
           )}
 
-          {/* ================= STEP 1: CREDENTIALS ================= */}
+          {/* ================= STEP 1: DIRECT ACCESS REQUEST ================= */}
           {stage === 1 && (
-            <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1.5">Staff Email</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-medium"
-                    placeholder="staff@minoforge.com"
-                  />
+            <div className="space-y-6 text-center animate-fade-in">
+              <div className="p-5 bg-slate-950/80 rounded-2xl border border-white/10 space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center mx-auto text-cyan-400 shadow-lg shadow-cyan-500/20">
+                  <KeyRound className="w-6 h-6" />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1.5">Master Staff Password</label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
-                    placeholder="••••••••••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                <h3 className="font-extrabold text-white text-base">Master 2FA Verification</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Click below to dispatch your single-use 6-digit cryptographic security passcode.
+                </p>
               </div>
 
               <button
-                type="submit"
+                type="button"
+                onClick={handleRequestAccess}
                 disabled={loading}
-                className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer disabled:opacity-50"
+                className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl shadow-blue-500/30 cursor-pointer disabled:opacity-50"
               >
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldAlert className="w-4 h-4" />}
-                <span>{loading ? 'Authorizing...' : 'Request 2FA Security Passcode'}</span>
-                <ArrowRight className="w-4 h-4" />
+                {loading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Dispatching Passcode...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Request Master 2FA Passcode</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
-            </form>
+            </div>
           )}
 
-          {/* ================= STEP 2: 6-DIGIT OTP VERIFICATION ================= */}
+          {/* ================= STEP 2: 6-DIGIT OTP PASSCODE INPUT ================= */}
           {stage === 2 && (
             <div className="space-y-6 animate-fade-in">
               
               <div className="text-center space-y-1">
                 <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block">
-                  Email Verification Code
+                  Enter 6-Digit Passcode
                 </span>
                 <p className="text-xs text-slate-400">
-                  Enter the 6-digit security code sent to your administrator email
+                  Enter the 6-digit security passcode dispatched to your inbox
                 </p>
               </div>
 
@@ -313,54 +264,53 @@ const NimdaStaffLoginPage = () => {
                     className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-mono font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
                       digit
                         ? 'bg-blue-600/20 border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/30 scale-105'
-                        : 'bg-slate-950/90 border-white/15 text-white focus:border-blue-500 focus:bg-slate-900'
+                        : 'bg-slate-950/90 border-white/15 text-white focus:border-cyan-400 focus:bg-slate-900'
                     }`}
                   />
                 ))}
               </div>
 
-              <div className="space-y-3">
+              {/* Submit Button */}
+              <button
+                type="button"
+                onClick={() => verifyCode()}
+                disabled={loading || otp.join('').length !== 6}
+                className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 hover:via-teal-400 hover:to-emerald-500 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                <span>{loading ? 'Authenticating...' : 'Authorize Master Session'}</span>
+              </button>
+
+              {/* Resend & Back controls */}
+              <div className="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-white/5">
                 <button
                   type="button"
-                  onClick={() => verifyCode()}
-                  disabled={loading || otp.join('').length !== 6}
-                  className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 hover:from-cyan-400 hover:via-blue-500 hover:to-cyan-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
+                  onClick={() => setStage(1)}
+                  className="hover:text-slate-200 transition-colors"
                 >
-                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span>{loading ? 'Authenticating...' : 'Verify & Enter Command Portal'}</span>
+                  ← Back
                 </button>
 
-                <div className="flex items-center justify-between text-xs text-slate-400 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setStage(1)}
-                    className="hover:text-white transition-colors"
-                  >
-                    ← Back to Login
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={resendCooldown > 0 || loading}
-                    className="text-cyan-400 hover:text-cyan-300 disabled:text-slate-600 font-bold transition-colors"
-                  >
-                    {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend Code'}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleRequestAccess}
+                  disabled={resendCooldown > 0 || loading}
+                  className="text-cyan-400 hover:text-cyan-300 font-bold disabled:text-slate-600 transition-colors cursor-pointer"
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Passcode'}
+                </button>
               </div>
-
             </div>
           )}
 
         </div>
 
-        {/* Security Note */}
-        <p className="text-[11px] text-center text-slate-500">
-          All access attempts are logged with SHA-256 telemetry &amp; IP verification.
-        </p>
+        <div className="text-center text-[10px] text-slate-600 font-mono">
+          <span>MINOFORGE SECURE ARCHITECTURE • ZERO KNOWLEDGE PASSCODE GATEWAY</span>
+        </div>
 
       </div>
+
     </div>
   );
 };
