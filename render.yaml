@@ -22,7 +22,11 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://colasmp.net
+        value: https://minoforge.com
+      - key: EMAIL_FROM_ADDRESS
+        value: noreply@minoforge.com
+      - key: EMAIL_FROM_NAME
+        value: MinoForge Official
 
   - type: web
     name: minoforge-client

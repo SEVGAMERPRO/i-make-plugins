@@ -1,0 +1,20 @@
+{
+  "name": "minoforge-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MinoForge Game Plugin Marketplace",
+  "scripts": {
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "cd server && npm start",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev"
+  },
+  "keywords": [
+    "minoforge",
+    "marketplace",
+    "plugins",
+    "game-server"
+  ],
+  "author": "MinoForge Team",
+  "license": "ISC"
+}
