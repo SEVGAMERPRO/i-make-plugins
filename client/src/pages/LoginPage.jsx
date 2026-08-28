@@ -173,29 +173,6 @@ const LoginPage = () => {
         {step === 'CREDENTIALS' && (
           <div className="space-y-6">
             
-            {/* Google Sign-In */}
-            <div className="space-y-4">
-              <div className="flex justify-center w-full overflow-hidden rounded-2xl bg-slate-950 p-1 border border-white/10 shadow-lg">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="filled_black"
-                  shape="rectangular"
-                  size="large"
-                  width="360"
-                  text="continue_with"
-                  locale="en"
-                />
-              </div>
-
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-white/10 w-full" />
-                <span className="bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 absolute">
-                  or with 9-digit email code
-                </span>
-              </div>
-            </div>
-
             {/* Email Code Request Form */}
             <form onSubmit={handleRequestCode} className="space-y-4">
               <div>
@@ -220,12 +197,36 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group"
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-xl text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <span>{loading ? 'Sending 9-Digit Code...' : 'Send 9-Digit Security Code'}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-2">
+              <div className="border-t border-white/10 w-full" />
+              <span className="bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 absolute">
+                or continue with
+              </span>
+            </div>
+
+            {/* Google Sign-In Placed Underneath (Light / Outline Theme Matching Image 2) */}
+            <div className="space-y-4">
+              <div className="flex justify-center w-full overflow-hidden rounded-xl bg-white p-0.5 shadow-lg border border-slate-200">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  theme="outline"
+                  shape="rectangular"
+                  size="large"
+                  width="360"
+                  text="continue_with"
+                  locale="en"
+                />
+              </div>
+            </div>
 
             <div className="text-center text-xs text-slate-400 pt-2">
               Don't have an account?{' '}

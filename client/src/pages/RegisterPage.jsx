@@ -94,30 +94,6 @@ const RegisterPage = () => {
           </div>
         )}
 
-        {config.registrationsEnabled !== false && (
-          <>
-            {/* Google Sign-In Option */}
-            <div className="space-y-4">
-              <div className="flex justify-center w-full overflow-hidden rounded-2xl bg-slate-950 p-1 border border-white/10 shadow-lg">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError('Google Sign-In failed')}
-                  theme="filled_black"
-                  shape="pill"
-                  size="large"
-                  text="signup_with"
-                />
-              </div>
-
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-white/10 w-full" />
-                <span className="bg-slate-900 px-3 text-xs text-slate-400 uppercase font-mono tracking-wider">or continue with email</span>
-                <div className="border-t border-white/10 w-full" />
-              </div>
-            </div>
-          </>
-        )}
-
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="username" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
@@ -210,13 +186,38 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <span>{loading ? 'Creating account...' : 'Create Account'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </form>
+
+        {config.registrationsEnabled !== false && (
+          <div className="space-y-4">
+            <div className="relative flex items-center justify-center my-2">
+              <div className="border-t border-white/10 w-full" />
+              <span className="bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500 absolute">
+                or continue with
+              </span>
+            </div>
+
+            {/* Google Sign-In Option Underneath */}
+            <div className="flex justify-center w-full overflow-hidden rounded-xl bg-white p-0.5 shadow-lg border border-slate-200">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Sign-In failed')}
+                theme="outline"
+                shape="rectangular"
+                size="large"
+                width="360"
+                text="signup_with"
+                locale="en"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="text-center pt-2 border-t border-white/5">
           <p className="text-sm text-slate-400">
