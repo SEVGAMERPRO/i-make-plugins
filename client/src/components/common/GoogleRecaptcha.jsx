@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const SITE_KEY = '6LfTkZ0tAAAAAJPVvP9UPfoLTNPPaj4_7hEXtmKx';
+const SITE_KEY = '6LdYlp0tAAAAAI3e_nXpMkNMAMGSSrZHjJ0yNRXP';
 
 const GoogleRecaptcha = ({ onVerify, onExpired, onError }) => {
   const containerRef = useRef(null);
