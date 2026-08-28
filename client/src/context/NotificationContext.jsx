@@ -6,9 +6,15 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('minoforge_notifications');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Filter out any fake automatic plugin approval notifications
+        return Array.isArray(parsed) 
+          ? parsed.filter(n => !n.title?.toLowerCase().includes('plugin approved') && !n.message?.toLowerCase().includes('verified by staff'))
+          : [];
+      }
     } catch (e) {}
-    return []; // No default fake notifications!
+    return []; // Clean empty notifications list
   });
 
   useEffect(() => {

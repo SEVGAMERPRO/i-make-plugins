@@ -41,16 +41,6 @@ const StaffReviewPage = () => {
   const [showDenyModal, setShowDenyModal] = useState(false);
 
   const handleApprove = (id) => {
-    const plugin = queue.find(p => p.id === id);
-    const pluginTitle = plugin ? plugin.title : 'Plugin';
-    
-    addNotification({
-      title: `Plugin Approved! 🎉`,
-      message: `Your plugin "${pluginTitle}" has been verified by staff and is now LIVE on the marketplace!`,
-      type: 'approved',
-      link: '/plugins'
-    });
-
     const remaining = queue.filter(p => p.id !== id);
     setQueue(remaining);
     setSelectedPlugin(remaining[0] || null);
