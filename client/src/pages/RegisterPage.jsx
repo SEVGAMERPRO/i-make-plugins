@@ -48,6 +48,11 @@ const RegisterPage = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    if (!recaptchaToken) {
+      setError('Please check the "I\'m not a robot" box before registering with Google.');
+      return;
+    }
+
     setError('');
     setLoading(true);
     try {
