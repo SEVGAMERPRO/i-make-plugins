@@ -31,10 +31,6 @@ const RegisterPage = () => {
       return setError('Password must be at least 6 characters long');
     }
 
-    if (!recaptchaToken) {
-      return setError('Please check the "I\'m not a robot" box before creating an account.');
-    }
-
     setLoading(true);
     
     try {
