@@ -16,5 +16,8 @@
     "game-server"
   ],
   "author": "MinoForge Team",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }
