@@ -3,10 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Lock, Mail, KeyRound, Sparkles, CheckCircle2, ArrowRight, RefreshCw, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import NimdaAdminDashboard from './NimdaAdminDashboard';
 
 const NimdaStaffLoginPage = () => {
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth();
+  const { loginWithToken, user } = useAuth();
+
+  // Admin authenticated state (Session stored in localStorage)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    try {
+      return localStorage.getItem('nimda_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // Stage: 1 = Credentials, 2 = 6-digit OTP 2FA Verification
   const [stage, setStage] = useState(1);
@@ -21,6 +31,14 @@ const NimdaStaffLoginPage = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [resendCooldown, setResendCooldown] = useState(60);
   const inputRefs = useRef([]);
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('nimda_admin_auth');
+    setIsAdminAuthenticated(false);
+    setStage(1);
+    setPassword('');
+    setOtp(['', '', '', '', '', '']);
+  };
 
   // Auto countdown for 2FA resend
   useEffect(() => {
@@ -131,8 +149,8 @@ const NimdaStaffLoginPage = () => {
           localStorage.setItem('user', JSON.stringify(res.data.user));
         }
 
-        // Navigate to Staff Tickets Command Center
-        navigate('/staff/tickets');
+        localStorage.setItem('nimda_admin_auth', 'true');
+        setIsAdminAuthenticated(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Incorrect verification code. Please try again.');
@@ -140,6 +158,11 @@ const NimdaStaffLoginPage = () => {
       setLoading(false);
     }
   };
+
+  // If already authenticated as Master Admin, render full Command & Control Dashboard
+  if (isAdminAuthenticated) {
+    return <NimdaAdminDashboard onLogout={handleAdminLogout} />;
+  }
 
   // Resend code
   const handleResend = async () => {

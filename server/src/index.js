@@ -8,6 +8,7 @@ const gameRoutes = require('./routes/games');
 const pluginRoutes = require('./routes/plugins');
 const userRoutes = require('./routes/users');
 const customRequestsRoutes = require('./routes/customRequests');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use('/api/games', gameRoutes);
 app.use('/api/plugins', pluginRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', customRequestsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

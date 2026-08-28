@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Copy, Check, Download, RefreshCw, Code, CheckCircle, Terminal, HelpCircle, ArrowRight, Sliders, Layers, FileText } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const PRESETS = [
   {
