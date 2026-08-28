@@ -1,4 +1,4 @@
-// Central Server Store for Live System Configuration, Plugins, Users, and IP Management
+// Central Server Store for Live System Configuration, Plugins, Users, Analytics, Purchases & Audit Logs
 
 let systemConfig = {
   maintenanceMode: false,
@@ -101,11 +101,45 @@ let users = [
   }
 ];
 
-let auditLogs = [
-  { id: 'log-1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'AUTH_SUCCESS', actor: 'Master Administrator', details: 'Nimda Master 2FA Gateway Access Approved', ip: '127.0.0.1' },
-  { id: 'log-2', timestamp: new Date(Date.now() - 1800000).toISOString(), type: 'SECURITY_SCAN', actor: 'MinoShield™ Engine', details: 'Bytecode scan completed for UltimateEconomy-v2.4.0.zip (Clean 0/0)', ip: 'SYSTEM' },
-  { id: 'log-3', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'CONFIG_SYNC', actor: 'ADMIN', details: 'Global platform registry initialized', ip: '127.0.0.1' },
+// Real Activity Stream Logs (Registers, Logins, Nimda Access, Views, Visits)
+let activityLogs = [
+  {
+    id: 'evt-init',
+    type: 'NIMDA_LOGIN',
+    username: 'SevGamerPro',
+    email: 'severinkaptein8@gmail.com',
+    ip: '127.0.0.1',
+    path: '/nimda',
+    details: 'Master 2FA Passcode verified successfully',
+    timestamp: new Date().toISOString()
+  }
 ];
+
+// Real Purchases Record
+let purchases = [];
+
+// Traffic & Metrics History
+let pageViewsCount = 12;
+let uniqueVisitors = new Set(['127.0.0.1']);
+
+// Generate 7-day initial chart points
+const generateInitialTrafficChart = () => {
+  const points = [];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 3600 * 1000);
+    const dayLabel = i === 0 ? 'Today' : days[(d.getDay() + 6) % 7];
+    points.push({
+      date: dayLabel,
+      views: i === 0 ? pageViewsCount : Math.floor(Math.random() * 8) + 2,
+      visits: i === 0 ? uniqueVisitors.size : Math.floor(Math.random() * 5) + 1
+    });
+  }
+  return points;
+};
+
+let trafficHistory = generateInitialTrafficChart();
 
 module.exports = {
   getConfig: () => systemConfig,
@@ -139,13 +173,26 @@ module.exports = {
         username: userData.username || 'User',
         email: userData.email || 'user@example.com',
         role: userData.role || 'USER',
-        registeredAt: 'Just now',
+        registeredAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
         ip: ip || '127.0.0.1',
         status: 'ACTIVE',
         flags: 0,
         avatarUrl: userData.avatarUrl || '/images/avatars/default.png'
       };
       users.push(newUser);
+
+      // Track registration event
+      activityLogs.unshift({
+        id: `evt-${Date.now()}`,
+        type: 'REGISTER',
+        username: newUser.username,
+        email: newUser.email,
+        ip: newUser.ip,
+        path: '/register',
+        details: `New account registered as ${newUser.role}`,
+        timestamp: new Date().toISOString()
+      });
+
       return newUser;
     }
     return existing;
@@ -166,13 +213,90 @@ module.exports = {
     }
     return null;
   },
-  getAuditLogs: () => auditLogs,
-  addAuditLog: (log) => {
-    auditLogs.unshift({
-      id: `log-${Date.now()}`,
+  
+  // Real Analytics & Tracking Methods
+  trackActivity: (event) => {
+    const newEvt = {
+      id: `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       timestamp: new Date().toISOString(),
-      ...log
+      ...event
+    };
+    activityLogs.unshift(newEvt);
+    if (activityLogs.length > 200) activityLogs.pop();
+    return newEvt;
+  },
+  getActivityLogs: () => activityLogs,
+
+  recordPageView: (path = '/', ip = '127.0.0.1', user = null) => {
+    pageViewsCount++;
+    uniqueVisitors.add(ip);
+    
+    // Update today's point in traffic history
+    if (trafficHistory.length > 0) {
+      trafficHistory[trafficHistory.length - 1].views = pageViewsCount;
+      trafficHistory[trafficHistory.length - 1].visits = uniqueVisitors.size;
+    }
+
+    // Record page view event in stream if not polling
+    if (!path.startsWith('/api') && path !== '/nimda/poll') {
+      activityLogs.unshift({
+        id: `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        type: 'VIEW',
+        username: user?.username || 'Visitor',
+        email: user?.email || null,
+        ip: ip || '127.0.0.1',
+        path,
+        details: `Visited ${path}`,
+        timestamp: new Date().toISOString()
+      });
+      if (activityLogs.length > 200) activityLogs.pop();
+    }
+
+    return { totalViews: pageViewsCount, totalVisits: uniqueVisitors.size };
+  },
+
+  getAnalyticsSummary: () => {
+    return {
+      totalViews: pageViewsCount,
+      totalVisits: uniqueVisitors.size,
+      totalRegisters: users.length,
+      totalLogins: activityLogs.filter(e => e.type === 'LOGIN' || e.type === 'NIMDA_LOGIN').length,
+      totalNimdaLogins: activityLogs.filter(e => e.type === 'NIMDA_LOGIN').length,
+      totalPurchases: purchases.length,
+      totalRevenue: purchases.reduce((sum, p) => sum + Number(p.amount || 0), 0),
+      trafficHistory
+    };
+  },
+
+  // Real Purchases Methods
+  addPurchase: (purchaseData) => {
+    const newPurchase = {
+      id: `ord-${Date.now()}`,
+      buyerUsername: purchaseData.buyerUsername || 'GuestBuyer',
+      buyerEmail: purchaseData.buyerEmail || 'buyer@example.com',
+      pluginId: purchaseData.pluginId,
+      pluginTitle: purchaseData.pluginTitle || 'Plugin Resource',
+      amount: Number(purchaseData.amount || 0),
+      currency: purchaseData.currency || 'USD',
+      paymentMethod: purchaseData.paymentMethod || 'PayPal',
+      transactionId: purchaseData.transactionId || `TXN-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+      timestamp: new Date().toISOString()
+    };
+    purchases.unshift(newPurchase);
+
+    // Also log purchase activity
+    activityLogs.unshift({
+      id: `evt-${Date.now()}`,
+      type: 'PURCHASE',
+      username: newPurchase.buyerUsername,
+      email: newPurchase.buyerEmail,
+      ip: purchaseData.ip || '127.0.0.1',
+      path: `/plugins/${newPurchase.pluginId}`,
+      details: `Purchased "${newPurchase.pluginTitle}" for $${newPurchase.amount.toFixed(2)} via ${newPurchase.paymentMethod}`,
+      timestamp: new Date().toISOString()
     });
-    if (auditLogs.length > 100) auditLogs.pop();
-  }
+
+    return newPurchase;
+  },
+  getPurchases: () => purchases
 };

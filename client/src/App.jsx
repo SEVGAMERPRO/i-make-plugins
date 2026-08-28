@@ -1,11 +1,29 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import Layout from './components/layout/Layout';
+import { useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { ConfigProvider } from './context/ConfigContext';
 import CartDrawer from './components/cart/CartDrawer';
 import PaymentSimulatorModal from './components/cart/PaymentSimulatorModal';
+
+function PageViewTracker() {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (location.pathname !== '/nimda') {
+      axios.post('/api/admin/track-view', {
+        path: location.pathname,
+        user: user ? { username: user.username, email: user.email } : null
+      }).catch(() => {});
+    }
+  }, [location.pathname, user]);
+
+  return null;
+}
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -39,7 +57,8 @@ function App() {
       <CurrencyProvider>
         <CartProvider>
           <Layout>
-        <Routes>
+            <PageViewTracker />
+            <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

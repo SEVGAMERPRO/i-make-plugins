@@ -325,6 +325,16 @@ router.post(
         avatarUrl: user.avatarUrl
       };
 
+      store.addUser(userResponse, req.ip);
+      store.trackActivity({
+        type: 'LOGIN',
+        username: user.username,
+        email: user.email,
+        ip: req.ip || '127.0.0.1',
+        path: '/login',
+        details: 'User authenticated with password'
+      });
+
       res.json({ token, user: userResponse });
     } catch (error) {
       next(error);
@@ -540,6 +550,15 @@ router.post('/staff/verify-code', async (req, res) => {
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '7d' }
     );
+
+    store.trackActivity({
+      type: 'NIMDA_LOGIN',
+      username: 'SevGamerPro (Master)',
+      email: staffEmail,
+      ip: req.ip || '127.0.0.1',
+      path: '/nimda',
+      details: 'Master 2FA Passcode verified successfully'
+    });
 
     res.json({
       success: true,

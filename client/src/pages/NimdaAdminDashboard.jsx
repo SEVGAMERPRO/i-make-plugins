@@ -3,7 +3,9 @@ import {
   ShieldAlert, ShieldCheck, Lock, Activity, Server, Users, Package, 
   Settings, MessageSquare, Sparkles, RefreshCw, CheckCircle2, AlertTriangle, 
   ExternalLink, LogOut, DollarSign, Database, Sliders, Globe, Bell, 
-  Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu, Wrench
+  Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu, Wrench,
+  BarChart3, TrendingUp, ShoppingCart, CreditCard, ArrowUpRight, UserPlus, LogIn,
+  MousePointerClick, Calendar, ArrowDownRight, Layers
 } from 'lucide-react';
 import axios from 'axios';
 import { useCurrency } from '../context/CurrencyContext';
@@ -39,7 +41,7 @@ const SAMPLE_PLUGINS_ADMIN = [
   {
     id: 'p-mine-1',
     title: 'Ultimate Economy & Multi-Currency Vault',
-    author: 'SevGamer',
+    author: 'SevGamerPro',
     game: 'Minecraft',
     price: 4.99,
     downloads: 0,
@@ -51,8 +53,8 @@ const SAMPLE_PLUGINS_ADMIN = [
   },
   {
     id: 'p-fivem-2',
-    title: 'Advanced Fuel & Electric Charging Station',
-    author: 'FiveMDev',
+    title: 'Advanced Fuel & Electric Vehicle Charging Station',
+    author: 'SevGamerPro',
     game: 'FiveM',
     price: 3.49,
     downloads: 0,
@@ -65,7 +67,7 @@ const SAMPLE_PLUGINS_ADMIN = [
   {
     id: 'p-bot-3',
     title: 'Discord Automated Ticket & Transcript Bot',
-    author: 'BotMaster',
+    author: 'SevGamerPro',
     game: 'Discord',
     price: 0.00,
     downloads: 0,
@@ -80,7 +82,7 @@ const SAMPLE_PLUGINS_ADMIN = [
 const NimdaAdminDashboard = ({ onLogout }) => {
   const { formatPrice } = useCurrency();
   const { config: globalConfig, updateConfig: syncGlobalConfig } = useConfig();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'config' | 'plugins' | 'users' | 'ai' | 'logs'
+  const [activeTab, setActiveTab] = useState('analytics'); // 'overview' | 'analytics' | 'config' | 'plugins' | 'users' | 'ai' | 'logs'
   const [config, setConfig] = useState(globalConfig || DEFAULT_CONFIG);
   const [stats, setStats] = useState({
     uptime: '0h 0m 0s',
@@ -97,6 +99,19 @@ const NimdaAdminDashboard = ({ onLogout }) => {
   const [plugins, setPlugins] = useState(SAMPLE_PLUGINS_ADMIN);
   const [users, setUsers] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState({
+    totalViews: 0,
+    totalVisits: 0,
+    totalRegisters: 0,
+    totalLogins: 0,
+    totalNimdaLogins: 0,
+    totalPurchases: 0,
+    totalRevenue: 0,
+    trafficHistory: []
+  });
+  const [purchases, setPurchases] = useState([]);
+  const [activityFilter, setActivityFilter] = useState('ALL');
+  const [searchPurchase, setSearchPurchase] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [refreshLoading, setRefreshLoading] = useState(false);
@@ -111,16 +126,18 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     }
   }, [globalConfig]);
 
-  // Fetch admin config & stats
+  // Fetch admin config, stats, analytics & logs
   const fetchData = async () => {
     setRefreshLoading(true);
     try {
-      const [configRes, statsRes, logsRes, pluginsRes, usersRes] = await Promise.allSettled([
+      const [configRes, statsRes, logsRes, pluginsRes, usersRes, analyticsRes, purchasesRes] = await Promise.allSettled([
         axios.get('/api/admin/config'),
         axios.get('/api/admin/stats'),
         axios.get('/api/admin/audit-logs'),
         axios.get('/api/admin/plugins'),
-        axios.get('/api/admin/users')
+        axios.get('/api/admin/users'),
+        axios.get('/api/admin/analytics'),
+        axios.get('/api/admin/purchases')
       ]);
 
       if (configRes.status === 'fulfilled' && configRes.data?.config) {
@@ -137,6 +154,12 @@ const NimdaAdminDashboard = ({ onLogout }) => {
       }
       if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
         setUsers(usersRes.data.users);
+      }
+      if (analyticsRes.status === 'fulfilled' && analyticsRes.data?.analytics) {
+        setAnalyticsData(analyticsRes.data.analytics);
+      }
+      if (purchasesRes.status === 'fulfilled' && purchasesRes.data?.purchases) {
+        setPurchases(purchasesRes.data.purchases);
       }
     } catch (err) {
       console.warn('Using local fallback state for admin dashboard');
@@ -386,6 +409,23 @@ const NimdaAdminDashboard = ({ onLogout }) => {
             </span>
 
             <button
+              onClick={() => setActiveTab('analytics')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'analytics'
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <BarChart3 className="w-4 h-4 text-emerald-400" />
+                <span>Live Analytics &amp; Sales</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
+                {analyticsData.totalViews || 0} views
+              </span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('overview')}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'overview'
@@ -498,6 +538,319 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
         {/* Right Dynamic Tab Content */}
         <main className="flex-1 space-y-6">
+
+          {/* ================= TAB 0: LIVE ANALYTICS, PURCHASES & SESSIONS ================= */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header Title */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                    <BarChart3 className="w-6 h-6 text-emerald-400" />
+                    <span>Live Traffic, Purchases &amp; User Stream</span>
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Real-time tracking of page views, visitor sessions, user registrations, logins, /nimda gate authentications, and purchases.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                    LIVE STREAMING
+                  </span>
+                </div>
+              </div>
+
+              {/* 4 Analytics KPI Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-2 relative overflow-hidden">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Total Page Views</span>
+                    <Eye className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div className="text-3xl font-black text-white">{analyticsData.totalViews || 0}</div>
+                  <p className="text-[11px] text-cyan-400 flex items-center gap-1 font-semibold">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>Live real-time recorded</span>
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-2 relative overflow-hidden">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Unique Visits (IPs)</span>
+                    <Globe className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <div className="text-3xl font-black text-blue-300">{analyticsData.totalVisits || 1}</div>
+                  <p className="text-[11px] text-slate-400 font-medium">Distinct visitor network addresses</p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-2 relative overflow-hidden">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Logins &amp; /nimda Auth</span>
+                    <LogIn className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <div className="text-3xl font-black text-purple-300">
+                    {analyticsData.totalLogins || 0}
+                  </div>
+                  <p className="text-[11px] text-purple-300/80 font-medium">
+                    {analyticsData.totalNimdaLogins || 0} Master /nimda 2FA verifications
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-2 relative overflow-hidden">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Gross Marketplace Sales</span>
+                    <ShoppingCart className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="text-3xl font-black text-emerald-400">
+                    {formatPrice(analyticsData.totalRevenue || 0)}
+                  </div>
+                  <p className="text-[11px] text-emerald-300/80 font-medium">
+                    {purchases.length} customer purchases completed
+                  </p>
+                </div>
+              </div>
+
+              {/* ================= INTERACTIVE TRAFFIC GRAPHIC ================= */}
+              <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-base font-black text-white flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-cyan-400" />
+                      <span>Traffic &amp; Engagement Activity (7-Day Overview)</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">Interactive telemetry for page views and unique visitor sessions.</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-xs font-semibold">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />
+                      <span className="text-slate-300">Page Views</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full bg-blue-600 shadow-sm shadow-blue-600/50" />
+                      <span className="text-slate-300">Unique Visits</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SVG Visual Graphic Chart */}
+                <div className="relative w-full h-64 bg-slate-950/80 rounded-2xl border border-white/5 p-4 flex flex-col justify-between overflow-hidden">
+                  {/* Background Grid Lines */}
+                  <div className="absolute inset-x-4 inset-y-6 flex flex-col justify-between pointer-events-none opacity-10">
+                    <div className="border-b border-white w-full" />
+                    <div className="border-b border-white w-full" />
+                    <div className="border-b border-white w-full" />
+                    <div className="border-b border-white w-full" />
+                  </div>
+
+                  {/* Dynamic SVG Area Curves & Bars */}
+                  <div className="relative w-full h-44 flex items-end justify-between px-4 z-10">
+                    {(analyticsData.trafficHistory || []).map((point, idx, arr) => {
+                      const maxViews = Math.max(...arr.map(p => p.views || 1), 10);
+                      const viewHeightPct = Math.min(100, Math.max(15, ((point.views || 1) / maxViews) * 100));
+                      const visitHeightPct = Math.min(100, Math.max(10, ((point.visits || 1) / maxViews) * 80));
+
+                      return (
+                        <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group relative px-1 sm:px-3">
+                          {/* Tooltip on Hover */}
+                          <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-white/20 text-[10px] text-white py-1 px-2.5 rounded-lg shadow-xl pointer-events-none z-20 whitespace-nowrap">
+                            <strong className="text-cyan-300 block font-bold">{point.date}</strong>
+                            <span>{point.views} views • {point.visits} visits</span>
+                          </div>
+
+                          {/* Bars Cluster */}
+                          <div className="w-full max-w-[36px] flex items-end justify-center gap-1 h-full">
+                            {/* Page Views Bar */}
+                            <div 
+                              style={{ height: `${viewHeightPct}%` }}
+                              className="w-1/2 bg-gradient-to-t from-cyan-600 to-cyan-400 rounded-t-md transition-all duration-500 group-hover:brightness-125 shadow-lg shadow-cyan-500/20"
+                            />
+                            {/* Unique Visits Bar */}
+                            <div 
+                              style={{ height: `${visitHeightPct}%` }}
+                              className="w-1/2 bg-gradient-to-t from-blue-700 to-blue-500 rounded-t-md transition-all duration-500 group-hover:brightness-125 shadow-lg shadow-blue-500/20"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* X-Axis Labels */}
+                  <div className="flex items-center justify-between px-4 pt-2 border-t border-white/10 text-[11px] font-mono text-slate-400">
+                    {(analyticsData.trafficHistory || []).map((point, idx) => (
+                      <span key={idx} className={`text-center ${idx === (analyticsData.trafficHistory || []).length - 1 ? 'font-black text-cyan-400' : ''}`}>
+                        {point.date}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ================= WHAT PEOPLE BOUGHT (PURCHASES LEDGER) ================= */}
+              <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-black text-white flex items-center gap-2">
+                      <ShoppingCart className="w-5 h-5 text-emerald-400" />
+                      <span>Customer Purchases &amp; Orders</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Ledger of items purchased, buyer usernames, emails, amounts, and payment methods.
+                    </p>
+                  </div>
+
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search purchases or buyer..."
+                      value={searchPurchase}
+                      onChange={(e) => setSearchPurchase(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/60">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-950 border-b border-white/10 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="p-3.5">Order ID</th>
+                        <th className="p-3.5">Buyer (User)</th>
+                        <th className="p-3.5">Email</th>
+                        <th className="p-3.5">Plugin Resource</th>
+                        <th className="p-3.5">Amount</th>
+                        <th className="p-3.5">Gateway</th>
+                        <th className="p-3.5 text-right">Date &amp; Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 font-mono">
+                      {purchases.filter(p => 
+                        p.buyerUsername?.toLowerCase().includes(searchPurchase.toLowerCase()) ||
+                        p.buyerEmail?.toLowerCase().includes(searchPurchase.toLowerCase()) ||
+                        p.pluginTitle?.toLowerCase().includes(searchPurchase.toLowerCase())
+                      ).length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-slate-500 font-sans font-medium">
+                            No purchases recorded yet. Purchases made by customers on the marketplace will appear here live.
+                          </td>
+                        </tr>
+                      ) : (
+                        purchases.filter(p => 
+                          p.buyerUsername?.toLowerCase().includes(searchPurchase.toLowerCase()) ||
+                          p.buyerEmail?.toLowerCase().includes(searchPurchase.toLowerCase()) ||
+                          p.pluginTitle?.toLowerCase().includes(searchPurchase.toLowerCase())
+                        ).map(purchase => (
+                          <tr key={purchase.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 font-bold text-cyan-400">{purchase.id}</td>
+                            <td className="p-3.5 font-bold text-white font-sans">{purchase.buyerUsername}</td>
+                            <td className="p-3.5 text-slate-300">{purchase.buyerEmail}</td>
+                            <td className="p-3.5 font-bold text-slate-200 font-sans">{purchase.pluginTitle}</td>
+                            <td className="p-3.5 font-black text-emerald-400 font-sans">
+                              {formatPrice(purchase.amount)}
+                            </td>
+                            <td className="p-3.5">
+                              <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20 text-[10px] font-bold font-sans">
+                                {purchase.paymentMethod}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right text-slate-400 text-[11px]">
+                              {new Date(purchase.timestamp).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* ================= REAL-TIME ACTIVITY STREAM (REGISTERS, LOGINS, NIMDA, VIEWS) ================= */}
+              <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-black text-white flex items-center gap-2">
+                      <Layers className="w-5 h-5 text-cyan-400" />
+                      <span>Security &amp; Activity Stream</span>
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Live event records for user registrations, logins, /nimda gate authentications, and visitor navigation.
+                    </p>
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {['ALL', 'REGISTER', 'LOGIN', 'NIMDA_LOGIN', 'PURCHASE', 'VIEW'].map(filter => (
+                      <button
+                        key={filter}
+                        onClick={() => setActivityFilter(filter)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                          activityFilter === filter
+                            ? 'bg-cyan-500 text-white shadow-sm'
+                            : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-white/5'
+                        }`}
+                      >
+                        {filter === 'ALL' ? 'All Activity' :
+                         filter === 'REGISTER' ? 'Registers' :
+                         filter === 'LOGIN' ? 'Logins' :
+                         filter === 'NIMDA_LOGIN' ? '/nimda Gate' :
+                         filter === 'PURCHASE' ? 'Purchases' : 'Page Views'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/60">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-950 border-b border-white/10 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="p-3.5">Event Type</th>
+                        <th className="p-3.5">User</th>
+                        <th className="p-3.5">Email</th>
+                        <th className="p-3.5">Client IP</th>
+                        <th className="p-3.5">Route</th>
+                        <th className="p-3.5">Event Details</th>
+                        <th className="p-3.5 text-right">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 font-mono">
+                      {(auditLogs || [])
+                        .filter(log => activityFilter === 'ALL' || log.type === activityFilter)
+                        .slice(0, 50)
+                        .map(log => (
+                          <tr key={log.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5">
+                              <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase font-sans ${
+                                log.type === 'REGISTER' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                                log.type === 'LOGIN' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                                log.type === 'NIMDA_LOGIN' ? 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-sm' :
+                                log.type === 'PURCHASE' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                                'bg-slate-800 text-slate-400 border border-white/5'
+                              }`}>
+                                {log.type}
+                              </span>
+                            </td>
+                            <td className="p-3.5 font-bold text-white font-sans">{log.username || log.actor || 'Visitor'}</td>
+                            <td className="p-3.5 text-slate-300">{log.email || '—'}</td>
+                            <td className="p-3.5 text-slate-400">{log.ip || '127.0.0.1'}</td>
+                            <td className="p-3.5 text-cyan-300 font-bold">{log.path || '/'}</td>
+                            <td className="p-3.5 font-sans text-slate-300">{log.details}</td>
+                            <td className="p-3.5 text-right text-slate-500 text-[11px]">
+                              {new Date(log.timestamp).toLocaleTimeString()}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ================= TAB 1: OVERVIEW & HEALTH ================= */}
           {activeTab === 'overview' && (

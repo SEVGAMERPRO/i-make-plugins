@@ -200,18 +200,62 @@ router.get('/stats', (req, res) => {
 router.get('/audit-logs', (req, res) => {
   res.json({
     success: true,
-    logs: store.getAuditLogs().slice(0, 50)
+    logs: store.getActivityLogs().slice(0, 100)
+  });
+});
+
+// @route   GET /api/admin/analytics
+// @desc    Get comprehensive traffic, views, visits, and conversion analytics
+router.get('/analytics', (req, res) => {
+  res.json({
+    success: true,
+    analytics: store.getAnalyticsSummary()
+  });
+});
+
+// @route   GET /api/admin/purchases
+// @desc    Get real customer purchase ledger
+router.get('/purchases', (req, res) => {
+  res.json({
+    success: true,
+    purchases: store.getPurchases()
+  });
+});
+
+// @route   POST /api/admin/purchases
+// @desc    Record a new customer order / marketplace purchase
+router.post('/purchases', (req, res) => {
+  const purchase = store.addPurchase({
+    ...req.body,
+    ip: req.ip || '127.0.0.1'
+  });
+  res.json({
+    success: true,
+    message: 'Purchase recorded successfully',
+    purchase
+  });
+});
+
+// @route   POST /api/admin/track-view
+// @desc    Track live client pageviews and unique sessions
+router.post('/track-view', (req, res) => {
+  const { path, user } = req.body;
+  const result = store.recordPageView(path || '/', req.ip || '127.0.0.1', user);
+  res.json({
+    success: true,
+    ...result
   });
 });
 
 // @route   POST /api/admin/purge-cache
 // @desc    Flush in-memory and edge cache
 router.post('/purge-cache', (req, res) => {
-  store.addAuditLog({
+  store.trackActivity({
     type: 'CACHE_PURGE',
-    actor: 'Master Administrator',
-    details: 'Full edge and local memory cache purge triggered',
-    ip: req.ip || '127.0.0.1'
+    username: 'Master Administrator',
+    ip: req.ip || '127.0.0.1',
+    path: '/nimda',
+    details: 'Full edge and local memory cache purge triggered'
   });
 
   res.json({

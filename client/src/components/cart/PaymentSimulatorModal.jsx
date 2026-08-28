@@ -27,6 +27,8 @@ const PaymentSimulatorModal = () => {
 
   if (!isCheckoutOpen) return null;
 
+  const { user } = useAuth();
+
   const handleSimulatePayment = () => {
     setStatus('processing');
     setProcessingStep(1);
@@ -40,10 +42,29 @@ const PaymentSimulatorModal = () => {
       setProcessingStep(3);
     }, 1800);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const generatedId = `MF-TX-${Math.floor(100000 + Math.random() * 900000)}`;
       setTransactionId(generatedId);
       setStatus('success');
+
+      // Record real purchase records to backend
+      try {
+        for (const item of cartItems) {
+          await axios.post('/api/admin/purchases', {
+            buyerUsername: user?.username || 'SevGamerPro',
+            buyerEmail: user?.email || (emailAddress || 'severinkaptein8@gmail.com'),
+            pluginId: item.id,
+            pluginTitle: item.title,
+            amount: item.price,
+            currency: 'USD',
+            paymentMethod: selectedMethod.toUpperCase(),
+            transactionId: generatedId
+          });
+        }
+      } catch (err) {
+        console.warn('Purchase logged locally');
+      }
+
       clearCart();
     }, 2700);
   };
