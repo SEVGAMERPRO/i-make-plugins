@@ -13,14 +13,29 @@ const store = require('../store/globalStore');
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Setup Nodemailer for 2FA Verification Codes
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'severinkaptein8@gmail.com',
-    pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
+// Setup Nodemailer for 2FA Verification Codes (Brevo SMTP / Custom Domain)
+const createTransporter = () => {
+  if (process.env.SMTP_HOST) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: (process.env.SMTP_PASS || '').replace(/\s+/g, '')
+      }
+    });
   }
-});
+  return nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
+    }
+  });
+};
+
+const transporter = createTransporter();
 
 // Verification Codes In-Memory Storage (email -> { code, expiresAt, type })
 const verificationCodes = new Map();
@@ -78,10 +93,7 @@ router.post('/send-verification-code', async (req, res) => {
     });
 
     const mailOptions = {
-      from: {
-        name: 'MinoForge Verification',
-        address: process.env.EMAIL_USER || 'severinkaptein8@gmail.com'
-      },
+      from: `"MinoForge Official" <${process.env.EMAIL_FROM_ADDRESS || 'noreply@minoforge.com'}>`,
       to: cleanEmail,
       subject: `🔒 [MinoForge Verification] Your Security Code: ${code}`,
       text: `Hello,

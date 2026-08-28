@@ -2,14 +2,29 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 
-// Configure Transporter with Google SMTP using App Password
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'severinkaptein8@gmail.com',
-    pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
+// Configure Transporter with Brevo SMTP / Custom Domain
+const createTransporter = () => {
+  if (process.env.SMTP_HOST) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: (process.env.SMTP_PASS || '').replace(/\s+/g, '')
+      }
+    });
   }
-});
+  return nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
+    }
+  });
+};
+
+const transporter = createTransporter();
 
 // POST /api/requests/custom - Send Custom Plugin Request Email
 router.post('/custom', async (req, res) => {
@@ -46,9 +61,9 @@ router.post('/custom', async (req, res) => {
   const cleanPhone = phone.trim();
   const timeStr = timestamp || new Date().toLocaleString();
 
-  // 1. Order details email: SENT ONLY TO ADMIN (minoforge.requests@gmail.com)
+  // 1. Order details email: SENT ONLY TO ADMIN (support@minoforge.com)
   const adminMailOptions = {
-    from: `"MinoForge Requests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Requests" <${process.env.EMAIL_FROM_ADDRESS || 'requests@minoforge.com'}>`,
     to: adminEmail, // STRICTLY ADMIN ONLY
     replyTo: cleanEmail,
     subject: `🚀 [NEW ORDER] Custom Plugin Request: ${game} (${budget || 'Flexible'})`,
@@ -92,7 +107,7 @@ ${requestDetails}
 
   // 2. Receipt confirmation email: SENT ONLY TO REQUESTER (cleanEmail)
   const clientConfirmationOptions = {
-    from: `"MinoForge Requests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Requests" <${process.env.EMAIL_FROM_ADDRESS || 'requests@minoforge.com'}>`,
     to: cleanEmail, // STRICTLY REQUESTER ONLY
     replyTo: adminEmail,
     subject: '✅ Order Confirmation: Your MinoForge Custom Plugin Request',
