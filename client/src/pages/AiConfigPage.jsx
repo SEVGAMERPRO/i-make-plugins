@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Copy, Check, Download, RefreshCw, Code, CheckCircle, Terminal, 
   HelpCircle, ArrowRight, Sliders, Layers, FileText, Bot, Crown, Rocket,
-  Flame, Skull, Zap, Shield, Swords, Coins, Heart, MessageSquare, Lock, Star
+  Flame, Skull, Zap, Shield, Swords, Coins, Heart, MessageSquare, Lock, Star,
+  LogIn, UserPlus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -48,6 +49,46 @@ const AiConfigPage = () => {
   const [showPaywallModal, setShowPaywallModal] = useState(false);
   const isUltimate = user?.role === 'ADMIN' || user?.isUltimate || false;
 
+  if (!user) {
+    return (
+      <div className="min-h-[85vh] bg-[#0b0f19] text-white flex items-center justify-center p-4">
+        <div className="bg-slate-900/90 border border-white/10 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center mx-auto text-white shadow-xl shadow-blue-500/20 relative z-10">
+            <Lock className="w-8 h-8 text-white" />
+          </div>
+
+          <div className="space-y-2 relative z-10">
+            <h2 className="text-2xl font-black text-white tracking-tight">Login Required</h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              You must be logged in to your MinoForge account to access the AI Config Generator and generate production-ready server configurations.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2 relative z-10">
+            <Link
+              to="/login?redirect=/ai-config"
+              className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Log In to Your Account</span>
+            </Link>
+
+            <Link
+              to="/register?redirect=/ai-config"
+              className="btn-animated w-full py-3 bg-slate-950 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/10 flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4 text-cyan-400" />
+              <span>Register Free Account</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
@@ -75,16 +116,16 @@ const AiConfigPage = () => {
 
         // Deduct trial quota for free users
         if (!isUltimate) {
-          const updated = Math.max(0, remainingGenerations - 1);
-          setRemainingGenerations(updated);
-          localStorage.setItem('minoforge_config_quota_today', updated.toString());
+          const nextVal = Math.max(0, remainingGenerations - 1);
+          setRemainingGenerations(nextVal);
+          localStorage.setItem('minoforge_config_quota_today', nextVal.toString());
         }
       } else {
         throw new Error('No configuration generated');
       }
     } catch (err) {
-      console.warn('Config generation error:', err);
-      setErrorMsg('Failed to generate configuration. Please try again.');
+      console.error('AI Config Generation failed:', err);
+      setErrorMsg(err.response?.data?.message || 'Failed to generate config. Please check your connection and prompt.');
     } finally {
       setLoading(false);
     }
@@ -98,10 +139,17 @@ const AiConfigPage = () => {
     else setFormat('YAML');
   };
 
-  const downloadConfig = () => {
+  const handleCopy = () => {
     if (!output) return;
-    const ext = format === 'Lua' ? 'lua' : format === 'JSON' ? 'json' : format === 'TOML' ? 'toml' : 'yml';
-    const filename = `config-${selectedGame.toLowerCase()}.${ext}`;
+    navigator.clipboard.writeText(output);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    if (!output) return;
+    const ext = format.toLowerCase() === 'json' ? 'json' : format.toLowerCase() === 'lua' ? 'lua' : 'yml';
+    const filename = `config_${selectedGame.toLowerCase()}_${Date.now()}.${ext}`;
     const blob = new Blob([output], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
