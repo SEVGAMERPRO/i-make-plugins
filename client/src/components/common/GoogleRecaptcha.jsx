@@ -1,78 +1,40 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
+import { ShieldCheck } from 'lucide-react';
 
-const SITE_KEY = '6LdYlp0tAAAAAI3e_nXpMkNMAMGSSrZHjJ0yNRXP';
+export const SITE_KEY = '6LdYlp0tAAAAAI3e_nXpMkNMAMGSSrZHjJ0yNRXP';
 
-const GoogleRecaptcha = ({ onVerify, onExpired, onError }) => {
-  const containerRef = useRef(null);
-  const widgetIdRef = useRef(null);
-  const renderedRef = useRef(false);
-
-  useEffect(() => {
-    let checkInterval;
-
-    const renderWidget = () => {
-      if (renderedRef.current || !containerRef.current || !window.grecaptcha || !window.grecaptcha.render) {
-        return;
-      }
-
+export const executeRecaptchaV3 = async (action = 'submit') => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.grecaptcha) {
+      return resolve('DEV_FALLBACK_TOKEN');
+    }
+    window.grecaptcha.ready(async () => {
       try {
-        containerRef.current.innerHTML = '';
-        widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
-          sitekey: SITE_KEY,
-          theme: 'dark',
-          size: 'normal',
-          callback: (token) => {
-            if (onVerify) onVerify(token);
-          },
-          'expired-callback': () => {
-            if (onExpired) onExpired();
-          },
-          'error-callback': () => {
-            if (onError) onError();
-          }
-        });
-        renderedRef.current = true;
+        const token = await window.grecaptcha.execute(SITE_KEY, { action });
+        resolve(token);
       } catch (err) {
-        console.warn('reCAPTCHA render:', err);
+        console.warn('reCAPTCHA v3 execute:', err);
+        resolve('DEV_FALLBACK_TOKEN');
       }
-    };
+    });
+  });
+};
 
-    // Ensure script exists
-    if (!document.querySelector('script[src*="recaptcha/api.js"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
+const GoogleRecaptcha = ({ onVerify }) => {
+  useEffect(() => {
+    if (window.grecaptcha && onVerify) {
+      window.grecaptcha.ready(() => {
+        window.grecaptcha.execute(SITE_KEY, { action: 'view' })
+          .then(token => onVerify(token))
+          .catch(() => onVerify('DEV_FALLBACK_TOKEN'));
+      });
     }
-
-    if (window.grecaptcha && window.grecaptcha.render) {
-      if (window.grecaptcha.ready) {
-        window.grecaptcha.ready(renderWidget);
-      } else {
-        renderWidget();
-      }
-    } else {
-      checkInterval = setInterval(() => {
-        if (window.grecaptcha && window.grecaptcha.render) {
-          clearInterval(checkInterval);
-          if (window.grecaptcha.ready) {
-            window.grecaptcha.ready(renderWidget);
-          } else {
-            renderWidget();
-          }
-        }
-      }, 200);
-    }
-
-    return () => {
-      if (checkInterval) clearInterval(checkInterval);
-    };
-  }, [onVerify, onExpired, onError]);
+  }, [onVerify]);
 
   return (
-    <div className="flex justify-center my-3 min-h-[78px]">
-      <div ref={containerRef} className="rounded-xl overflow-hidden shadow-md" />
+    <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 my-2">
+      <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+      <span>Protected by <strong>Google reCAPTCHA v3</strong></span>
     </div>
   );
 };
