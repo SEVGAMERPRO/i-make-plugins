@@ -51,7 +51,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import NimdaStaffLoginPage from './pages/NimdaStaffLoginPage';
 import StaffTicketsPage from './pages/StaffTicketsPage';
 import DiscordConnectPage from './pages/DiscordConnectPage';
-import Security2FAPage from './pages/Security2FAPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -62,11 +62,12 @@ function App() {
             <PageViewTracker />
             <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings/2fa" element={<SettingsPage />} />
+          <Route path="/security" element={<SettingsPage />} />
+          <Route path="/2fa" element={<SettingsPage />} />
           <Route path="/discord" element={<DiscordConnectPage />} />
           <Route path="/discord-connect" element={<DiscordConnectPage />} />
-          <Route path="/security" element={<Security2FAPage />} />
-          <Route path="/settings/2fa" element={<Security2FAPage />} />
-          <Route path="/2fa" element={<Security2FAPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/plugins" element={<PluginsPage />} />

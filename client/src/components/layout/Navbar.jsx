@@ -262,11 +262,11 @@ const Navbar = ({ onMenuClick }) => {
                       <Bot className="w-4 h-4 text-[#5865F2]" /> Discord Role Sync
                     </Link>
                     <Link 
-                      to="/security" 
+                      to="/settings" 
                       className="flex items-center gap-2.5 px-4 py-2 text-cyan-300 hover:text-white hover:bg-cyan-500/20 transition-colors"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <ShieldCheck className="w-4 h-4 text-cyan-400" /> Security &amp; Google 2FA
+                      <Settings className="w-4 h-4 text-cyan-400" /> Settings &amp; 2FA
                     </Link>
                     <Link 
                       to="/staff/reviews" 

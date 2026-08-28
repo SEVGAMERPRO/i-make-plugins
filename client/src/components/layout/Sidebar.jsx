@@ -83,6 +83,9 @@ const Sidebar = ({ isOpen, onClose }) => {
             <Link to="/staff/reviews" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/staff/reviews')}`}>
               <ShieldCheck className="w-4 h-4 text-purple-400" /> Staff Reviews
             </Link>
+            <Link to="/settings" onClick={onClose} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive('/settings')}`}>
+              <Settings className="w-4 h-4 text-cyan-400" /> Settings &amp; 2FA
+            </Link>
           </nav>
         </div>
       </div>
