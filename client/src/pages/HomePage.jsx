@@ -4,7 +4,7 @@ import axios from 'axios';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
 import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
-import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 
 const GAMES = [
@@ -89,6 +89,17 @@ const HomePage = () => {
 
         {/* Hero Content */}
         <div className="relative z-30 w-full max-w-4xl mx-auto text-center animate-fade-in">
+          {/* Note: Website Heavy Development Notice Banner */}
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-amber-500/10 backdrop-blur-md rounded-2xl text-xs md:text-sm text-amber-300 font-medium mb-4 border border-amber-500/30 shadow-lg shadow-amber-500/10 max-w-2xl mx-auto">
+            <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <span className="text-left text-xs md:text-sm leading-snug">
+              <strong className="text-amber-300 uppercase tracking-wide mr-1.5 font-bold">Note:</strong>
+              This website is still under heavy development, and not everything is working so some features of the subscription aren't fully working yet!
+            </span>
+          </div>
+
+          <br />
+
           {/* Marketplace Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 backdrop-blur-md rounded-full text-xs md:text-sm text-blue-300 font-semibold mb-6 border border-blue-500/20 shadow-lg shadow-blue-500/10">
             <Sparkles className="w-4 h-4 text-blue-400" />
