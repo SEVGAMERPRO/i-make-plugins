@@ -14,8 +14,8 @@ let systemConfig = {
   maxUploadSizeMB: 500,
   enableAiConfigGenerator: true,
   aiFreeDailyLimit: 2,
-  dispatcherEmail: 'severinkaptein8@gmail.com',
-  adminNotifyEmail: 'minoforge.requests@gmail.com',
+  dispatcherEmail: 'MinoForge Verification System',
+  adminNotifyEmail: 'MinoForge Administrative Inbound',
   announcement: {
     enabled: false,
     text: '🚀 Welcome to the new MinoForge Marketplace! Explore verified plugins with 0% platform fees for Ultimate creators.',
@@ -30,7 +30,7 @@ let systemConfig = {
 
 // Audit logs
 let auditLogs = [
-  { id: 'log-1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'AUTH_SUCCESS', actor: 'severinkaptein8@gmail.com', details: 'Nimda Master 2FA Gateway Access Approved', ip: '127.0.0.1' },
+  { id: 'log-1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'AUTH_SUCCESS', actor: 'Master Administrator', details: 'Nimda Master 2FA Gateway Access Approved', ip: '127.0.0.1' },
   { id: 'log-2', timestamp: new Date(Date.now() - 1800000).toISOString(), type: 'SECURITY_SCAN', actor: 'MinoShield™ Engine', details: 'Bytecode scan completed for UltimateEconomy-v2.4.0.zip (Clean 0/0)', ip: 'SYSTEM' },
   { id: 'log-3', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'CONFIG_SYNC', actor: 'ADMIN', details: 'Global currency registry initialized with USD default', ip: '127.0.0.1' },
 ];
@@ -57,7 +57,7 @@ router.post('/config', (req, res) => {
     id: `log-${Date.now()}`,
     timestamp: new Date().toISOString(),
     type: 'CONFIG_UPDATE',
-    actor: req.body.updatedBy || 'severinkaptein8@gmail.com',
+    actor: 'Master Administrator',
     details: `Updated platform configuration: ${Object.keys(updates).join(', ')}`,
     ip: req.ip || '127.0.0.1'
   });

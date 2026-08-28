@@ -20,8 +20,8 @@ const DEFAULT_CONFIG = {
   maxUploadSizeMB: 500,
   enableAiConfigGenerator: true,
   aiFreeDailyLimit: 2,
-  dispatcherEmail: 'severinkaptein8@gmail.com',
-  adminNotifyEmail: 'minoforge.requests@gmail.com',
+  dispatcherEmail: 'MinoForge Verification System',
+  adminNotifyEmail: 'MinoForge Administrative Inbound',
   announcement: {
     enabled: false,
     text: '🚀 Welcome to MinoForge! Explore verified plugins with 0% platform fees for Ultimate creators.',
@@ -77,8 +77,8 @@ const SAMPLE_PLUGINS_ADMIN = [
 ];
 
 const SAMPLE_USERS_ADMIN = [
-  { id: 'u-admin', username: 'SevGamerPro', email: 'severinkaptein8@gmail.com', role: 'ADMIN', registeredAt: 'Aug 2026', ip: '127.0.0.1', status: 'ACTIVE', flags: 0 },
-  { id: 'u-1', username: 'AlexDev', email: 'hugeapple.fn@gmail.com', role: 'CREATOR', registeredAt: 'Aug 2026', ip: '82.165.42.19', status: 'ACTIVE', flags: 0 },
+  { id: 'u-admin', username: 'SevGamerPro', email: 'admin@minoforge.net', role: 'ADMIN', registeredAt: 'Aug 2026', ip: '127.0.0.1', status: 'ACTIVE', flags: 0 },
+  { id: 'u-1', username: 'AlexDev', email: 'creator@example.com', role: 'CREATOR', registeredAt: 'Aug 2026', ip: '82.165.42.19', status: 'ACTIVE', flags: 0 },
   { id: 'u-2', username: 'PixelCraft', email: 'pixel@example.com', role: 'USER', registeredAt: 'Aug 2026', ip: '192.168.1.102', status: 'FLAGGED_IP_MULTI', flags: 1 },
 ];
 

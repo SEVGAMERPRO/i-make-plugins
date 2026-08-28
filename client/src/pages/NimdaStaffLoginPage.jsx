@@ -20,7 +20,7 @@ const NimdaStaffLoginPage = () => {
 
   // Stage: 1 = Credentials, 2 = 6-digit OTP 2FA Verification
   const [stage, setStage] = useState(1);
-  const [email, setEmail] = useState('severinkaptein8@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,6 +36,7 @@ const NimdaStaffLoginPage = () => {
     localStorage.removeItem('nimda_admin_auth');
     setIsAdminAuthenticated(false);
     setStage(1);
+    setEmail('');
     setPassword('');
     setOtp(['', '', '', '', '', '']);
   };
@@ -65,7 +66,7 @@ const NimdaStaffLoginPage = () => {
 
       if (res.data.success) {
         setStage(2);
-        setSuccessMsg(`6-Digit Security Code sent to ${email}`);
+        setSuccessMsg('6-Digit Security Code sent to your administrator inbox');
         setResendCooldown(60);
         // Focus first OTP box
         setTimeout(() => {
@@ -290,7 +291,7 @@ const NimdaStaffLoginPage = () => {
                   Email Verification Code
                 </span>
                 <p className="text-xs text-slate-400">
-                  Enter the 6-digit code sent to <strong className="text-white">{email}</strong>
+                  Enter the 6-digit security code sent to your administrator email
                 </p>
               </div>
 
