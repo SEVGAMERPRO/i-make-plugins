@@ -7,14 +7,13 @@ import NimdaAdminDashboard from './NimdaAdminDashboard';
 const NimdaStaffLoginPage = () => {
   const { loginWithToken } = useAuth();
 
-  // Admin authenticated state (Session stored in localStorage)
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    try {
-      return localStorage.getItem('nimda_admin_auth') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  // Zero-Trust Security: Always require 2FA verification on every visit to /nimda
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+
+  // Clear any existing stored admin session immediately upon mounting
+  useEffect(() => {
+    localStorage.removeItem('nimda_admin_auth');
+  }, []);
 
   // Stage: 1 = Request Access, 2 = 6-digit OTP 2FA Verification
   const [stage, setStage] = useState(1);
