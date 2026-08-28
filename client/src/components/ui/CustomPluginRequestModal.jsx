@@ -225,10 +225,7 @@ const CustomPluginRequestModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span>Direct delivery to <strong>minoforge.requests@gmail.com</strong> with 100% bug-free guarantee.</span>
-          </div>
+
 
           <div className="pt-3 flex justify-end gap-3">
             <button

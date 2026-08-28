@@ -48,7 +48,7 @@ router.post('/custom', async (req, res) => {
 
   // 1. Order details email: SENT ONLY TO ADMIN (minoforge.requests@gmail.com)
   const adminMailOptions = {
-    from: `"MinoForge Verification" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Requests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
     to: adminEmail, // STRICTLY ADMIN ONLY
     replyTo: cleanEmail,
     subject: `🚀 [NEW ORDER] Custom Plugin Request: ${game} (${budget || 'Flexible'})`,
@@ -92,7 +92,7 @@ ${requestDetails}
 
   // 2. Receipt confirmation email: SENT ONLY TO REQUESTER (cleanEmail)
   const clientConfirmationOptions = {
-    from: `"MinoForge Verification" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
+    from: `"MinoForge Requests" <${process.env.EMAIL_USER || 'severinkaptein8@gmail.com'}>`,
     to: cleanEmail, // STRICTLY REQUESTER ONLY
     replyTo: adminEmail,
     subject: '✅ Order Confirmation: Your MinoForge Custom Plugin Request',
@@ -150,25 +150,29 @@ Official Marketplace: https://minoforge.com`,
   };
 
   try {
-    // 1. Send Order Details strictly to Admin
-    const adminRes = await transporter.sendMail(adminMailOptions);
-    console.log(`[MinoForgeRequests] Admin order sent to ${adminEmail}: ${adminRes.messageId}`);
+    // Parallel sending to make the request super fast (< 1s)
+    const emailPromises = [
+      transporter.sendMail(adminMailOptions)
+    ];
 
-    // 2. Send Confirmation strictly to Requester (only if different from admin email, or to requester)
-    let clientMessageId = null;
     if (cleanEmail !== adminEmail) {
-      const clientRes = await transporter.sendMail(clientConfirmationOptions);
-      clientMessageId = clientRes.messageId;
-      console.log(`[MinoForgeRequests] Confirmation receipt sent ONLY to requester ${cleanEmail}: ${clientMessageId}`);
-    } else {
-      console.log(`[MinoForgeRequests] Requester is admin (${cleanEmail}). Skipped duplicate confirmation.`);
+      emailPromises.push(transporter.sendMail(clientConfirmationOptions));
+    }
+
+    const results = await Promise.all(emailPromises);
+    const adminRes = results[0];
+    const clientRes = results[1] || null;
+
+    console.log(`[MinoForgeRequests] Admin order sent to ${adminEmail}: ${adminRes?.messageId}`);
+    if (clientRes) {
+      console.log(`[MinoForgeRequests] Confirmation receipt sent to requester ${cleanEmail}: ${clientRes.messageId}`);
     }
 
     return res.status(200).json({
       success: true,
       message: 'Custom plugin request dispatched. Requester received confirmation only.',
-      adminMessageId: adminRes.messageId,
-      clientMessageId
+      adminMessageId: adminRes?.messageId,
+      clientMessageId: clientRes?.messageId || null
     });
   } catch (error) {
     console.error('[MinoForgeRequests Error]:', error);
