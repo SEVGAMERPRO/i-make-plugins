@@ -6,6 +6,7 @@ import { useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { ConfigProvider } from './context/ConfigContext';
+import { LanguageProvider } from './context/LanguageContext';
 import CartDrawer from './components/cart/CartDrawer';
 import PaymentSimulatorModal from './components/cart/PaymentSimulatorModal';
 
@@ -52,13 +53,15 @@ import NimdaStaffLoginPage from './pages/NimdaStaffLoginPage';
 import StaffTicketsPage from './pages/StaffTicketsPage';
 import DiscordConnectPage from './pages/DiscordConnectPage';
 import SettingsPage from './pages/SettingsPage';
+import CrashAnalyzerPage from './pages/CrashAnalyzerPage';
 
 function App() {
   return (
     <ConfigProvider>
-      <CurrencyProvider>
-        <CartProvider>
-          <Layout>
+      <LanguageProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <Layout>
             <PageViewTracker />
             <Routes>
           <Route path="/" element={<HomePage />} />
@@ -84,6 +87,8 @@ function App() {
           <Route path="/upgrade" element={<PricingPage />} />
           <Route path="/membership" element={<PricingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/analyzer" element={<CrashAnalyzerPage />} />
+          <Route path="/crash-analyzer" element={<CrashAnalyzerPage />} />
           <Route path="/dashboard" element={<CreatorDashboard />} />
           <Route path="/my-plugins" element={<CreatorDashboard />} />
           <Route path="/upload" element={<UploadPluginPage />} />
@@ -105,11 +110,12 @@ function App() {
         </Routes>
       </Layout>
       
-      {/* Global Slide-Over Cart Drawer & Payment Simulator */}
-      <CartDrawer />
-      <PaymentSimulatorModal />
-      </CartProvider>
-    </CurrencyProvider>
+        {/* Global Slide-Over Cart Drawer & Payment Simulator */}
+        <CartDrawer />
+        <PaymentSimulatorModal />
+        </CartProvider>
+      </CurrencyProvider>
+      </LanguageProvider>
     </ConfigProvider>
   );
 }

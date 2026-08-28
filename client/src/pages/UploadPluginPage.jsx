@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Upload, FileCode, DollarSign, ShieldCheck, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Image, Terminal, Sparkles, BookOpen, Plus, X, Layers, Lock, LogIn, UserPlus } from 'lucide-react';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
+import CanvaBannerModal from '../components/plugins/CanvaBannerModal';
+import ReadmeWriterModal from '../components/plugins/ReadmeWriterModal';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -22,6 +24,8 @@ const UploadPluginPage = () => {
   const { addNotification } = useNotifications();
   const [currentTab, setCurrentTab] = useState('general');
   const [loading, setLoading] = useState(false);
+  const [showCanvaModal, setShowCanvaModal] = useState(false);
+  const [showReadmeModal, setShowReadmeModal] = useState(false);
 
   // If not logged in, show authentication required prompt
   if (!user) {
@@ -319,13 +323,24 @@ const UploadPluginPage = () => {
                     className="hidden"
                     onChange={handleCoverUpload}
                   />
-                  <label
-                    htmlFor="cover-upload"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    <Image className="w-3.5 h-3.5" />
-                    <span>Upload Banner Image</span>
-                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <label
+                      htmlFor="cover-upload"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      <Image className="w-3.5 h-3.5" />
+                      <span>Upload Local File</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCanvaModal(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/30 hover:to-blue-600/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-black cursor-pointer transition-all shadow-sm"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>🎨 Design on Canva with AI</span>
+                    </button>
+                  </div>
                   
                   <div className="pt-1">
                     <input
@@ -420,14 +435,27 @@ const UploadPluginPage = () => {
         {/* Tab 3: Documentation */}
         {currentTab === 'documentation' && (
           <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl space-y-6 animate-fade-in">
-            <h2 className="text-xl font-bold text-white mb-2">Step 3: Multi-Tab Documentation</h2>
-            <p className="text-xs text-slate-400 mb-4">
-              MinoForge creates structured tabs on your plugin's public page so buyers have everything they need.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+              <div>
+                <h2 className="text-xl font-bold text-white">Step 3: Multi-Tab Documentation</h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  MinoForge creates structured tabs on your plugin's public page so buyers have everything they need.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowReadmeModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/40 hover:to-indigo-600/40 text-purple-300 border border-purple-500/40 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer transition-all shadow-md self-start sm:self-auto"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>📝 Write with AI Docs Generator</span>
+              </button>
+            </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Overview & Features
+                Overview &amp; Features
               </label>
               <textarea
                 rows={4}
@@ -614,9 +642,31 @@ const UploadPluginPage = () => {
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
               <ShieldCheck className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div className="text-xs">
-                <p className="font-bold text-white">MinoShield Automated Scan Complete</p>
-                <p className="text-slate-300 mt-0.5">No malicious bytecode, token grabbers, or unauthorized socket connections detected.</p>
+                <p className="font-bold text-white">MinoShield Automated Scan Ready</p>
+                <p className="text-slate-300 mt-0.5">Automated bytecode decompilation and security checks are enabled.</p>
               </div>
+            </div>
+
+            {/* Pre-Submission AI Crash Test Recommendation */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
+                  <Terminal className="w-4 h-4" />
+                </div>
+                <div className="text-xs">
+                  <strong className="text-white block">Pre-Submission Sanity Check #1</strong>
+                  <span className="text-slate-400">Have error logs or stack traces? Test with AI before staff review.</span>
+                </div>
+              </div>
+
+              <Link
+                to="/crash-analyzer"
+                target="_blank"
+                className="px-3.5 py-2 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <span>Run Crash Diagnostic</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t border-white/5">
@@ -648,6 +698,26 @@ const UploadPluginPage = () => {
             </div>
           </div>
         )}
+
+        {/* Canva Banner Designer Modal */}
+        <CanvaBannerModal
+          isOpen={showCanvaModal}
+          onClose={() => setShowCanvaModal(false)}
+          pluginTitle={title || 'My Plugin'}
+          onAcceptBanner={(tpl) => {
+            if (tpl) {
+              setCoverUrl(tpl.canvaTemplateUrl);
+            }
+          }}
+        />
+
+        {/* AI Readme & Docs Modal */}
+        <ReadmeWriterModal
+          isOpen={showReadmeModal}
+          onClose={() => setShowReadmeModal(false)}
+          pluginTitle={title || 'My Plugin'}
+          game={game}
+        />
 
       </div>
     </div>

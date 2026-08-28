@@ -7,14 +7,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
 
 const SettingsPage = () => {
   const { user } = useAuth();
   const { currency, setCurrency } = useCurrency();
+  const { language, setLanguage, t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [langSuccess, setLangSuccess] = useState('');
   
-  // Active Tab: 'security' | 'profile' | 'integrations' | 'notifications'
+  // Active Tab: 'security' | 'profile' | 'language' | 'integrations' | 'notifications'
   const initialTab = searchParams.get('tab') || 'security';
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -217,7 +220,8 @@ MinoForge Security Engine • https://colasmp.net
           {[
             { id: 'security', label: '🔒 Security & 2FA (Google Authenticator)', icon: ShieldCheck },
             { id: 'profile', label: '👤 Profile & Bio', icon: User },
-            { id: 'integrations', label: '🤖 Google Pro & API Keys', icon: Sparkles },
+            { id: 'language', label: '🌍 Language / Taal (Google Cloud Translate)', icon: Globe },
+            { id: 'integrations', label: '🤖 Discord & Webhooks', icon: Sparkles },
             { id: 'notifications', label: '🔔 Notifications & Regional', icon: Bell },
           ].map(tab => {
             const Icon = tab.icon;
@@ -552,6 +556,91 @@ MinoForge Security Engine • https://colasmp.net
               </button>
             </div>
           </form>
+        )}
+
+        {/* TAB: LANGUAGE & GOOGLE CLOUD TRANSLATE */}
+        {activeTab === 'language' && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div>
+                <h2 className="text-lg font-black text-white flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-cyan-400" />
+                  <span>{t('selectLanguage')}</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Powered by Google Cloud Instant Translation. Automatically translates Marketplace listings, configs, and creator portals.
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Google Cloud Translate</span>
+              </span>
+            </div>
+
+            {langSuccess && (
+              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>{langSuccess}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { code: 'en', name: 'English (US & UK)', flag: '🇺🇸', native: 'English' },
+                { code: 'nl', name: 'Nederlands (Dutch)', flag: '🇳🇱', native: 'Nederlands' },
+                { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪', native: 'Deutsch' },
+                { code: 'fr', name: 'Français (French)', flag: '🇫🇷', native: 'Français' },
+                { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸', native: 'Español' },
+              ].map((item) => {
+                const isSelected = language === item.code;
+                return (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      setLanguage(item.code);
+                      setLangSuccess(`Language switched to ${item.name}!`);
+                      setTimeout(() => setLangSuccess(''), 3000);
+                    }}
+                    className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between group ${
+                      isSelected
+                        ? 'bg-blue-600/30 border-cyan-400 shadow-lg shadow-blue-500/20'
+                        : 'bg-slate-950/60 border-white/10 hover:border-white/20 hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{item.flag}</span>
+                      <div>
+                        <strong className="text-sm font-bold text-white block group-hover:text-cyan-300 transition-colors">
+                          {item.native}
+                        </strong>
+                        <span className="text-[11px] text-slate-400">{item.name}</span>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div className="w-6 h-6 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center font-bold">
+                        <Check className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="p-4 bg-slate-950/80 rounded-2xl border border-white/5 flex items-center justify-between text-xs">
+              <span className="text-slate-400">Current active site language: <strong className="text-cyan-300 uppercase">{language}</strong></span>
+              <button
+                type="button"
+                onClick={() => {
+                  setLangSuccess('Language preference saved!');
+                  setTimeout(() => setLangSuccess(''), 3000);
+                }}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                {t('saveLanguage')}
+              </button>
+            </div>
+          </div>
         )}
 
         {/* TAB 3: DISCORD & INTEGRATIONS */}

@@ -9,6 +9,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MINOFORGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MINOFORGE', { 'send_page_view': false });
+    </script>
+
+    <!-- Google Search Rich Snippets (Schema.org JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MinoForge",
+      "url": "https://minoforge.com",
+      "description": "The next-generation game plugin and server marketplace for Minecraft, FiveM, Discord, Roblox, and Hytale.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://minoforge.com/plugins?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -422,6 +422,54 @@ const CreatorDashboard = () => {
                   </button>
                 </div>
 
+                {/* Google Pro Creator Tools Suite */}
+                <div className="p-5 rounded-3xl bg-slate-900/60 border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Google Pro AI Creator Tools</span>
+                    </span>
+                    <span className="text-[10px] bg-blue-500/10 text-blue-300 font-bold px-2 py-0.5 rounded-md border border-blue-500/30">
+                      Gemini 1.5/2.0 Pro
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Link
+                      to="/crash-analyzer"
+                      className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/5 hover:border-red-500/40 transition-all group block"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <strong className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">AI Crash Diagnostics</strong>
+                        <span className="text-[9px] bg-red-500/20 text-red-300 font-black px-1.5 py-0.5 rounded">Pre-Check #1</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">Test stack traces &amp; paper logs before staff submission.</p>
+                    </Link>
+
+                    <Link
+                      to="/upload"
+                      className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/5 hover:border-cyan-500/40 transition-all group block"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <strong className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">Canva Banner AI</strong>
+                        <span className="text-[9px] bg-cyan-500/20 text-cyan-300 font-black px-1.5 py-0.5 rounded">Design</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">Generate high-res YouTube &amp; store thumbnails on Canva.</p>
+                    </Link>
+
+                    <Link
+                      to="/settings?tab=language"
+                      className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/5 hover:border-emerald-500/40 transition-all group block"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <strong className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Global Translation</strong>
+                        <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-black px-1.5 py-0.5 rounded">5 Languages</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">Google Cloud instant multi-language translation.</p>
+                    </Link>
+                  </div>
+                </div>
+
                 {/* Listed Plugins Overview */}
                 {resources.length === 0 ? (
                   <div className="p-10 rounded-3xl bg-slate-900/80 border border-white/10 text-center space-y-4 shadow-xl">
