@@ -118,7 +118,7 @@ const LoginPage = () => {
     setError('');
     setLoading(true);
     try {
-      await loginWithGoogle(credentialResponse.credential);
+      await loginWithGoogle(credentialResponse);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');

@@ -9,8 +9,21 @@ const GoogleSignInButton = ({ onSuccess, onError, text = 'Continue with Google' 
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
+        let userInfo = null;
+        try {
+          const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+          });
+          userInfo = res.data;
+        } catch (uErr) {
+          console.warn('Client userinfo fetch fallback:', uErr);
+        }
+
         if (onSuccess) {
-          await onSuccess({ accessToken: tokenResponse.access_token });
+          await onSuccess({ 
+            accessToken: tokenResponse.access_token,
+            userInfo
+          });
         }
       } catch (err) {
         if (onError) onError(err);

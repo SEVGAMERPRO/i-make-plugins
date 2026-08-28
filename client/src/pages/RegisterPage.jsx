@@ -45,7 +45,7 @@ const RegisterPage = () => {
     setError('');
     setLoading(true);
     try {
-      await loginWithGoogle(credentialResponse.credential);
+      await loginWithGoogle(credentialResponse);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Google registration failed. Please try again.');
