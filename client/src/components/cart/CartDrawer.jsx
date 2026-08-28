@@ -211,17 +211,33 @@ const CartDrawer = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handleProceedToCheckout}
-                className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
-              >
-                <span>Proceed to Payment Simulator ({formatPrice(total)})</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleProceedToCheckout}
+                  className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
+                >
+                  <span>Checkout All Items ({formatPrice(total, true)})</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
 
-              <p className="text-[10px] text-center text-slate-500">
-                Encrypted with 256-Bit SSL • Instant .ZIP &amp; Documentation Delivery
-              </p>
+                <button
+                  onClick={handleProceedToCheckout}
+                  className="w-full py-3 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
+                >
+                  <span>Pay with</span>
+                  <span className="font-black text-base tracking-tight italic">
+                    <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 pt-1">
+                <span>🔒 256-Bit SSL</span>
+                <span>•</span>
+                <span>🛡️ PayPal Buyer Protection</span>
+                <span>•</span>
+                <span>⚡ Instant DRM Key</span>
+              </div>
             </div>
           )}
 

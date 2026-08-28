@@ -750,15 +750,28 @@ const PluginDetailPage = () => {
                       addToCart(plugin, false);
                       setIsCheckoutOpen(true);
                     }}
-                    className="btn-glow-blue btn-shimmer btn-animated w-full py-4 px-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-base cursor-pointer"
+                    className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
                   >
-                    <CreditCard className="w-5 h-5" />
-                    <span>Instant Pay Simulator ({formatPrice(plugin.price)})</span>
+                    <CreditCard className="w-4 h-4" />
+                    <span>Instant Checkout ({formatPrice(plugin.price)})</span>
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      addToCart(plugin, false);
+                      setIsCheckoutOpen(true);
+                    }}
+                    className="w-full py-3 px-6 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black rounded-2xl shadow-lg shadow-amber-500/10 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  >
+                    <span>Pay with</span>
+                    <span className="font-black text-base tracking-tight italic">
+                      <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
+                    </span>
                   </button>
 
                   <button 
                     onClick={() => addToCart(plugin, true)}
-                    className="btn-animated w-full py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
+                    className="btn-animated w-full py-2.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
                   >
                     <ShoppingCart className="w-4 h-4 text-cyan-400" />
                     <span>{isInCart(plugin.id) ? 'In Cart • View Cart' : 'Add to Shopping Cart'}</span>
