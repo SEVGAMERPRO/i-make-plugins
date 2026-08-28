@@ -23,10 +23,22 @@ services:
         generateValue: true
       - key: CLIENT_URL
         value: https://minoforge.com
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        value: b70e6a001@smtp-brevo.com
+      - key: SMTP_PASS
+        sync: false
       - key: EMAIL_FROM_ADDRESS
         value: noreply@minoforge.com
       - key: EMAIL_FROM_NAME
         value: MinoForge Official
+      - key: ADMIN_EMAIL
+        value: support@minoforge.com
 
   - type: web
     name: minoforge-client

@@ -15,23 +15,16 @@ const prisma = new PrismaClient();
 
 // Setup Nodemailer for 2FA Verification Codes (Brevo SMTP / Custom Domain)
 const createTransporter = () => {
-  if (process.env.SMTP_HOST) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: (process.env.SMTP_PASS || '').replace(/\s+/g, '')
-      }
-    });
-  }
+  const host = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER || 'b70e6a001@smtp-brevo.com';
+  const pass = (process.env.SMTP_PASS || process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '');
+
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: (process.env.EMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
-    }
+    host,
+    port,
+    secure: process.env.SMTP_SECURE === 'true' || port === 465,
+    auth: { user, pass }
   });
 };
 
