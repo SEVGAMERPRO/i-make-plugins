@@ -96,17 +96,14 @@ const TermsPage = () => {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-              <span className="text-amber-400 font-mono">06.</span> Trademark Fair-Use &amp; Non-Affiliation Notice
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span className="text-blue-400 font-mono">06.</span> Non-Affiliation &amp; Trademark Notice
             </h2>
-            <p className="font-bold text-white">
-              !! Not affiliated with the official Miniforge project !!
+            <p>
+              MinoForge (<code>minoforge.com</code>) is an independent platform for game server modifications. MinoForge is not affiliated with, endorsed by, or connected to the Conda-Forge Miniforge project, Mojang AB, Microsoft Corporation, Rockstar Games, Roblox Corporation, or Discord Inc.
             </p>
             <p>
-              MinoForge (<code>minoforge.com</code>) is an independent community marketplace. MinoForge is not affiliated with, endorsed by, sponsored by, or associated with the <em>conda-forge Miniforge</em> project, <em>Mojang AB</em>, <em>Microsoft Corporation</em>, <em>Rockstar Games</em>, <em>Take-Two Interactive</em>, <em>Roblox Corporation</em>, <em>Discord Inc.</em>, or any of their affiliates. 
-            </p>
-            <p>
-              All trademarks, product names, logos, and brands mentioned on this site are property of their respective owners. Their use on MinoForge is strictly descriptive and nominative to indicate software compatibility and game category under standard Fair Use doctrines.
+              All trademarks and brand names are the property of their respective owners and are used solely for descriptive compatibility purposes under Nominative Fair Use.
             </p>
           </section>
 

@@ -65,18 +65,14 @@ const Footer = () => {
 
         </div>
 
-        {/* Legal Disclaimer & Safe Harbor Notice */}
-        <div className="my-8 p-4 rounded-2xl bg-slate-900/70 border border-white/10 text-[11px] text-slate-400 leading-relaxed space-y-2">
-          <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wide">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>Legal Disclaimer &amp; Non-Affiliation Notice</span>
-          </div>
-          <p className="font-bold text-amber-300 text-xs">
-            !! Not affiliated with the official Miniforge project !!
+        {/* Professional Legal Notice */}
+        <div className="my-8 p-4 sm:p-5 rounded-2xl bg-slate-900/50 border border-white/5 text-[11px] text-slate-400 leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p className="max-w-4xl">
+            <strong className="text-slate-300 font-semibold">Non-Affiliation Notice:</strong> MinoForge is an independent community marketplace and is not affiliated with, endorsed by, or connected to the Conda-Forge Miniforge distribution, Mojang AB, Microsoft, Rockstar Games, Roblox Corporation, or Discord Inc. All trademarks belong to their respective owners.
           </p>
-          <p className="text-slate-400">
-            <strong>MinoForge (minoforge.com)</strong> is an independent community platform and marketplace for game plugins, server configs, and developer resources. MinoForge is not affiliated with, endorsed by, or associated with the <em>conda-forge Miniforge</em> distribution, <em>Mojang AB</em>, <em>Microsoft Corporation</em>, <em>Rockstar Games</em>, <em>Take-Two Interactive</em>, <em>Roblox Corporation</em>, <em>Discord Inc.</em>, or any other trademark holders. <em>Minecraft</em> is a registered trademark of Mojang AB / Microsoft. All game titles, trademarks, brand names, and logos referenced on this website remain the sole property of their respective copyright and trademark owners and are used purely for identification and compatibility purposes under Fair Use.
-          </p>
+          <Link to="/terms" className="text-cyan-400 hover:text-cyan-300 font-semibold whitespace-nowrap text-xs">
+            Legal Terms →
+          </Link>
         </div>
 
         {/* Bottom copyright and Currency Switcher */}
