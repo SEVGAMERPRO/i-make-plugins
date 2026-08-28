@@ -4,7 +4,7 @@
   "private": true,
   "description": "MinoForge Game Plugin Marketplace",
   "scripts": {
-    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
+    "build": "bash build.sh",
     "start": "node server/src/index.js",
     "server": "npm --prefix server run dev",
     "client": "npm --prefix client run dev"
