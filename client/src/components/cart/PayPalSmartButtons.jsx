@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { ShieldCheck, Lock, Loader2, AlertCircle } from 'lucide-react';
 
-const PAYPAL_CLIENT_ID = 'BAAqvhYL5t4FVu1HCOquDM0Q7eO5D51VpdhVMolNko0IJYBX4OpoI_E2jMEMKkHb1YmD9KuoCX0fzmnles';
+const PAYPAL_CLIENT_ID = 'BAAREs6NlWG9nBdVzwe1KQHe1hHWrFYLEeAABbw-c020J-zlnJR-pvWi67vlxnASrz6BWSSrQS4oNMsqPQ';
 
 const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
   const { user } = useAuth();

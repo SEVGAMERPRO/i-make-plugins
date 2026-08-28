@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || 'BAAqvhYL5t4FVu1HCOquDM0Q7eO5D51VpdhVMolNko0IJYBX4OpoI_E2jMEMKkHb1YmD9KuoCX0fzmnles';
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || 'EH3OLItddQ774bhwXn8ntKNTacrbMrAlnrvW3RWpFMxiWRSt_ioiWxCFsuGyAcjdk9VpBN4dGnyT1Ma2';
-const PAYPAL_BASE_URL = (process.env.PAYPAL_MODE === 'live')
-  ? 'https://api-m.paypal.com'
-  : 'https://api-m.sandbox.paypal.com';
+const getPayPalConfig = () => {
+  const isLive = (process.env.PAYPAL_MODE || 'live') === 'live';
+  return {
+    clientId: process.env.PAYPAL_CLIENT_ID || 'BAAREs6NlWG9nBdVzwe1KQHe1hHWrFYLEeAABbw-c020J-zlnJR-pvWi67vlxnASrz6BWSSrQS4oNMsqPQ',
+    clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+    baseUrl: isLive ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com'
+  };
+};
 
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENTAGE || '10');
 
@@ -28,9 +31,10 @@ const transporter = createTransporter();
 
 // Helper: Get PayPal OAuth2 Bearer Token
 async function getPayPalAccessToken() {
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
+  const { clientId, clientSecret, baseUrl } = getPayPalConfig();
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
   
-  const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+  const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: 'POST',
     body: 'grant_type=client_credentials',
     headers: {
@@ -60,10 +64,11 @@ function generateLicenseKey(title) {
 // @route   GET /api/paypal/config
 // @desc    Get public PayPal Client ID for frontend SDK initialization
 router.get('/config', (req, res) => {
+  const { clientId, baseUrl } = getPayPalConfig();
   return res.json({
-    clientId: PAYPAL_CLIENT_ID,
+    clientId,
     currency: 'EUR',
-    mode: process.env.PAYPAL_MODE || 'sandbox'
+    mode: (process.env.PAYPAL_MODE || 'live')
   });
 });
 
@@ -109,7 +114,8 @@ router.post('/create-order', async (req, res) => {
       }))
     }];
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
+    const { baseUrl } = getPayPalConfig();
+    const response = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -157,8 +163,9 @@ router.post('/capture-order', async (req, res) => {
     }
 
     const accessToken = await getPayPalAccessToken();
+    const { baseUrl } = getPayPalConfig();
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`, {
+    const response = await fetch(`${baseUrl}/v2/checkout/orders/${orderId}/capture`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
