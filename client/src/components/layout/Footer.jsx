@@ -81,7 +81,7 @@ const Footer = () => {
 
         {/* Bottom copyright and Currency Switcher */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} MinoForge. Built for server creators worldwide.</p>
+          <p>© {new Date().getFullYear()} MinoForge. All rights reserved. Built for server creators worldwide.</p>
           
           <div className="flex items-center gap-3">
             <span className="text-slate-400">Display Currency:</span>
