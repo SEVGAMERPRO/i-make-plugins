@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass, ShoppingCart, MessageSquare } from 'lucide-react';
+import { Menu, User, Settings, LogOut, Package, Plus, Sparkles, Briefcase, ShieldAlert, ShieldCheck, Crown, Megaphone, Compass, ShoppingCart, MessageSquare, Bot } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import NotificationBell from '../ui/NotificationBell';
@@ -253,6 +253,13 @@ const Navbar = ({ onMenuClick }) => {
                       onClick={() => setDropdownOpen(false)}
                     >
                       <Briefcase className="w-4 h-4 text-cyan-400" /> Custom Bounties
+                    </Link>
+                    <Link 
+                      to="/discord" 
+                      className="flex items-center gap-2.5 px-4 py-2 text-indigo-300 hover:text-white hover:bg-[#5865F2]/20 transition-colors"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <Bot className="w-4 h-4 text-[#5865F2]" /> Discord Role Sync
                     </Link>
                     <Link 
                       to="/staff/reviews" 

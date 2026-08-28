@@ -50,6 +50,7 @@ import MinoShieldPage from './pages/MinoShieldPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NimdaStaffLoginPage from './pages/NimdaStaffLoginPage';
 import StaffTicketsPage from './pages/StaffTicketsPage';
+import DiscordConnectPage from './pages/DiscordConnectPage';
 
 function App() {
   return (
@@ -60,6 +61,8 @@ function App() {
             <PageViewTracker />
             <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/discord" element={<DiscordConnectPage />} />
+          <Route path="/discord-connect" element={<DiscordConnectPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/plugins" element={<PluginsPage />} />

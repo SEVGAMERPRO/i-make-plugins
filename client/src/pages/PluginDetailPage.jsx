@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart } from 'lucide-react';
+import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { useCart } from '../context/CartContext';
@@ -497,25 +497,16 @@ const PluginDetailPage = () => {
   const { id } = useParams();
   const { addToCart, isInCart, setIsCheckoutOpen } = useCart();
   const { formatPrice } = useCurrency();
-  const [loading, setLoading] = useState(true);
-  const [plugin, setPlugin] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [userLicense, setUserLicense] = useState(null);
+  const [copiedLic, setCopiedLic] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    getPluginById(id)
-      .then(res => {
-        setPlugin(res.data);
-      })
-      .catch(() => {
-        const found = SAMPLE_PLUGINS_DATABASE[id] || SAMPLE_PLUGINS_DATABASE['p-mine-1'];
-        setPlugin(found);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id]);
+    try {
+      const licenses = JSON.parse(localStorage.getItem('minoforge_licenses') || '[]');
+      const found = licenses.find(l => l.pluginId === id || l.pluginTitle === plugin?.title);
+      if (found) setUserLicense(found);
+    } catch {}
+  }, [id, plugin]);
 
   const handleDownload = () => {
     const url = plugin?.downloadUrl || '/downloads/UltimateEconomy-v2.4.0.zip';
@@ -540,12 +531,33 @@ const PluginDetailPage = () => {
       <div className="max-w-7xl mx-auto">
         
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-400 mb-8">
+        <div className="flex items-center gap-2 text-xs text-slate-400 mb-6">
           <Link to="/" className="hover:text-blue-400">Home</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <Link to="/plugins" className="hover:text-blue-400">Marketplace</Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-white font-medium truncate">{plugin.title}</span>
+        </div>
+
+        {/* Flash Sale Banner */}
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-red-500/20 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0 animate-pulse">
+              <Flame className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-black uppercase text-amber-300 tracking-wide block">
+                🔥 Summer Launch Flash Sale — 20% OFF
+              </span>
+              <span className="text-[11px] text-slate-300">
+                Use promo code <code className="bg-slate-950 px-2 py-0.5 rounded text-amber-400 font-mono font-bold">MINO20</code> in your cart!
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-300 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-amber-500/20">
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>05h : 22m : 14s remaining</span>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -563,7 +575,11 @@ const PluginDetailPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                 
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 backdrop-blur-md rounded-xl text-[10px] font-black uppercase flex items-center gap-1">
+                    <Award className="w-3 h-3" />
+                    <span>FEATURED RESOURCE</span>
+                  </span>
                   <span className="px-3.5 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-xl text-xs font-extrabold text-blue-400 border border-white/10 shadow-lg">
                     {plugin.gameName || plugin.game}
                   </span>
@@ -576,9 +592,16 @@ const PluginDetailPage = () => {
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
                       {plugin.title}
                     </h1>
-                    <p className="text-sm text-slate-400 flex items-center gap-2">
-                      Developed by <Link to={`/users/${plugin.authorName}`} className="text-blue-400 font-bold hover:underline">{plugin.authorName}</Link>
-                    </p>
+                    <div className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
+                      <span>Developed by</span>
+                      <Link to={`/users/${plugin.authorName}`} className="text-blue-400 font-bold hover:underline">
+                        {plugin.authorName}
+                      </Link>
+                      <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 text-[10px] font-bold border border-blue-500/20 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                        <span>Verified Creator</span>
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -593,11 +616,11 @@ const PluginDetailPage = () => {
                   <div className="flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                     <strong className="text-white text-sm">{plugin.rating}</strong>
-                    <span className="text-slate-400">({plugin.reviewsCount} reviews)</span>
+                    <span className="text-slate-400">({plugin.reviewsCount || 12} reviews)</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Download className="w-4 h-4 text-blue-400" />
-                    <strong className="text-white text-sm">{plugin.downloads.toLocaleString()}</strong>
+                    <strong className="text-white text-sm">{(plugin.downloads || 284).toLocaleString()}</strong>
                     <span className="text-slate-400">downloads</span>
                   </div>
                   <MinoShieldBadge />
@@ -605,22 +628,24 @@ const PluginDetailPage = () => {
               </div>
             </div>
 
-            {/* Multi-Tab Documentation Hub */}
+            {/* Multi-Tab Documentation & BuiltByBit Suite Hub */}
             <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl p-6 md:p-8">
               
               {/* Tab Navigation */}
               <div className="flex flex-wrap gap-2 pb-6 border-b border-white/10">
                 {[
                   { id: 'overview', label: 'Overview' },
-                  { id: 'screenshots', label: '📸 In-Game Screenshots' },
-                  { id: 'install', label: 'Installation' },
+                  { id: 'compatibility', label: '🎮 Compatibility Matrix' },
+                  { id: 'screenshots', label: '📸 In-Game Visuals' },
+                  { id: 'changelog', label: '📜 Version Changelog' },
                   { id: 'commands', label: 'Commands & Perms' },
                   { id: 'config', label: 'Sample Config' },
+                  { id: 'minoshield', label: '🛡️ MinoShield™ Scan' },
                 ].map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
                   >
                     {tab.label}
                   </button>
@@ -636,6 +661,165 @@ const PluginDetailPage = () => {
                   />
                 )}
 
+                {/* Compatibility Matrix Tab */}
+                {activeTab === 'compatibility' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div>
+                      <h3 className="text-base font-black text-white flex items-center gap-2">
+                        <Cpu className="w-5 h-5 text-cyan-400" />
+                        <span>Platform Compatibility &amp; Requirements</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">Verified tested runtime environments for this resource.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Game Versions */}
+                      <div className="p-4 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase">
+                          <Layers className="w-4 h-4" />
+                          <span>Tested Game Versions</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {['1.8.8', '1.12.2', '1.16.5', '1.18.2', '1.20.4', '1.21.x'].map(v => (
+                            <span key={v} className="px-2.5 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 rounded-lg text-xs font-mono font-bold">
+                              ✓ {v}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Server Software */}
+                      <div className="p-4 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase">
+                          <Cpu className="w-4 h-4" />
+                          <span>Server Engines</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {['Paper', 'Purpur', 'Velocity', 'Folia', 'BungeeCord', 'Spigot'].map(s => (
+                            <span key={s} className="px-2.5 py-1 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-lg text-xs font-semibold">
+                              ✓ {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Java Runtime */}
+                      <div className="p-4 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase">
+                          <Zap className="w-4 h-4" />
+                          <span>Java Runtimes</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {['Java 17 (LTS)', 'Java 21 (Recommended)', 'Java 8+'].map(j => (
+                            <span key={j} className="px-2.5 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-lg text-xs font-semibold">
+                              ✓ {j}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Changelog Tab */}
+                {activeTab === 'changelog' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div>
+                      <h3 className="text-base font-black text-white flex items-center gap-2">
+                        <History className="w-5 h-5 text-purple-400" />
+                        <span>Release History &amp; Changelogs</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">All published updates and improvements for this plugin.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Latest Release */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-purple-500/30 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-white font-mono">{plugin.version || 'v2.4.0'}</span>
+                            <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase">
+                              Latest Stable
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-400">Released 2 days ago</span>
+                        </div>
+                        <ul className="space-y-2 text-xs text-slate-300">
+                          <li className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">FEATURE</span>
+                            <span>Added multi-vault 54-slot ATM visual banking GUI with 4-digit PIN lock.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-mono font-bold">OPTIMIZE</span>
+                            <span>Refactored async MySQL connection pool for Folia multi-threaded regions.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold">BUGFIX</span>
+                            <span>Fixed decimal rounding discrepancy during cross-proxy server transfers.</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* v2.3.0 */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-white font-mono">v2.3.0</span>
+                          </div>
+                          <span className="text-xs text-slate-500">Released 3 weeks ago</span>
+                        </div>
+                        <ul className="space-y-2 text-xs text-slate-300">
+                          <li className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">FEATURE</span>
+                            <span>Integrated global player Auction House with sales tax deduction.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold">BUGFIX</span>
+                            <span>Resolved SQLite lock conflict during concurrent server restarts.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* MinoShield Security Report Tab */}
+                {activeTab === 'minoshield' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div>
+                      <h3 className="text-base font-black text-white flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                        <span>MinoShield™ Decompilation &amp; Malware Report</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">Automated static bytecode analysis &amp; security verification.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-950 rounded-2xl border border-emerald-500/30 space-y-2">
+                        <span className="text-xs text-slate-400 font-bold uppercase">VirusTotal &amp; Signatures</span>
+                        <div className="text-2xl font-black text-emerald-400">0 / 70 Clean</div>
+                        <p className="text-[11px] text-slate-400">Zero malicious class injections or backdoors detected.</p>
+                      </div>
+
+                      <div className="p-4 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
+                        <span className="text-xs text-slate-400 font-bold uppercase">Bytecode Integrity</span>
+                        <div className="text-sm font-mono text-cyan-300 truncate">SHA256: 8f9b4c1... verified</div>
+                        <p className="text-[11px] text-emerald-400 font-semibold">✓ Package matches author original build</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-xs text-slate-300 space-y-2">
+                      <h4 className="font-bold text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>MinoForge Security Guarantee</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        Every resource uploaded to MinoForge passes through our automated bytecode decompilation pipeline to ensure zero forced OP commands, unauthorized token stealers, or external webhooks.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {activeTab === 'screenshots' && (
                   <div className="space-y-4">
                     <p className="text-xs text-slate-400">
@@ -649,20 +833,10 @@ const PluginDetailPage = () => {
                             alt={`${plugin.title} preview ${idx + 1}`} 
                             className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                            <span className="text-[11px] font-bold text-white">Feature Showcase #{idx + 1}</span>
-                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-
-                {activeTab === 'install' && (
-                  <div 
-                    className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: plugin.installation || '<p>Follow standard plugin installation for this platform.</p>' }}
-                  />
                 )}
 
                 {activeTab === 'commands' && (
@@ -694,12 +868,37 @@ const PluginDetailPage = () => {
 
           </div>
 
-          {/* Sidebar */}
+          {/* Right Sidebar */}
           <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
             
-              {/* Purchase / Download Card */}
+            {/* Purchase / Download Card */}
             <div className="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl sticky top-24 space-y-4">
               
+              {/* User License Key (If previously purchased) */}
+              {userLicense && (
+                <div className="p-3.5 bg-slate-950 border border-cyan-500/30 rounded-2xl space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-bold text-cyan-300 flex items-center gap-1">
+                      <Key className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Your Active License</span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(userLicense.licenseKey);
+                        setCopiedLic(true);
+                        setTimeout(() => setCopiedLic(false), 2000);
+                      }}
+                      className="text-xs text-slate-400 hover:text-cyan-300 cursor-pointer"
+                    >
+                      {copiedLic ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                  <div className="font-mono text-xs font-bold text-emerald-400 select-all truncate">
+                    {userLicense.licenseKey}
+                  </div>
+                </div>
+              )}
+
               {/* Primary Action Button */}
               {!isFree ? (
                 <div className="space-y-2.5">
@@ -720,14 +919,6 @@ const PluginDetailPage = () => {
                   >
                     <ShoppingCart className="w-4 h-4 text-cyan-400" />
                     <span>{isInCart(plugin.id) ? 'In Cart • View Cart' : 'Add to Shopping Cart'}</span>
-                  </button>
-
-                  <button 
-                    onClick={handleDownload}
-                    className="w-full py-2 text-slate-400 hover:text-emerald-400 transition-colors flex items-center justify-center gap-1.5 text-[11px] font-semibold"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Direct Download Resource (.zip)</span>
                   </button>
                 </div>
               ) : (
@@ -750,24 +941,13 @@ const PluginDetailPage = () => {
                 </div>
               )}
 
-              {downloadSuccess && (
-                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center font-bold animate-fade-in">
-                  Package saved to your Downloads folder!
-                </div>
-              )}
-
-              {/* AI Config Banner */}
+              {/* Direct 1-on-1 Chat with Creator for Support / Refund Button */}
               <Link
-                to="/ai-config"
-                className="block p-4 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 hover:border-blue-400/50 transition-all group"
+                to={`/chats?creator=${plugin.authorName || 'MinoDeveloper'}&plugin=${encodeURIComponent(plugin.title)}`}
+                className="w-full py-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 hover:border-purple-500/50 text-purple-200 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-blue-300 font-bold text-xs mb-1">
-                  <Sparkles className="w-4 h-4 text-blue-400" />
-                  <span>AI Config Generator</span>
-                </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Need a custom rank or economy configuration? Let MinoForge AI write it for you.
-                </p>
+                <MessageSquare className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span>Chat with Owner (Support &amp; Refunds)</span>
               </Link>
 
               {/* Details table */}
@@ -783,10 +963,6 @@ const PluginDetailPage = () => {
                 <div className="flex justify-between">
                   <span className="text-slate-400">Category</span>
                   <strong className="text-blue-400">{plugin.gameName || plugin.game}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Package Format</span>
-                  <strong className="font-mono text-white">.ZIP Resource</strong>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Security</span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode } from 'lucide-react';
+import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
 
@@ -31,32 +32,70 @@ const PaymentSimulatorModal = () => {
 
   const handleSimulatePayment = () => {
     setStatus('processing');
-    setProcessingStep(1);
+    setProcessingStep(0);
 
-    // Realistic processing timeline
-    setTimeout(() => {
-      setProcessingStep(2);
-    }, 900);
+    const generatedId = `MF-${Math.floor(100000 + Math.random() * 900000)}`;
+    setTransactionId(generatedId);
 
-    setTimeout(() => {
-      setProcessingStep(3);
-    }, 1800);
+    // Generate license keys for each item
+    const licenses = cartItems.map(item => ({
+      pluginId: item.id,
+      pluginTitle: item.title,
+      authorName: item.authorName || 'MinoDeveloper',
+      orderId: generatedId,
+      licenseKey: `MF-${(item.title || 'PLG').replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+      issuedAt: new Date().toISOString()
+    }));
+    setGeneratedLicenses(licenses);
+
+    // Persist licenses locally
+    try {
+      const existingLicenses = JSON.parse(localStorage.getItem('minoforge_licenses') || '[]');
+      localStorage.setItem('minoforge_licenses', JSON.stringify([...licenses, ...existingLicenses]));
+
+      // Create an automated creator chat thread for support / refund requests
+      const existingChats = JSON.parse(localStorage.getItem('minoforge_user_chats') || '[]');
+      cartItems.forEach(item => {
+        const chatItem = {
+          id: `chat-${Date.now()}-${item.id}`,
+          creator: item.authorName || 'MinoDeveloper',
+          pluginTitle: item.title,
+          orderId: generatedId,
+          updatedAt: new Date().toISOString(),
+          unread: 1,
+          messages: [
+            {
+              id: `msg-${Date.now()}`,
+              sender: item.authorName || 'MinoDeveloper',
+              avatar: '/favicon.svg',
+              time: 'Just now',
+              text: `👋 Thank you for purchasing ${item.title} (Order #${generatedId})! Your official DRM License Key is \`${licenses.find(l => l.pluginId === item.id)?.licenseKey}\`. If you have questions, need setup assistance, or wish to discuss a refund, feel free to reply right here!`
+            }
+          ]
+        };
+        existingChats.unshift(chatItem);
+      });
+      localStorage.setItem('minoforge_user_chats', JSON.stringify(existingChats));
+    } catch (e) {
+      console.warn('Failed to save order chats', e);
+    }
+
+    // Step sequence
+    setTimeout(() => setProcessingStep(1), 800);
+    setTimeout(() => setProcessingStep(2), 1600);
+    setTimeout(() => setProcessingStep(3), 2300);
 
     setTimeout(async () => {
-      const generatedId = `MF-TX-${Math.floor(100000 + Math.random() * 900000)}`;
-      setTransactionId(generatedId);
       setStatus('success');
-
-      // Record real purchase records to backend
+      
+      // Track real purchase in backend store for live /nimda ledger
       try {
         for (const item of cartItems) {
           await axios.post('/api/admin/purchases', {
-            buyerUsername: user?.username || 'SevGamerPro',
-            buyerEmail: user?.email || (emailAddress || 'severinkaptein8@gmail.com'),
-            pluginId: item.id,
+            buyerUsername: user?.username || 'GuestBuyer',
+            buyerEmail: user?.email || 'buyer@example.com',
             pluginTitle: item.title,
-            amount: item.price,
-            currency: 'USD',
+            amount: parseFloat(item.price) || 0,
             paymentMethod: selectedMethod.toUpperCase(),
             transactionId: generatedId
           });
@@ -345,6 +384,66 @@ const PaymentSimulatorModal = () => {
                 </button>
               </div>
 
+              {/* Generated License Keys Section */}
+              {generatedLicenses.length > 0 && (
+                <div className="space-y-3 p-4 bg-slate-900/90 border border-cyan-500/30 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-2">
+                      <Key className="w-4 h-4 text-cyan-400" />
+                      <span>Your Plugin License Key (DRM)</span>
+                    </h4>
+                    <span className="text-[10px] text-cyan-400/80 font-mono">Bound to Order #{transactionId}</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {generatedLicenses.map((lic, idx) => (
+                      <div key={idx} className="p-3 bg-slate-950 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                          <strong className="text-xs text-white block">{lic.pluginTitle}</strong>
+                          <span className="text-xs font-mono font-bold text-emerald-400 select-all">{lic.licenseKey}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(lic.licenseKey);
+                            setCopiedKey(lic.licenseKey);
+                            setTimeout(() => setCopiedKey(''), 2000);
+                          }}
+                          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg flex items-center gap-1 font-mono transition-all cursor-pointer"
+                        >
+                          {copiedKey === lic.licenseKey ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedKey === lic.licenseKey ? 'Copied' : 'Copy Key'}</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Chat with Creator for Support / Refund Box */}
+              <div className="p-4 bg-gradient-to-r from-purple-950/40 via-slate-900 to-purple-950/40 border border-purple-500/30 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-purple-300 font-bold text-xs">
+                    <MessageSquare className="w-4 h-4 text-purple-400" />
+                    <span>Creator Support &amp; Refund Request</span>
+                  </div>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-mono font-bold">
+                    DIRECT CHAT CREATED
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  We automatically opened a 1-on-1 chat thread with the plugin author. If you need help with installation, server configuration, or wish to request a refund, chat directly with the owner!
+                </p>
+                <Link
+                  to="/chats"
+                  onClick={handleClose}
+                  className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 transition-all cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Open 1-on-1 Chat with Creator</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
               {/* Instant Download Archives */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -415,7 +514,7 @@ const PaymentSimulatorModal = () => {
               {/* Done Button */}
               <button
                 onClick={handleClose}
-                className="btn-animated w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-white/10"
+                className="btn-animated w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-white/10 cursor-pointer"
               >
                 Done &amp; Return to Marketplace
               </button>

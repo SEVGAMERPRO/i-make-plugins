@@ -57,8 +57,40 @@ export const CartProvider = ({ children }) => {
     return cartItems.some(item => item.id === pluginId);
   };
 
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+
+  const VALID_COUPONS = {
+    'MINO20': { code: 'MINO20', percent: 20, desc: '20% Summer Launch Promo' },
+    'LAUNCH10': { code: 'LAUNCH10', percent: 10, desc: '10% Welcome Discount' },
+    'VIP50': { code: 'VIP50', percent: 50, desc: '50% VIP Creator Pass' },
+    'BUILDBYBIT': { code: 'BUILDBYBIT', percent: 15, desc: '15% Community Special' }
+  };
+
+  const applyCoupon = (code) => {
+    setCouponError('');
+    if (!code || !code.trim()) {
+      setCouponError('Please enter a coupon code.');
+      return false;
+    }
+    const cleanCode = code.trim().toUpperCase();
+    if (VALID_COUPONS[cleanCode]) {
+      setAppliedCoupon(VALID_COUPONS[cleanCode]);
+      return true;
+    } else {
+      setCouponError('Invalid or expired coupon code.');
+      return false;
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
+
   const subtotal = cartItems.reduce((acc, item) => acc + (parseFloat(item.price) || 0), 0);
-  const total = subtotal; // 0% tax / fees on MinoForge digital resources
+  const discountAmount = appliedCoupon ? (subtotal * (appliedCoupon.percent / 100)) : 0;
+  const total = Math.max(0, subtotal - discountAmount);
 
   return (
     <CartContext.Provider
@@ -67,6 +99,11 @@ export const CartProvider = ({ children }) => {
         cartCount: cartItems.length,
         subtotal: subtotal.toFixed(2),
         total: total.toFixed(2),
+        appliedCoupon,
+        discountAmount: discountAmount.toFixed(2),
+        couponError,
+        applyCoupon,
+        removeCoupon,
         isCartOpen,
         setIsCartOpen,
         isCheckoutOpen,

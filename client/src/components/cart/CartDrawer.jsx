@@ -1,18 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Trash2, ShoppingCart, ArrowRight, ShieldCheck, Sparkles, Download, CheckCircle2 } from 'lucide-react';
+import { X, Trash2, ShoppingCart, ArrowRight, ShieldCheck, Sparkles, Download, CheckCircle2, Tag, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
 
 const CartDrawer = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, removeFromCart, clearCart, subtotal, total, setIsCheckoutOpen } = useCart();
+  const { 
+    cartItems, 
+    isCartOpen, 
+    setIsCartOpen, 
+    removeFromCart, 
+    clearCart, 
+    subtotal, 
+    total, 
+    appliedCoupon, 
+    discountAmount, 
+    couponError, 
+    applyCoupon, 
+    removeCoupon, 
+    setIsCheckoutOpen 
+  } = useCart();
   const { formatPrice, activeCurrency } = useCurrency();
+  const [couponInput, setCouponInput] = useState('');
 
   if (!isCartOpen) return null;
 
   const handleProceedToCheckout = () => {
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
+  };
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (applyCoupon(couponInput)) {
+      setCouponInput('');
+    }
   };
 
   return (
@@ -127,11 +149,58 @@ const CartDrawer = () => {
                 <span className="font-semibold text-[11px]">MinoShield™ Bytecode Verified &amp; 100% Exploit Free</span>
               </div>
 
+              {/* Promo / Coupon Code Section */}
+              <div className="space-y-2 pt-1">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs">
+                    <div className="flex items-center gap-2 text-emerald-300">
+                      <Tag className="w-3.5 h-3.5" />
+                      <span className="font-bold font-mono">{appliedCoupon.code}</span>
+                      <span className="text-emerald-400 font-semibold">({appliedCoupon.percent}% off applied)</span>
+                    </div>
+                    <button
+                      onClick={removeCoupon}
+                      className="text-xs text-red-400 hover:text-red-300 font-bold ml-2 cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Coupon Code (e.g. MINO20)"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 uppercase font-mono"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all border border-white/10 cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                )}
+                {couponError && (
+                  <p className="text-[11px] text-red-400 font-medium">{couponError}</p>
+                )}
+              </div>
+
               <div className="space-y-1.5 text-xs text-slate-300">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span className="font-mono font-bold">{formatPrice(subtotal, true)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-400 font-semibold">
+                    <span>Coupon Discount ({appliedCoupon.code})</span>
+                    <span className="font-mono font-bold">-{formatPrice(discountAmount, true)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-slate-400">
                   <span>Digital Delivery &amp; DRM License</span>
                   <span className="text-emerald-400 font-bold">Instant Free</span>
