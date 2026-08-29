@@ -169,6 +169,82 @@ router.post('/users/:id/resolve-ip', (req, res) => {
   });
 });
 
+// @route   POST /api/admin/users/grant-gift
+// @desc    Instantly gift Ultimate to any username or email directly
+router.post('/users/grant-gift', (req, res) => {
+  const { target, duration = '1_MONTH' } = req.body;
+  if (!target || !target.trim()) {
+    return res.status(400).json({ success: false, message: 'Username or email is required.' });
+  }
+
+  const cleanTarget = target.trim();
+  let expiresAt = null;
+  let durationLabel = '1 Month';
+
+  if (duration === 'REVOKE') {
+    durationLabel = 'Revoked';
+  } else {
+    const now = Date.now();
+    switch (duration) {
+      case '1_DAY':
+        expiresAt = new Date(now + 1 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '24 Hours (1 Day)';
+        break;
+      case '7_DAYS':
+        expiresAt = new Date(now + 7 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '7 Days (1 Week)';
+        break;
+      case '1_MONTH':
+        expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '30 Days (1 Month)';
+        break;
+      case '3_MONTHS':
+        expiresAt = new Date(now + 90 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '90 Days (3 Months)';
+        break;
+      case '6_MONTHS':
+        expiresAt = new Date(now + 180 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '180 Days (6 Months)';
+        break;
+      case '1_YEAR':
+        expiresAt = new Date(now + 365 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '365 Days (1 Year)';
+        break;
+      case 'LIFETIME':
+      default:
+        expiresAt = 'LIFETIME';
+        durationLabel = 'Permanent Lifetime VIP';
+        break;
+    }
+  }
+
+  const updated = store.updateUserUltimate(cleanTarget, {
+    isUltimate: duration !== 'REVOKE',
+    duration: duration === 'REVOKE' ? null : duration,
+    expiresAt: duration === 'REVOKE' ? null : expiresAt,
+    plan: duration === 'REVOKE' ? null : `ADMIN_GIFT_${duration}`
+  });
+
+  const actionDetails = duration === 'REVOKE' 
+    ? `Revoked MinoForge Ultimate from ${updated.username} (${updated.email})`
+    : `Gifted ${durationLabel} MinoForge Ultimate access to ${updated.username} (${updated.email})`;
+
+  store.addAuditLog({
+    type: duration === 'REVOKE' ? 'ULTIMATE_REVOKE' : 'ULTIMATE_GIFT',
+    actor: 'Master Administrator',
+    details: actionDetails,
+    ip: req.ip || '127.0.0.1'
+  });
+
+  res.json({
+    success: true,
+    message: duration === 'REVOKE'
+      ? `Revoked Ultimate from ${updated.username}`
+      : `Successfully gifted ${durationLabel} Ultimate access to ${updated.username}!`,
+    user: updated
+  });
+});
+
 // @route   PUT /api/admin/users/:id/ultimate
 // @desc    Gift or revoke MinoForge Ultimate for a user with custom time period
 router.put('/users/:id/ultimate', (req, res) => {

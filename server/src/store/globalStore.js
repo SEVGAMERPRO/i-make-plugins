@@ -230,8 +230,36 @@ module.exports = {
     }
     return null;
   },
-  updateUserUltimate: (id, { isUltimate, duration, expiresAt, plan }) => {
-    const idx = users.findIndex(u => u.id === id || u.email === id || u.username === id);
+  updateUserUltimate: (idOrName, { isUltimate, duration, expiresAt, plan }) => {
+    const clean = (idOrName || '').trim().toLowerCase();
+    let idx = users.findIndex(u => 
+      u.id.toLowerCase() === clean || 
+      (u.email && u.email.toLowerCase() === clean) || 
+      (u.username && u.username.toLowerCase() === clean)
+    );
+
+    if (idx === -1 && isUltimate) {
+      // If user is not yet in array, create them on the fly!
+      const isEmail = clean.includes('@');
+      const newUser = {
+        id: `u-${Date.now()}`,
+        username: isEmail ? clean.split('@')[0] : idOrName.trim(),
+        email: isEmail ? clean : `${clean}@minoforge.user`,
+        role: 'CREATOR',
+        isUltimate: true,
+        ultimateDuration: duration || '1_MONTH',
+        ultimateExpiresAt: expiresAt || null,
+        ultimatePlan: plan || 'GIFTED_BY_ADMIN',
+        registeredAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        ip: '127.0.0.1',
+        status: 'ACTIVE',
+        flags: 0,
+        avatarUrl: '/images/avatars/default.png'
+      };
+      users.unshift(newUser);
+      return newUser;
+    }
+
     if (idx !== -1) {
       users[idx] = {
         ...users[idx],

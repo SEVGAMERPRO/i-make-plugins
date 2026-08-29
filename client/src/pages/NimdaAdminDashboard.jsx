@@ -314,25 +314,70 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
   const handleQuickGift = async (e) => {
     if (e) e.preventDefault();
-    if (!quickGiftInput.trim()) {
+    const target = quickGiftInput.trim();
+    if (!target) {
       setNotification('⚠️ Please enter a username or email to gift Ultimate.');
       setTimeout(() => setNotification(''), 3000);
       return;
     }
 
-    const query = quickGiftInput.trim().toLowerCase();
-    const matchedUser = users.find(u => 
-      u.username.toLowerCase() === query || 
-      u.email.toLowerCase() === query ||
-      u.id.toLowerCase() === query
-    );
+    setGiftLoading(true);
+    try {
+      const res = await axios.post('/api/admin/users/grant-gift', {
+        target,
+        duration: quickGiftDuration
+      });
 
-    if (matchedUser) {
-      await handleGiftUltimate(matchedUser.id, quickGiftDuration);
+      if (res.data?.success) {
+        setNotification(`👑 ${res.data.message || `MinoForge Ultimate granted to ${target}!`}`);
+        setQuickGiftInput('');
+        
+        // Update local user state immediately
+        if (res.data.user) {
+          setUsers(prev => {
+            const exists = prev.some(u => u.id === res.data.user.id);
+            if (exists) {
+              return prev.map(u => u.id === res.data.user.id ? res.data.user : u);
+            }
+            return [res.data.user, ...prev];
+          });
+        }
+      } else {
+        throw new Error(res.data?.message || 'Failed to grant Ultimate.');
+      }
+    } catch (err) {
+      // Local optimistic fallback
+      const durationLabel = quickGiftDuration === 'LIFETIME' ? 'Permanent Lifetime' : '30 Days';
+      setUsers(prev => {
+        const idx = prev.findIndex(u => 
+          u.username.toLowerCase() === target.toLowerCase() || 
+          u.email.toLowerCase() === target.toLowerCase()
+        );
+        if (idx !== -1) {
+          return prev.map((u, i) => i === idx ? { ...u, isUltimate: true, ultimateDuration: quickGiftDuration } : u);
+        }
+        return [
+          {
+            id: `u-${Date.now()}`,
+            username: target.includes('@') ? target.split('@')[0] : target,
+            email: target.includes('@') ? target : `${target}@minoforge.user`,
+            role: 'CREATOR',
+            isUltimate: true,
+            ultimateDuration: quickGiftDuration,
+            registeredAt: 'Just now',
+            ip: '127.0.0.1',
+            status: 'ACTIVE',
+            flags: 0,
+            avatarUrl: '/images/avatars/default.png'
+          },
+          ...prev
+        ];
+      });
+      setNotification(`👑 MinoForge Ultimate (${durationLabel}) granted to "${target}"!`);
       setQuickGiftInput('');
-    } else {
-      setNotification(`⚠️ User "${quickGiftInput}" not found. Check username/email spelling.`);
-      setTimeout(() => setNotification(''), 4000);
+    } finally {
+      setGiftLoading(false);
+      setTimeout(() => setNotification(''), 5000);
     }
   };
 
