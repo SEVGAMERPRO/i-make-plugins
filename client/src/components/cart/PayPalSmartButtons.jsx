@@ -81,7 +81,7 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
         style: {
           layout: 'vertical',
           color: 'gold',
-          shape: 'rect',
+          shape: 'pill',
           label: 'paypal',
           height: 48
         },
@@ -166,7 +166,7 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
         </div>
       )}
 
-      <div ref={containerRef} className={loading ? 'hidden' : 'block'} />
+      <div ref={containerRef} className={loading ? 'hidden' : 'block rounded-2xl overflow-hidden'} />
 
       <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400 pt-1">
         <span className="flex items-center gap-1">
