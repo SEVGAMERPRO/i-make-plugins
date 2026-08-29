@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2 } from 'lucide-react';
+import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -38,6 +38,8 @@ const PaymentSimulatorModal = () => {
   const [transactionId, setTransactionId] = useState('');
   const [copiedId, setCopiedId] = useState(false);
   const [generatedLicenses, setGeneratedLicenses] = useState([]);
+  const [donation, setDonation] = useState(0);
+  const [customDonationInput, setCustomDonationInput] = useState('');
 
   // Form Fields
   const [cardNumber, setCardNumber] = useState('•••• •••• •••• 4242');
@@ -193,11 +195,13 @@ const PaymentSimulatorModal = () => {
           {status === 'idle' && (
             <div className="space-y-6">
               
-              {/* Order Summary Strip */}
+              {/* Order Summary Strip with Live Donation Calculation */}
               <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 block">Total Due ({cartItems.length} items)</span>
-                  <span className="text-2xl font-black text-emerald-400 font-mono">${total} USD</span>
+                  <span className="text-xs text-slate-400 block">Total Due ({cartItems.length} items{donation > 0 ? ` + €${donation.toFixed(2)} tip` : ''})</span>
+                  <span className="text-2xl font-black text-emerald-400 font-mono">
+                    {formatPrice(total + (parseFloat(donation) || 0), true)}
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
@@ -338,6 +342,63 @@ const PaymentSimulatorModal = () => {
                 </div>
               )}
 
+              {/* Voluntary Platform Tip / Donation Selector */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-950/20 via-slate-900 to-pink-950/10 border border-pink-500/25 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-pink-300 text-xs font-bold">
+                    <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+                    <span>Support MinoForge Development</span>
+                  </div>
+                  <span className="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full font-bold">
+                    Optional Tip
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Add an optional tip to support platform servers and new creator tools:
+                </p>
+
+                {/* Quick Preset Buttons */}
+                <div className="grid grid-cols-4 gap-1.5 text-xs">
+                  {[0, 1.00, 2.50, 5.00].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => { 
+                        setDonation(val); 
+                        setCustomDonationInput(val > 0 ? val.toString() : ''); 
+                      }}
+                      className={`py-1.5 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
+                        donation === val && customDonationInput === (val > 0 ? val.toString() : '')
+                          ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30 border border-pink-400'
+                          : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-white/10'
+                      }`}
+                    >
+                      {val === 0 ? 'No Tip' : `+€${val.toFixed(2)}`}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Input */}
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-pink-400">€</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.50"
+                    placeholder="Custom tip amount (e.g. 10.00)"
+                    value={customDonationInput}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomDonationInput(val);
+                      const num = parseFloat(val);
+                      setDonation(!isNaN(num) && num > 0 ? num : 0);
+                    }}
+                    className="w-full pl-7 pr-3 py-2 bg-slate-900 border border-pink-500/30 focus:border-pink-400 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
               {selectedMethod === 'paypal' && (
                 <div className="p-6 bg-slate-900/80 rounded-2xl border border-amber-500/30 space-y-4 shadow-xl shadow-amber-500/5">
                   <div className="text-center space-y-2">
@@ -357,8 +418,9 @@ const PaymentSimulatorModal = () => {
 
                   <div className="pt-2">
                     <PayPalSmartButtons
+                      key={`paypal_cart_${total + (parseFloat(donation) || 0)}`}
                       items={cartItems}
-                      totalAmount={total}
+                      totalAmount={total + (parseFloat(donation) || 0)}
                       onSuccess={handlePayPalSuccess}
                       onError={(err) => console.error('PayPal checkout error', err)}
                     />
@@ -403,8 +465,8 @@ const PaymentSimulatorModal = () => {
                   <Lock className="w-4 h-4" />
                   <span>
                     {selectedMethod === 'ideal' 
-                      ? `Pay ${formatPrice(total, true)} with iDEAL (${selectedBank})` 
-                      : `Complete Order of ${formatPrice(total, true)}`}
+                      ? `Pay ${formatPrice(total + (parseFloat(donation) || 0), true)} with iDEAL (${selectedBank})` 
+                      : `Complete Order of ${formatPrice(total + (parseFloat(donation) || 0), true)}`}
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>

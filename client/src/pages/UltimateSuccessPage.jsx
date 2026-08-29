@@ -1,0 +1,307 @@
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { 
+  Crown, Sparkles, CheckCircle2, Check, ArrowRight, Download, 
+  Rocket, Zap, Heart, ShieldCheck, Copy, Star, MessageSquare, 
+  Bot, ExternalLink, Printer, Share2, Award
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
+
+const UltimateSuccessPage = () => {
+  const { user } = useAuth();
+  const { formatPrice } = useCurrency();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Extract query params
+  const searchParams = new URLSearchParams(location.search);
+  const orderId = searchParams.get('orderId') || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
+  const planName = searchParams.get('plan') || 'MinoForge Ultimate';
+  const rawAmount = parseFloat(searchParams.get('amount') || '0.01');
+  const tipAmount = parseFloat(searchParams.get('tip') || '0');
+  const billingCycle = searchParams.get('cycle') || 'Monthly';
+
+  const [copiedTx, setCopiedTx] = useState(false);
+
+  useEffect(() => {
+    // Scroll to top
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleCopyTx = () => {
+    navigator.clipboard.writeText(orderId);
+    setCopiedTx(true);
+    setTimeout(() => setCopiedTx(false), 2500);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0b0f19] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-amber-500/15 via-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 right-10 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto space-y-10 relative z-10 animate-fade-in">
+        
+        {/* Top Hero Banner */}
+        <div className="text-center space-y-4">
+          {/* Glowing Animated Crown */}
+          <div className="relative w-24 h-24 mx-auto">
+            <div className="absolute inset-0 rounded-full bg-amber-500/30 blur-2xl animate-pulse" />
+            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 via-yellow-300 to-orange-400 p-1 shadow-2xl shadow-amber-500/40 mx-auto flex items-center justify-center">
+              <div className="w-full h-full bg-slate-950 rounded-[20px] flex items-center justify-center text-amber-400">
+                <Crown className="w-12 h-12 animate-bounce" />
+              </div>
+            </div>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 text-amber-300 rounded-full text-xs font-black uppercase tracking-wider border border-amber-500/40 shadow-lg shadow-amber-500/10">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>Official VIP Creator Activation</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Thank You For Subscribing!
+          </h1>
+          
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Welcome to the elite tier of <strong className="text-white">MinoForge</strong>. Your subscription is active, your creator fee is reduced to <strong>5% (you keep 95%)</strong>, and all platform superpowers are now unlocked.
+          </p>
+
+          {tipAmount > 0 && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/15 border border-pink-500/30 rounded-2xl text-xs font-bold text-pink-300 shadow-lg shadow-pink-500/10">
+              <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+              <span>Includes a generous {formatPrice(tipAmount, true)} platform development contribution. Thank you for supporting MinoForge!</span>
+            </div>
+          )}
+        </div>
+
+        {/* Two-Column Section: VIP Card + Order Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          
+          {/* Left Column: Digital VIP Pass (5 Cols) */}
+          <div className="md:col-span-5 space-y-6">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-2 border-amber-500/40 shadow-2xl shadow-amber-500/20 relative overflow-hidden group">
+              {/* Background ambient shine */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <img src="/favicon.png" alt="MinoForge" className="w-7 h-7 rounded-lg object-cover" />
+                  <span className="font-black text-sm tracking-tight text-white">MINO<span className="text-cyan-400">FORGE</span></span>
+                </div>
+                <span className="px-2.5 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase rounded-full border border-amber-500/30">
+                  VIP PASS
+                </span>
+              </div>
+
+              <div className="py-6 text-center space-y-3">
+                <div className="w-20 h-20 rounded-full bg-slate-900 border-2 border-amber-400/60 mx-auto flex items-center justify-center overflow-hidden shadow-xl shadow-amber-500/20 relative">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-black text-amber-400 uppercase">{user?.username?.[0] || 'U'}</span>
+                  )}
+                  <div className="absolute bottom-0 right-0 p-1 bg-amber-500 text-slate-950 rounded-full">
+                    <Crown className="w-3 h-3" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black text-white flex items-center justify-center gap-1.5">
+                    <span>{user?.username || 'Creator'}</span>
+                    <Crown className="w-4 h-4 text-amber-400 inline" />
+                  </h3>
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    Ultimate Status: Active
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/10 space-y-2 text-xs text-slate-300">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Membership Tier:</span>
+                  <span className="font-bold text-amber-300">{planName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Sales Commission:</span>
+                  <span className="font-bold text-emerald-400">5% Only (Keep 95%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Monthly Ad Credits:</span>
+                  <span className="font-bold text-emerald-400">€5.00 / mo</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">AI Config Engine:</span>
+                  <span className="font-bold text-cyan-400">Unlimited Access</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-2">
+              <Link
+                to="/dashboard"
+                className="w-full py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-slate-950 font-black rounded-2xl text-sm shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Rocket className="w-4 h-4" />
+                <span>Go to Creator Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <button
+                onClick={handlePrint}
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print Official Tax Receipt / Invoice</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Order Details & Unlocked Perks (7 Cols) */}
+          <div className="md:col-span-7 space-y-6">
+            
+            {/* Invoice Breakdown Card */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border border-white/10 space-y-5 shadow-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <h3 className="font-bold text-white text-base">Payment Receipt &amp; Settlement</h3>
+                </div>
+                <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/30">
+                  Paid In Full
+                </span>
+              </div>
+
+              {/* Order Reference Number */}
+              <div className="p-3.5 bg-slate-950 rounded-2xl border border-white/5 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold block">
+                    Transaction ID
+                  </span>
+                  <span className="font-mono text-sm font-bold text-amber-300">{orderId}</span>
+                </div>
+                <button
+                  onClick={handleCopyTx}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  {copiedTx ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedTx ? 'Copied' : 'Copy ID'}</span>
+                </button>
+              </div>
+
+              {/* Line Items */}
+              <div className="space-y-2.5 text-xs text-slate-300">
+                <div className="flex justify-between py-1 border-b border-white/5">
+                  <span className="text-white font-medium">{planName} ({billingCycle})</span>
+                  <span className="font-mono font-bold text-white">{formatPrice(rawAmount - tipAmount, true)}</span>
+                </div>
+
+                {tipAmount > 0 && (
+                  <div className="flex justify-between py-1 border-b border-white/5 text-pink-300">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5 fill-pink-400 text-pink-400" />
+                      <span>Voluntary Platform Support Contribution</span>
+                    </span>
+                    <span className="font-mono font-bold">+{formatPrice(tipAmount, true)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-2 text-sm font-black text-white">
+                  <span>Total Amount Paid:</span>
+                  <span className="text-amber-300 font-mono text-base">{formatPrice(rawAmount, true)}</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5 text-[11px] text-slate-400 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Invoice confirmation and receipt dispatched via <strong>noreply@minoforge.com</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Protected by 180-day PayPal Buyer Guarantee &amp; SSL 256-bit encryption</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Unlocked Superpowers Grid */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-400" />
+                <span>Your Unlocked VIP Perks</span>
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+                    95%
+                  </div>
+                  <strong className="text-xs font-bold text-white block">5% Marketplace Cut</strong>
+                  <p className="text-[11px] text-slate-400">Keep 95% of every plugin sale directly in your creator wallet.</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <Rocket className="w-4 h-4" />
+                  </div>
+                  <strong className="text-xs font-bold text-white block">€5.00 / mo Free Ad Credits</strong>
+                  <p className="text-[11px] text-slate-400">Feature your plugins on the homepage and search header for free.</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <strong className="text-xs font-bold text-white block">Unlimited AI Config Generator</strong>
+                  <p className="text-[11px] text-slate-400">Zero daily limits with high-speed Gemini Pro optimization.</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <strong className="text-xs font-bold text-white block">Fast-Track Verification</strong>
+                  <p className="text-[11px] text-slate-400">Your plugin submissions jump to the front of the staff review queue.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Bottom Navigation Ribbon */}
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-blue-950/40 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left space-y-1">
+            <h4 className="text-sm font-bold text-white">Ready to publish your next masterpiece?</h4>
+            <p className="text-xs text-slate-400">Upload plugins or manage your products directly in the Creator Studio.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/upload"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/30 transition-all"
+            >
+              Upload Plugin
+            </Link>
+            <Link
+              to="/plugins"
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all"
+            >
+              Explore Marketplace
+            </Link>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default UltimateSuccessPage;

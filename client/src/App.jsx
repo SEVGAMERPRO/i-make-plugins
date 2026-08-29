@@ -40,6 +40,7 @@ import BountiesPage from './pages/BountiesPage';
 import AiConfigPage from './pages/AiConfigPage';
 import StaffReviewPage from './pages/StaffReviewPage';
 import PricingPage from './pages/PricingPage';
+import UltimateSuccessPage from './pages/UltimateSuccessPage';
 import AdsManagerPage from './pages/AdsManagerPage';
 import CustomPluginPage from './pages/CustomPluginPage';
 import RequestSuccessPage from './pages/RequestSuccessPage';
@@ -87,6 +88,9 @@ function App() {
           <Route path="/upgrade" element={<PricingPage />} />
           <Route path="/membership" element={<PricingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/ultimate/success" element={<UltimateSuccessPage />} />
+          <Route path="/order-success" element={<UltimateSuccessPage />} />
+          <Route path="/success" element={<UltimateSuccessPage />} />
           <Route path="/analyzer" element={<CrashAnalyzerPage />} />
           <Route path="/crash-analyzer" element={<CrashAnalyzerPage />} />
           <Route path="/dashboard" element={<CreatorDashboard />} />
