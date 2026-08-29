@@ -135,39 +135,31 @@ const NimdaAdminDashboard = ({ onLogout }) => {
         axios.get('/api/admin/promo-codes')
       ]);
 
-      if (configRes.status === 'fulfilled' && configRes.data?.config) {
-        setConfig(configRes.data.config);
-      }
-      if (statsRes.status === 'fulfilled' && statsRes.data?.stats) {
-        setStats(statsRes.data.stats);
-      }
-      if (logsRes.status === 'fulfilled' && logsRes.data?.logs) {
-        setAuditLogs(logsRes.data.logs);
-      }
-      if (pluginsRes.status === 'fulfilled' && pluginsRes.data?.plugins) {
-        setPlugins(pluginsRes.data.plugins);
-      }
-      if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
-        setUsers(usersRes.data.users);
-      }
-      if (analyticsRes.status === 'fulfilled' && analyticsRes.data?.analytics) {
-        setAnalyticsData(analyticsRes.data.analytics);
-      }
-      if (purchasesRes.status === 'fulfilled' && purchasesRes.data?.purchases) {
-        setPurchases(purchasesRes.data.purchases);
-      }
-      if (promoRes.status === 'fulfilled' && promoRes.data?.promoCodes) {
-        setPromoCodes(promoRes.data.promoCodes);
-      }
-      if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
-        setUsers(usersRes.data.users);
-      }
-      if (analyticsRes.status === 'fulfilled' && analyticsRes.data?.analytics) {
-        setAnalyticsData(analyticsRes.data.analytics);
-      }
-      if (purchasesRes.status === 'fulfilled' && purchasesRes.data?.purchases) {
-        setPurchases(purchasesRes.data.purchases);
-      }
+      const getData = (res) => (res.status === 'fulfilled' ? res.value?.data : null);
+
+      const configData = getData(configRes);
+      if (configData?.config) setConfig(configData.config);
+
+      const statsData = getData(statsRes);
+      if (statsData?.stats) setStats(statsData.stats);
+
+      const logsData = getData(logsRes);
+      if (logsData?.logs) setAuditLogs(logsData.logs);
+
+      const pluginsData = getData(pluginsRes);
+      if (pluginsData?.plugins) setPlugins(pluginsData.plugins);
+
+      const usersData = getData(usersRes);
+      if (usersData?.users) setUsers(usersData.users);
+
+      const analyticsData = getData(analyticsRes);
+      if (analyticsData?.analytics) setAnalyticsData(analyticsData.analytics);
+
+      const purchasesData = getData(purchasesRes);
+      if (purchasesData?.purchases) setPurchases(purchasesData.purchases);
+
+      const promoData = getData(promoRes);
+      if (promoData?.promoCodes) setPromoCodes(promoData.promoCodes);
     } catch (err) {
       console.warn('Using local fallback state for admin dashboard');
     } finally {
