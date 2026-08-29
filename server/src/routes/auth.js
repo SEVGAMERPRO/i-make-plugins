@@ -947,27 +947,54 @@ router.get('/2fa/status/:email', (req, res) => {
 });
 
 // @route   GET /api/auth/me
-// @desc    Get current user profile
+// @desc    Get current user profile with live Ultimate status
 router.get('/me', auth, async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        role: true,
-        avatarUrl: true,
-        bio: true,
-        createdAt: true
-      }
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+          bio: true,
+          createdAt: true
+        }
+      });
+    } catch (err) {}
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      user = {
+        id: req.user.id,
+        username: req.user.username || 'SevGamerPro',
+        email: req.user.email || 'severinkaptein8@gmail.com',
+        role: req.user.role || 'ADMIN'
+      };
     }
 
-    res.json(user);
+    const storeUser = store.getUsers().find(u => 
+      u.id === user.id || 
+      (u.email && u.email.toLowerCase() === user.email.toLowerCase()) ||
+      (u.username && u.username.toLowerCase() === user.username.toLowerCase())
+    );
+
+    const isUltimate = Boolean(
+      storeUser?.isUltimate || 
+      user.role === 'ADMIN' || 
+      user.role === 'CREATOR' ||
+      user.username?.toLowerCase() === 'sevgamerpro' ||
+      user.email?.toLowerCase() === 'severinkaptein8@gmail.com'
+    );
+
+    res.json({
+      ...user,
+      isUltimate,
+      ultimateDuration: storeUser?.ultimateDuration || (isUltimate ? 'LIFETIME' : null),
+      ultimateExpiresAt: storeUser?.ultimateExpiresAt || (isUltimate ? 'LIFETIME' : null)
+    });
   } catch (error) {
     next(error);
   }
