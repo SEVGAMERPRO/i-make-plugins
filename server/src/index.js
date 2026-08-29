@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/games');
@@ -60,19 +59,6 @@ app.use('/api', (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
   next();
 });
-
-// Rate limiting with localhost & development bypass
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || req.path.startsWith('/api/auth/staff');
-  }
-});
-app.use(limiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);

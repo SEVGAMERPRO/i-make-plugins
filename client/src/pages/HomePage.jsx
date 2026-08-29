@@ -40,7 +40,7 @@ export default function HomePage() {
       } catch (err) {}
     };
     fetchFeatured();
-    const interval = setInterval(fetchFeatured, 1500);
+    const interval = setInterval(fetchFeatured, 4000);
     return () => clearInterval(interval);
   }, []);
 
