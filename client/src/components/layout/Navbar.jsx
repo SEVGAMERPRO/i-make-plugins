@@ -78,6 +78,13 @@ const Navbar = ({ onMenuClick }) => {
     return location.pathname === path;
   };
 
+  const isUltimate = Boolean(
+    user?.isUltimate || 
+    user?.role === 'CREATOR' || 
+    localStorage.getItem('minoforge_ultimate_active') === 'true' ||
+    (localStorage.getItem('minoforge_user') && localStorage.getItem('minoforge_user').includes('"isUltimate":true'))
+  );
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
       !isVisible ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
@@ -164,14 +171,25 @@ const Navbar = ({ onMenuClick }) => {
             )}
           </button>
 
-          {/* Go Ultimate Top-Bar CTA Button (Matches User Uploaded Reference) */}
-          <Link
-            to="/upgrade"
-            className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-500/25 border border-cyan-400/40 hover:border-cyan-300 transition-all cursor-pointer"
-          >
-            <Rocket className="w-3.5 h-3.5 text-cyan-200 animate-pulse" />
-            <span>Go Ultimate</span>
-          </Link>
+          {/* Top-Bar Button: Switches dynamically from 'Go Ultimate' to 'Your Ultimate' */}
+          {isUltimate ? (
+            <Link
+              to="/ultimate"
+              className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/30 border border-amber-300/80 hover:border-amber-200 transition-all cursor-pointer"
+              title="Manage Your Ultimate Membership"
+            >
+              <Crown className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+              <span>Your Ultimate</span>
+            </Link>
+          ) : (
+            <Link
+              to="/upgrade"
+              className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-500/25 border border-cyan-400/40 hover:border-cyan-300 transition-all cursor-pointer"
+            >
+              <Rocket className="w-3.5 h-3.5 text-cyan-200 animate-pulse" />
+              <span>Go Ultimate</span>
+            </Link>
+          )}
 
           {!user ? (
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -201,13 +219,24 @@ const Navbar = ({ onMenuClick }) => {
                 }`}
               >
                 <div className="relative">
-                  <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-300 overflow-hidden text-xs border border-white/10">
+                  <div className={`w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-300 overflow-hidden text-xs border ${
+                    isUltimate ? 'border-amber-400/80 shadow-md shadow-amber-500/20' : 'border-white/10'
+                  }`}>
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
                     ) : (
                       <span>{user.username?.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
+
+                  {/* Golden Crown on Avatar Top-Left (Exact spot user circled in image 1) */}
+                  {isUltimate && (
+                    <div className="absolute -top-2.5 -left-2.5 z-10 filter drop-shadow-[0_2px_6px_rgba(245,158,11,0.9)] animate-bounce-subtle pointer-events-none">
+                      <Crown className="w-4 h-4 text-amber-400 fill-amber-400 -rotate-12" />
+                    </div>
+                  )}
+
+                  {/* Online Green Dot */}
                   <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 border border-slate-950 rounded-full" />
                 </div>
                 <span className="text-xs font-bold text-white max-w-[90px] sm:max-w-[120px] truncate hidden xs:inline-block">
@@ -216,7 +245,7 @@ const Navbar = ({ onMenuClick }) => {
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180 text-cyan-400' : ''}`} />
               </button>
 
-              {/* RICH BUILTBYBIT-STYLE USER PROFILE POPOVER DROPDOWN (BETTER & DIFFERENT) */}
+              {/* RICH BUILTBYBIT-STYLE USER PROFILE POPOVER DROPDOWN */}
               {dropdownOpen && (
                 <>
                   <div 
@@ -235,13 +264,21 @@ const Navbar = ({ onMenuClick }) => {
                       
                       {/* Avatar with Glow & Online Status */}
                       <div className="relative flex-shrink-0">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-cyan-400/40 p-0.5 shadow-lg shadow-cyan-500/20 overflow-hidden flex items-center justify-center text-cyan-300 font-black text-xl">
+                        <div className={`w-14 h-14 rounded-2xl bg-slate-900 border-2 ${isUltimate ? 'border-amber-400 shadow-lg shadow-amber-500/30' : 'border-cyan-400/40 shadow-lg shadow-cyan-500/20'} p-0.5 overflow-hidden flex items-center justify-center text-cyan-300 font-black text-xl`}>
                           {user.avatarUrl ? (
                             <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover rounded-xl" />
                           ) : (
                             <span>{user.username?.charAt(0).toUpperCase()}</span>
                           )}
                         </div>
+
+                        {/* Ultimate Golden Crown on Big Avatar */}
+                        {isUltimate && (
+                          <div className="absolute -top-3.5 -left-3.5 z-10 filter drop-shadow-[0_2px_8px_rgba(245,158,11,0.9)] animate-bounce-subtle pointer-events-none">
+                            <Crown className="w-6 h-6 text-amber-400 fill-amber-400 -rotate-12" />
+                          </div>
+                        )}
+
                         <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-emerald-500 text-slate-950 text-[8px] font-black rounded-md uppercase tracking-wider shadow">
                           ONLINE
                         </span>
@@ -332,14 +369,25 @@ const Navbar = ({ onMenuClick }) => {
                           <span className="truncate">Preferences</span>
                         </Link>
 
-                        <Link 
-                          to="/upgrade" 
-                          className="flex items-center gap-2 px-2.5 py-2 text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 rounded-xl transition-colors font-bold"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          <Crown className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                          <span className="truncate">Go Ultimate</span>
-                        </Link>
+                        {isUltimate ? (
+                          <Link 
+                            to="/ultimate" 
+                            className="flex items-center gap-2 px-2.5 py-2 text-amber-300 hover:text-white bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-xl transition-colors font-bold"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            <Crown className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                            <span className="truncate">Your Ultimate Hub</span>
+                          </Link>
+                        ) : (
+                          <Link 
+                            to="/upgrade" 
+                            className="flex items-center gap-2 px-2.5 py-2 text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 rounded-xl transition-colors font-bold"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            <Crown className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                            <span className="truncate">Go Ultimate</span>
+                          </Link>
+                        )}
                       </div>
 
                       {/* Right Column */}

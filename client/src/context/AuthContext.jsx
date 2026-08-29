@@ -93,8 +93,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (newData) => {
+    setUser(prev => {
+      const updated = { ...(prev || {}), ...newData };
+      localStorage.setItem('minoforge_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, verifyLoginCode, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, verifyLoginCode, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

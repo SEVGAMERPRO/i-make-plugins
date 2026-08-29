@@ -41,6 +41,7 @@ import AiConfigPage from './pages/AiConfigPage';
 import StaffReviewPage from './pages/StaffReviewPage';
 import PricingPage from './pages/PricingPage';
 import UltimateSuccessPage from './pages/UltimateSuccessPage';
+import YourUltimatePage from './pages/YourUltimatePage';
 import AdsManagerPage from './pages/AdsManagerPage';
 import CustomPluginPage from './pages/CustomPluginPage';
 import RequestSuccessPage from './pages/RequestSuccessPage';
@@ -88,6 +89,8 @@ function App() {
           <Route path="/upgrade" element={<PricingPage />} />
           <Route path="/membership" element={<PricingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/ultimate" element={<YourUltimatePage />} />
+          <Route path="/your-ultimate" element={<YourUltimatePage />} />
           <Route path="/receipt/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/checkout/success/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/order-success/:checkoutId" element={<UltimateSuccessPage />} />
