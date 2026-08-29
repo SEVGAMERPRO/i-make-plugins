@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/admin');
 const aiRoutes = require('./routes/ai');
 const ordersRoutes = require('./routes/orders');
 const paypalRoutes = require('./routes/paypal');
+const reviewsRoutes = require('./routes/reviews');
 const { router: developerRoutes } = require('./routes/developer');
 const path = require('path');
 const fs = require('fs');
@@ -70,6 +71,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/paypal', paypalRoutes);
+app.use('/api/reviews', reviewsRoutes);
 app.use('/api/developer', developerRoutes);
 
 // SEO Sitemaps & Robots

@@ -294,13 +294,35 @@ const Navbar = ({ onMenuClick }) => {
                       {/* Name, Role & Real Stats */}
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-black text-sm text-white truncate">{user.username}</h3>
-                          <span className="text-cyan-400 text-xs">✓</span>
+                          <h3 className={`font-black text-sm truncate ${isUltimate ? 'text-amber-300' : 'text-white'}`}>
+                            {user?.username && user.username.toLowerCase() !== 'user' 
+                              ? user.username 
+                              : (user?.email ? user.email.split('@')[0] : 'Community Member')}
+                          </h3>
+                          {isUltimate ? (
+                            <span className="text-amber-400 text-xs font-black" title="Ultimate Verified VIP">👑</span>
+                          ) : (
+                            <span className="text-cyan-400 text-xs">✓</span>
+                          )}
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[10px] font-bold rounded-md">
-                            {user.role === 'ADMIN' ? '👑 Staff Admin' : 'Verified Member'}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {isUltimate && (
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-black rounded-md flex items-center gap-1 shadow-sm">
+                              <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
+                              <span>Ultimate VIP</span>
+                            </span>
+                          )}
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${
+                            user.role === 'ADMIN' 
+                              ? 'bg-red-500/10 border-red-500/30 text-red-300' 
+                              : user.role === 'CREATOR'
+                              ? 'bg-purple-500/10 border-purple-500/30 text-purple-300'
+                              : user.role === 'STAFF'
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                              : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                          }`}>
+                            {user.role === 'ADMIN' ? '👑 Staff Admin' : user.role === 'CREATOR' ? '🎨 Verified Creator' : user.role === 'STAFF' ? '🛡️ Staff Mod' : 'Verified Member'}
                           </span>
                         </div>
 

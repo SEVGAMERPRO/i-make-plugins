@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle, Bell, BellOff, Users, GitFork, PackageCheck, AlertTriangle, FileArchive } from 'lucide-react';
+import axios from 'axios';
+import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle, Bell, BellOff, Users, GitFork, PackageCheck, AlertTriangle, FileArchive, Lock, ThumbsUp } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import StarRating from '../components/ui/StarRating';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -125,6 +127,72 @@ const PluginDetailPage = () => {
   const { formatPrice } = useCurrency();
   const [userLicense, setUserLicense] = useState(null);
   const [copiedLic, setCopiedLic] = useState(false);
+
+  // Review states
+  const [pluginReviews, setPluginReviews] = useState([]);
+  const [canUserReview, setCanUserReview] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5.0);
+  const [reviewTitle, setReviewTitle] = useState('');
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState({ type: '', message: '' });
+
+  const fetchPluginReviews = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await axios.get(`/api/reviews/plugin/${id}`, { headers });
+      if (res.data?.success) {
+        setPluginReviews(res.data.reviews || []);
+        setCanUserReview(Boolean(res.data.canReview));
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchPluginReviews();
+  }, [id]);
+
+  const handlePostPluginReview = async (e) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+    setReviewSubmitting(true);
+    setReviewStatus({ type: '', message: '' });
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setReviewStatus({ type: 'error', message: 'Please log in to submit a verified review.' });
+        setReviewSubmitting(false);
+        return;
+      }
+
+      const res = await axios.post(`/api/reviews/plugin/${id}`, {
+        rating: reviewRating,
+        title: reviewTitle.trim() || `${plugin?.title || 'Resource'} Review`,
+        comment: reviewComment.trim()
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data?.success) {
+        setReviewStatus({ type: 'success', message: '⭐ Your review has been verified and published!' });
+        setReviewComment('');
+        setReviewTitle('');
+        if (res.data.averageRating) {
+          setPlugin(prev => ({ ...prev, rating: res.data.averageRating, reviewsCount: res.data.totalReviews }));
+        }
+        fetchPluginReviews();
+      }
+    } catch (err) {
+      setReviewStatus({
+        type: 'error',
+        message: err.response?.data?.message || '🔒 Verified purchase required. You must purchase this resource before submitting a review for the seller.'
+      });
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -312,6 +380,7 @@ const PluginDetailPage = () => {
               <div className="flex flex-wrap gap-2 pb-6 border-b border-white/10">
                 {[
                   { id: 'overview', label: 'Overview' },
+                  { id: 'reviews', label: `⭐ Reviews & Ratings (${pluginReviews.length})` },
                   { id: 'dependencies', label: '📦 Dependencies & Hooks' },
                   { id: 'compatibility', label: '🎮 Compatibility Matrix' },
                   { id: 'screenshots', label: '📸 In-Game Visuals' },
@@ -337,6 +406,167 @@ const PluginDetailPage = () => {
                     className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: plugin.overview || plugin.summary }}
                   />
+                )}
+
+                {/* ⭐ Buyer Reviews & Seller Rating Tab (.1 Precision) */}
+                {activeTab === 'reviews' && (
+                  <div className="space-y-8 animate-fade-in">
+                    {/* Header score card */}
+                    <div className="p-6 bg-slate-950/90 border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+                      <div className="flex items-center gap-4 text-center sm:text-left">
+                        <div className="text-4xl font-black text-amber-400 font-mono">
+                          {Number(plugin.rating || 5.0).toFixed(1)}
+                        </div>
+                        <div>
+                          <StarRating rating={plugin.rating || 5.0} size="lg" showValue={false} />
+                          <p className="text-xs text-slate-400 mt-1">
+                            Based on {pluginReviews.length} verified buyer reviews
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 px-3.5 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-300 text-xs font-bold">
+                        <ShieldCheck className="w-4 h-4 text-blue-400" />
+                        <span>100% Authentic Verified Purchases Only</span>
+                      </div>
+                    </div>
+
+                    {/* Write Review Form or Verified Guard Banner */}
+                    {canUserReview || isFree ? (
+                      <div className="p-6 bg-slate-950/60 border border-white/10 rounded-2xl space-y-4">
+                        <div className="flex items-center gap-2 text-sm font-black text-white">
+                          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                          <span>Leave a Verified Review for this Plugin Seller</span>
+                        </div>
+
+                        <form onSubmit={handlePostPluginReview} className="space-y-4">
+                          {/* Rating Slider */}
+                          <div className="p-4 bg-slate-900/80 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                              Your Rating (1.0 - 5.0)
+                            </label>
+                            <div className="flex items-center gap-3">
+                              <StarRating 
+                                rating={reviewRating} 
+                                size="lg" 
+                                interactive={true} 
+                                onChange={(val) => setReviewRating(val)}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Review Title */}
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                              Review Title
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Excellent discord bot, works right out of the box!"
+                              value={reviewTitle}
+                              onChange={(e) => setReviewTitle(e.target.value)}
+                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                            />
+                          </div>
+
+                          {/* Review Message */}
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                              Detailed Feedback Message *
+                            </label>
+                            <textarea
+                              rows="3"
+                              required
+                              placeholder="Share details about performance, configuration ease, support, and reliability..."
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+                            />
+                          </div>
+
+                          {reviewStatus.message && (
+                            <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                              reviewStatus.type === 'success' 
+                                ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' 
+                                : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                            }`}>
+                              {reviewStatus.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                              <span>{reviewStatus.message}</span>
+                            </div>
+                          )}
+
+                          <div className="flex justify-end">
+                            <button
+                              type="submit"
+                              disabled={reviewSubmitting}
+                              className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                            >
+                              {reviewSubmitting ? 'Verifying & Posting...' : 'Publish Verified Review'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="p-6 bg-slate-950/80 border border-amber-500/20 rounded-2xl flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0">
+                          <Lock className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-sm text-white">🔒 Verified Purchase Required</h4>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            To ensure 100% authentic ratings, only buyers who have purchased or downloaded this resource can publish a review.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => addToCart(plugin)}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold whitespace-nowrap shadow cursor-pointer"
+                        >
+                          Buy Resource to Review
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Existing Reviews List */}
+                    <div className="space-y-4 pt-2">
+                      <h4 className="font-black text-xs uppercase tracking-wider text-slate-400">
+                        Recent Buyer Feedback ({pluginReviews.length})
+                      </h4>
+
+                      {pluginReviews.length === 0 ? (
+                        <div className="p-8 text-center bg-slate-950/40 rounded-2xl border border-white/5 text-slate-500 text-xs">
+                          No reviews submitted for this resource yet. Be the first verified buyer to leave feedback!
+                        </div>
+                      ) : (
+                        pluginReviews.map((rev) => (
+                          <div key={rev.id} className="p-5 bg-slate-950/80 border border-white/10 rounded-2xl space-y-3 shadow-lg">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center font-bold text-xs text-amber-300">
+                                  {rev.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-xs text-white">{rev.username}</span>
+                                    {rev.isUltimate && <span className="text-[10px] text-amber-400 font-black">👑</span>}
+                                    <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded">
+                                      ✓ Verified Buyer
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] text-slate-400 font-mono">
+                                    {new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                  </span>
+                                </div>
+                              </div>
+                              <StarRating rating={rev.rating} size="sm" showValue={true} />
+                            </div>
+
+                            <h5 className="font-bold text-white text-xs">"{rev.title}"</h5>
+                            <p className="text-slate-300 text-xs leading-relaxed italic">"{rev.comment}"</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {/* Compatibility Matrix Tab */}

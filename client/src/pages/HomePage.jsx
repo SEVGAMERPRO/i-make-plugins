@@ -4,7 +4,8 @@ import axios from 'axios';
 import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
 import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
-import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import StarRating from '../components/ui/StarRating';
+import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, AlertCircle, Star, MessageSquare, Plus, CheckCircle } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 
 const GAMES = [
@@ -29,6 +30,29 @@ export default function HomePage() {
   const [bgIndex, setBgIndex] = useState(0);
   const [isCustomRequestOpen, setIsCustomRequestOpen] = useState(false);
   const [featuredPlugins, setFeaturedPlugins] = useState([]);
+  
+  // Platform Reviews State
+  const [platformReviews, setPlatformReviews] = useState([]);
+  const [platformAvgRating, setPlatformAvgRating] = useState(4.9);
+  const [platformTotalReviews, setPlatformTotalReviews] = useState(3);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newReviewRating, setNewReviewRating] = useState(5.0);
+  const [newReviewTitle, setNewReviewTitle] = useState('');
+  const [newReviewComment, setNewReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
+  const [reviewErrorMsg, setReviewErrorMsg] = useState('');
+
+  const fetchPlatformReviews = async () => {
+    try {
+      const res = await axios.get('/api/reviews/platform');
+      if (res.data?.success) {
+        setPlatformReviews(res.data.reviews || []);
+        if (res.data.averageRating) setPlatformAvgRating(res.data.averageRating);
+        if (res.data.totalReviews !== undefined) setPlatformTotalReviews(res.data.totalReviews);
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -40,9 +64,48 @@ export default function HomePage() {
       } catch (err) {}
     };
     fetchFeatured();
+    fetchPlatformReviews();
     const interval = setInterval(fetchFeatured, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handlePostPlatformReview = async (e) => {
+    e.preventDefault();
+    if (!newReviewComment.trim()) return;
+    setReviewSubmitting(true);
+    setReviewErrorMsg('');
+    setReviewSuccessMsg('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setReviewErrorMsg('Please log in to submit a platform review.');
+        setReviewSubmitting(false);
+        return;
+      }
+      const res = await axios.post('/api/reviews/platform', {
+        rating: newReviewRating,
+        title: newReviewTitle.trim() || 'MinoForge Experience',
+        comment: newReviewComment.trim()
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data?.success) {
+        setReviewSuccessMsg('⭐ Thank you for your feedback! Your review is live.');
+        setNewReviewComment('');
+        setNewReviewTitle('');
+        fetchPlatformReviews();
+        setTimeout(() => {
+          setIsReviewModalOpen(false);
+          setReviewSuccessMsg('');
+        }, 2000);
+      }
+    } catch (err) {
+      setReviewErrorMsg(err.response?.data?.message || 'Failed to submit review. Please ensure you are logged in.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     // 9-second cinematic hero background crossfade
@@ -295,6 +358,94 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ⭐ Platform Experience & Community Reviews Section (.1 Precision) */}
+      <section className="py-20 px-4 bg-gradient-to-b from-[#0b0f19] via-slate-950 to-[#0b0f19] border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          
+          {/* Section Header with Average Score & Review CTA */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/25 rounded-full text-amber-400 text-xs font-bold mb-3">
+                <Star className="w-3.5 h-3.5 fill-amber-400" />
+                <span>Verified Platform Reviews &amp; Ratings</span>
+              </div>
+              <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
+                What Creators &amp; Server Admins Say
+              </h2>
+              <p className="text-slate-400 mt-2 text-sm max-w-xl">
+                Real feedback from community members building with MinoForge plugins, tools, and creator ecosystem.
+              </p>
+            </div>
+
+            {/* Platform Score Snapshot & Add Review Button */}
+            <div className="flex flex-wrap items-center gap-4 bg-slate-900/90 border border-white/10 p-4 rounded-2xl shadow-xl">
+              <div className="text-center sm:text-left pr-2 border-r border-white/10">
+                <div className="text-3xl font-black text-amber-300 font-mono flex items-center gap-1.5">
+                  <span>{platformAvgRating.toFixed(1)}</span>
+                  <span className="text-xs text-slate-400 font-normal">/ 5.0</span>
+                </div>
+                <StarRating rating={platformAvgRating} size="sm" showValue={false} />
+                <span className="text-[11px] text-slate-400 block mt-0.5">{platformTotalReviews} verified reviews</span>
+              </div>
+
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Write Website Review</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Reviews Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {platformReviews.map((rev) => (
+              <div 
+                key={rev.id} 
+                className="p-6 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between shadow-xl"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <StarRating rating={rev.rating} size="sm" showValue={true} />
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-white text-sm mb-2 leading-snug">
+                    "{rev.title}"
+                  </h3>
+
+                  <p className="text-slate-300 text-xs leading-relaxed italic">
+                    "{rev.comment}"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-5 mt-5 border-t border-white/5">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-xs text-amber-300">
+                    {rev.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-xs text-white truncate">{rev.username}</span>
+                      {rev.isUltimate && (
+                        <span className="text-[10px] text-amber-400 font-black" title="Ultimate VIP">👑</span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                      <CheckCircle className="w-2.5 h-2.5" />
+                      <span>Verified Experience</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
       {/* Supported Games Quick Grid */}
       <section className="py-20 px-4 bg-[#0b0f19]">
         <div className="max-w-5xl mx-auto text-center">
@@ -351,6 +502,111 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Write Platform Review Modal */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-white/15 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
+                  ⭐
+                </div>
+                <div>
+                  <h3 className="font-black text-lg text-white">Rate Your Experience</h3>
+                  <p className="text-xs text-slate-400">Share your thoughts on MinoForge performance and ecosystem.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsReviewModalOpen(false)}
+                className="text-slate-400 hover:text-white text-lg font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handlePostPlatformReview} className="space-y-4">
+              {/* .1 Precision Star Rating Picker */}
+              <div className="p-4 bg-slate-950/90 rounded-2xl border border-white/10 text-center space-y-3">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Platform Rating (1.0 to 5.0 Stars)
+                </label>
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <StarRating 
+                    rating={newReviewRating} 
+                    size="xl" 
+                    interactive={true} 
+                    onChange={(val) => setNewReviewRating(val)}
+                  />
+                  <span className="text-xs text-amber-400 font-medium">
+                    Slide or tap to adjust rating with .1 decimal precision
+                  </span>
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Review Headline
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Best marketplace experience with 0% fees"
+                  value={newReviewTitle}
+                  onChange={(e) => setNewReviewTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              {/* Comment Message */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Your Feedback Message *
+                </label>
+                <textarea
+                  rows="4"
+                  required
+                  placeholder="What was your experience with downloads, speed, customer support, or plugins on MinoForge?"
+                  value={newReviewComment}
+                  onChange={(e) => setNewReviewComment(e.target.value)}
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+                />
+              </div>
+
+              {reviewSuccessMsg && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{reviewSuccessMsg}</span>
+                </div>
+              )}
+
+              {reviewErrorMsg && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{reviewErrorMsg}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReviewModalOpen(false)}
+                  className="px-4 py-2.5 text-slate-400 hover:text-white text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {reviewSubmitting ? 'Publishing...' : 'Publish Verified Review'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar {

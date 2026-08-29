@@ -60,7 +60,12 @@ function generate9DigitCode() {
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, role: user.role },
+    { 
+      id: user.id, 
+      username: user.username || (user.email ? user.email.split('@')[0] : 'Member'), 
+      email: user.email, 
+      role: user.role || 'USER' 
+    },
     process.env.JWT_SECRET || 'secret',
     { expiresIn: '7d' }
   );
@@ -702,15 +707,16 @@ router.post('/staff/verify-code', async (req, res) => {
       };
     }
 
-    const token = jwt.sign(
-      { id: staffUser.id, role: 'ADMIN' },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: '7d' }
-    );
+    const token = generateToken({
+      id: staffUser.id,
+      username: staffUser.username || staffEmail.split('@')[0],
+      email: staffEmail,
+      role: 'ADMIN'
+    });
 
     store.trackActivity({
       type: 'NIMDA_LOGIN',
-      username: 'SevGamerPro (Master)',
+      username: staffUser.username || staffEmail.split('@')[0],
       email: staffEmail,
       ip: req.ip || '127.0.0.1',
       path: '/nimda',
@@ -722,7 +728,7 @@ router.post('/staff/verify-code', async (req, res) => {
       token,
       user: {
         id: staffUser.id,
-        username: staffUser.username || 'MinoAdmin',
+        username: staffUser.username || staffEmail.split('@')[0],
         email: staffEmail,
         role: 'ADMIN'
       }

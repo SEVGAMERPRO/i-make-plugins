@@ -135,6 +135,63 @@ let promoCodes = [
 // Real Purchases Record
 let purchases = [];
 
+// Platform Experience Reviews (Website itself)
+let websiteReviews = [
+  {
+    id: 'rev-site-1',
+    userId: 'u-rev-1',
+    username: 'LunarHosting',
+    avatarUrl: '/images/avatars/default.png',
+    rating: 4.9,
+    title: 'The cleanest mod & plugin marketplace on the web',
+    comment: 'Super fast instant downloads, zero sketchy redirect links, and the automated bytecode verification gives total peace of mind for our dedicated servers.',
+    isUltimate: true,
+    isVerifiedUser: true,
+    createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
+  },
+  {
+    id: 'rev-site-2',
+    userId: 'u-rev-2',
+    username: 'RedstoneDev',
+    avatarUrl: '/images/avatars/default.png',
+    rating: 5.0,
+    title: '0% fees for Ultimate creators is genuinely unmatched',
+    comment: 'Switched all our network resources over to MinoForge. Direct instant payouts and the creator toolkit is leagues ahead of older legacy forums.',
+    isUltimate: true,
+    isVerifiedUser: true,
+    createdAt: new Date(Date.now() - 4 * 86400000).toISOString()
+  },
+  {
+    id: 'rev-site-3',
+    userId: 'u-rev-3',
+    username: 'VelocityRP',
+    avatarUrl: '/images/avatars/default.png',
+    rating: 4.8,
+    title: 'Amazing FiveM & Minecraft ecosystem',
+    comment: 'Bought 3 custom resource packs and scripts here. Everything installed with zero compatibility conflicts.',
+    isUltimate: false,
+    isVerifiedUser: true,
+    createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
+  }
+];
+
+// Individual Plugin & Seller Reviews (Verified Buyers Only)
+let pluginReviews = [
+  {
+    id: 'rev-plug-1',
+    pluginId: 'p-bot-3',
+    userId: 'u-buyer-1',
+    username: 'CraftMaster',
+    avatarUrl: '/images/avatars/default.png',
+    rating: 4.9,
+    title: 'Flawless Discord Ticket transcript engine',
+    comment: 'Installed in under 2 minutes. The HTML transcript generation is clean, searchable, and saves our support staff hours every week.',
+    isUltimate: false,
+    isVerifiedBuyer: true,
+    createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
+  }
+];
+
 // Developer API Keys, Webhooks & Real-time Events
 let apiKeys = [];
 let discordWebhooks = [];
@@ -654,5 +711,120 @@ module.exports = {
     return developerEvents
       .filter(e => (e.creatorEmail || '').toLowerCase() === clean || (e.buyerEmail || '').toLowerCase() === clean || !e.creatorEmail)
       .slice(0, limit);
+  },
+
+  // ==========================================
+  // ⭐ PLATFORM & PLUGIN REVIEWS ENGINE (.1 PRECISION)
+  // ==========================================
+  getWebsiteReviews: () => {
+    const total = websiteReviews.length;
+    const avg = total > 0 ? (websiteReviews.reduce((sum, r) => sum + Number(r.rating || 5), 0) / total).toFixed(1) : '5.0';
+    return {
+      reviews: websiteReviews,
+      averageRating: parseFloat(avg),
+      totalReviews: total
+    };
+  },
+
+  addWebsiteReview: (review) => {
+    const rawRating = parseFloat(review.rating);
+    const parsedRating = isNaN(rawRating) ? 5.0 : Math.max(1.0, Math.min(5.0, Math.round(rawRating * 10) / 10));
+    const newReview = {
+      id: `rev-site-${Date.now()}`,
+      userId: review.userId || `u-${Date.now()}`,
+      username: review.username || 'Community Member',
+      avatarUrl: review.avatarUrl || '/images/avatars/default.png',
+      rating: parsedRating,
+      title: (review.title || 'Platform Review').trim(),
+      comment: (review.comment || review.message || '').trim(),
+      isUltimate: Boolean(review.isUltimate),
+      isVerifiedUser: true,
+      createdAt: new Date().toISOString()
+    };
+    websiteReviews.unshift(newReview);
+    return newReview;
+  },
+
+  getPluginReviews: (pluginId) => {
+    const matching = pluginReviews.filter(r => r.pluginId === pluginId);
+    const total = matching.length;
+    const avg = total > 0 ? (matching.reduce((sum, r) => sum + Number(r.rating || 5), 0) / total).toFixed(1) : '5.0';
+    return {
+      reviews: matching,
+      averageRating: parseFloat(avg),
+      totalReviews: total
+    };
+  },
+
+  addPluginReview: (pluginId, review) => {
+    const rawRating = parseFloat(review.rating);
+    const parsedRating = isNaN(rawRating) ? 5.0 : Math.max(1.0, Math.min(5.0, Math.round(rawRating * 10) / 10));
+    const newReview = {
+      id: `rev-plug-${Date.now()}`,
+      pluginId,
+      userId: review.userId || `u-${Date.now()}`,
+      username: review.username || 'Verified Buyer',
+      avatarUrl: review.avatarUrl || '/images/avatars/default.png',
+      rating: parsedRating,
+      title: (review.title || 'Resource Review').trim(),
+      comment: (review.comment || review.message || '').trim(),
+      isUltimate: Boolean(review.isUltimate),
+      isVerifiedBuyer: true,
+      createdAt: new Date().toISOString()
+    };
+    pluginReviews.unshift(newReview);
+
+    // Recalculate plugin rating & review count
+    const matching = pluginReviews.filter(r => r.pluginId === pluginId);
+    const total = matching.length;
+    const avg = (matching.reduce((sum, r) => sum + Number(r.rating || 5), 0) / total).toFixed(1);
+    
+    const pIdx = plugins.findIndex(p => p.id === pluginId);
+    if (pIdx !== -1) {
+      plugins[pIdx].rating = parseFloat(avg);
+      plugins[pIdx].ratingCount = total;
+      plugins[pIdx].reviewsCount = total;
+    }
+
+    return { review: newReview, averageRating: parseFloat(avg), totalReviews: total };
+  },
+
+  hasPurchased: (userId, userEmail, pluginId) => {
+    const targetPlugin = plugins.find(p => p.id === pluginId);
+    // Free resources are automatically accessible to review
+    if (targetPlugin && (Number(targetPlugin.price) === 0 || targetPlugin.price === '0.00' || targetPlugin.price === 'Free')) {
+      return true;
+    }
+    // Author can test/review
+    if (targetPlugin && targetPlugin.author && (targetPlugin.author.id === userId || targetPlugin.author.username === userId)) {
+      return true;
+    }
+    // Check purchase records
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const cleanId = (userId || '').trim().toLowerCase();
+    return purchases.some(p => 
+      p.pluginId === pluginId && 
+      (
+        (p.userId && p.userId.toLowerCase() === cleanId) || 
+        (p.buyerEmail && cleanEmail && p.buyerEmail.toLowerCase() === cleanEmail) || 
+        (p.buyerUsername && p.buyerUsername.toLowerCase() === cleanId)
+      )
+    );
+  },
+
+  recordPurchase: (purchase) => {
+    const newPurchase = {
+      id: `ord-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      pluginId: purchase.pluginId,
+      pluginTitle: purchase.pluginTitle || 'Game Resource',
+      userId: purchase.userId,
+      buyerUsername: purchase.buyerUsername || 'Customer',
+      buyerEmail: purchase.buyerEmail || 'customer@minoforge.com',
+      amount: purchase.amount || 0,
+      gateway: purchase.gateway || 'PAYPAL',
+      createdAt: new Date().toISOString()
+    };
+    purchases.unshift(newPurchase);
+    return newPurchase;
   }
 };
