@@ -169,9 +169,9 @@ export default function PricingPage() {
             return (
               <div
                 key={tier.id}
-                className={`relative flex flex-col justify-between rounded-3xl p-8 transition-all duration-300 ${
+                className={`relative flex flex-col justify-between rounded-3xl p-6 sm:p-8 transition-all duration-300 ${
                   tier.highlighted
-                    ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border-2 border-amber-500/60 shadow-2xl shadow-amber-500/20 scale-105 z-10'
+                    ? 'bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border-2 border-amber-500/60 shadow-2xl shadow-amber-500/20 md:scale-105 scale-100 z-10'
                     : 'bg-slate-900/70 border border-white/10 shadow-xl hover:border-white/20'
                 }`}
               >

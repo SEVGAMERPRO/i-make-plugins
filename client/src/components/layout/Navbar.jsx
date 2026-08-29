@@ -153,10 +153,12 @@ const Navbar = ({ onMenuClick }) => {
         </div>
 
         {/* Right User Actions & Popover Menu */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
           
-          {/* Currency Switcher */}
-          <CurrencySwitcher />
+          {/* Currency Switcher (Desktop only; mobile uses drawer & footer) */}
+          <div className="hidden sm:block">
+            <CurrencySwitcher />
+          </div>
 
           {/* Notification Bell */}
           <NotificationBell />
@@ -197,16 +199,16 @@ const Navbar = ({ onMenuClick }) => {
           )}
 
           {!user ? (
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Link 
                 to="/login" 
-                className="btn-animated text-slate-300 hover:text-white font-bold text-xs sm:text-sm px-2.5 sm:px-3.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+                className="btn-animated text-slate-300 hover:text-white font-bold text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
               >
                 Log In
               </Link>
               <Link 
                 to="/register" 
-                className="btn-glow-blue btn-shimmer btn-animated bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl"
+                className="btn-glow-blue btn-shimmer btn-animated bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm px-2.5 sm:px-4 py-1.5 rounded-xl whitespace-nowrap shadow-sm"
               >
                 Register
               </Link>

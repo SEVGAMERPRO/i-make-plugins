@@ -139,11 +139,11 @@ export default function CheckoutPage() {
                   <span className="text-slate-400 text-[11px]">Cancel or change your subscription anytime in 1 click.</span>
                 </div>
 
-                <div className="flex items-center gap-2 bg-slate-900 p-1 rounded-xl border border-white/10">
+                <div className="flex items-center gap-2 bg-slate-900 p-1 rounded-xl border border-white/10 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setAnnualBilling(false)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
                       !annualBilling
                         ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                         : 'text-slate-400 hover:text-white'
@@ -154,7 +154,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setAnnualBilling(true)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       annualBilling
                         ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                         : 'text-slate-400 hover:text-white'
@@ -302,7 +302,7 @@ export default function CheckoutPage() {
                 </p>
 
                 {/* Quick Presets */}
-                <div className="grid grid-cols-4 gap-1.5 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   {[0, 1.00, 2.50, 5.00].map((val) => (
                     <button
                       key={val}
@@ -311,7 +311,7 @@ export default function CheckoutPage() {
                         setDonation(val); 
                         setCustomDonationInput(val > 0 ? val.toString() : ''); 
                       }}
-                      className={`py-2 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
+                      className={`py-3 px-2 rounded-xl font-bold transition-all text-center cursor-pointer active:scale-95 text-xs ${
                         donation === val && customDonationInput === (val > 0 ? val.toString() : '')
                           ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30 border border-pink-400'
                           : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-white/10'
