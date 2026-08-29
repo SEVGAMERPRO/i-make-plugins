@@ -425,7 +425,7 @@ export default function CheckoutPage() {
                     <div className="relative flex-1">
                       <input
                         type="text"
-                        placeholder="e.g. SEV50, LAUNCH100"
+                        placeholder="Enter promo or creator code"
                         value={promoCodeInput}
                         onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                         className="w-full pl-3 pr-3 py-2.5 bg-slate-900 border border-white/15 focus:border-amber-400 rounded-xl text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none uppercase"

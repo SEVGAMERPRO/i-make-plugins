@@ -311,7 +311,7 @@ const PaymentSimulatorModal = () => {
                   <form onSubmit={handleApplyPromo} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="e.g. SEV50, LAUNCH100"
+                      placeholder="Enter promo code"
                       value={promoCodeInput}
                       onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                       className="flex-1 bg-slate-950 border border-white/15 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none uppercase"

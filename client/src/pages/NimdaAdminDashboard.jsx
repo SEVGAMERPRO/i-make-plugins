@@ -1891,7 +1891,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. SEV50, LAUNCH100"
+                        placeholder="e.g. DISCOUNT20, PARTNERCODE"
                         value={newPromoCode}
                         onChange={(e) => setNewPromoCode(e.target.value.toUpperCase().replace(/\s+/g, ''))}
                         className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none focus:border-amber-400"
