@@ -349,6 +349,12 @@ router.post('/purge-cache', (req, res) => {
     details: 'Full edge and local memory cache purge triggered'
   });
 
+  res.json({
+    success: true,
+    message: 'Cache purged successfully. 0 stale entries removed.'
+  });
+});
+
 // ==========================================
 // 🏷️ PROMO & CREATOR CODE ADMIN ROUTES
 // ==========================================

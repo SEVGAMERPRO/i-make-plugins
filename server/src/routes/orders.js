@@ -117,6 +117,10 @@ router.post('/payout-request', async (req, res) => {
 
   } catch (error) {
     console.error('[Payout Request Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to submit payout request.' });
+  }
+});
+
 // @route   POST /api/orders/validate-promo
 // @desc    Validate promo or creator code live for checkout
 router.post('/validate-promo', (req, res) => {
