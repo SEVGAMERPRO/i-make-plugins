@@ -3,7 +3,6 @@ import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSi
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate } from 'react-router-dom';
-import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
 
 const TIERS = [
   {
