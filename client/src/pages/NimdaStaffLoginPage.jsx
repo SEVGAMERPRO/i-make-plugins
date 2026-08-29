@@ -8,12 +8,9 @@ const NimdaStaffLoginPage = () => {
   const { loginWithToken } = useAuth();
 
   // Authentication State
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-
-  // Clear any existing stored admin session immediately upon mounting
-  useEffect(() => {
-    localStorage.removeItem('nimda_admin_auth');
-  }, []);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('nimda_admin_auth') === 'true';
+  });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
