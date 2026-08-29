@@ -177,7 +177,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 4000);
+    const interval = setInterval(fetchData, 1200); // 1.2s ultra-fast real-time telemetry
     return () => clearInterval(interval);
   }, []);
 

@@ -52,6 +52,15 @@ app.use(cors({
   credentials: true
 }));
 
+// Instant live synchronization - disable caching on all API responses so updates are 100% real-time
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 // Rate limiting with localhost & development bypass
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
