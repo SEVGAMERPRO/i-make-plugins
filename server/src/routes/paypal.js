@@ -284,7 +284,7 @@ router.post('/capture-order', async (req, res) => {
 
 // Cache for generated PayPal Subscription Plan IDs
 let cachedSubscriptionPlans = {
-  monthly: process.env.PAYPAL_PLAN_ID_MONTHLY || null,
+  monthly: process.env.PAYPAL_PLAN_ID_MONTHLY || 'P-6N334537WX7871409NKJRIKY',
   yearly: process.env.PAYPAL_PLAN_ID_YEARLY || null,
   productId: process.env.PAYPAL_PRODUCT_ID || null
 };
