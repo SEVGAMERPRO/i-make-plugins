@@ -6,7 +6,16 @@ import { ShieldCheck, Lock, Loader2, AlertCircle } from 'lucide-react';
 
 const PAYPAL_CLIENT_ID = 'BAAREs6NlWG9nBdVzwe1KQHe1hHWrFYLEeAABbw-c020J-zlnJR-pvWi67vlxnASrz6BWSSrQS4oNMsqPQ';
 
-const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
+const PayPalSmartButtons = ({ 
+  items, 
+  totalAmount, 
+  onSuccess, 
+  onError,
+  isSubscription = false,
+  billingCycle = 'monthly',
+  subscriptionPlanId = null,
+  donation = 0
+}) => {
   const { user } = useAuth();
   const { activeCurrency } = useCurrency();
   const containerRef = useRef(null);
@@ -20,7 +29,7 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
     let isMounted = true;
 
     const loadPayPalSdk = () => {
-      const scriptId = 'paypal-sdk-script';
+      const scriptId = isSubscription ? 'paypal-sdk-subscription-script' : 'paypal-sdk-script';
       const existingScript = document.getElementById(scriptId);
 
       if (window.paypal && window.paypal.Buttons) {
@@ -43,7 +52,11 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
 
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=${currencyCode}&intent=capture&components=buttons`;
+      const sdkUrl = isSubscription
+        ? `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=${currencyCode}&vault=true&intent=subscription&components=buttons`
+        : `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=${currencyCode}&intent=capture&components=buttons`;
+
+      script.src = sdkUrl;
       script.async = true;
 
       script.onload = () => {
@@ -69,7 +82,7 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
     return () => {
       isMounted = false;
     };
-  }, [currencyCode]);
+  }, [currencyCode, isSubscription]);
 
   useEffect(() => {
     if (!sdkReady || !window.paypal || !containerRef.current) return;
@@ -77,78 +90,151 @@ const PayPalSmartButtons = ({ items, totalAmount, onSuccess, onError }) => {
     containerRef.current.innerHTML = '';
 
     try {
-      window.paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'pill',
-          label: 'paypal',
-          height: 48
-        },
+      if (isSubscription) {
+        // Recurring Subscription Button Mode
+        window.paypal.Buttons({
+          style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'pill',
+            label: 'subscribe',
+            height: 48
+          },
 
-        // 1. Create order on backend
-        createOrder: async () => {
-          setPayError('');
-          try {
-            const res = await axios.post('/api/paypal/create-order', {
-              items,
-              totalAmount,
-              currency: currencyCode
-            });
+          createSubscription: async (data, actions) => {
+            setPayError('');
+            try {
+              let activePlanId = subscriptionPlanId;
+              if (!activePlanId) {
+                const res = await axios.get(`/api/paypal/subscription-plan?cycle=${billingCycle}`);
+                activePlanId = res.data?.planId;
+              }
 
-            if (!res.data || !res.data.id) {
-              throw new Error('No order ID returned from PayPal server.');
+              if (!activePlanId) {
+                throw new Error('Could not retrieve active subscription plan from PayPal.');
+              }
+
+              return actions.subscription.create({
+                plan_id: activePlanId
+              });
+            } catch (err) {
+              const msg = err.response?.data?.error || err.message || 'Failed to initialize subscription checkout.';
+              setPayError(msg);
+              if (onError) onError(msg);
+              throw err;
             }
-            return res.data.id;
-          } catch (err) {
-            const msg = err.response?.data?.error || err.message || 'Failed to initialize PayPal order.';
+          },
+
+          onApprove: async (data) => {
+            setPayError('');
+            setLoading(true);
+            try {
+              const res = await axios.post('/api/paypal/verify-subscription', {
+                subscriptionId: data.subscriptionID,
+                buyerEmail: user?.email,
+                buyerUsername: user?.username,
+                billingCycle,
+                tip: donation
+              });
+
+              if (res.data && res.data.success) {
+                if (onSuccess) onSuccess({ ...res.data, orderID: data.subscriptionID, subscriptionID: data.subscriptionID });
+              } else {
+                throw new Error(res.data?.error || 'Subscription verification failed.');
+              }
+            } catch (err) {
+              const msg = err.response?.data?.error || err.message || 'Subscription verification failed.';
+              setPayError(msg);
+              if (onError) onError(msg);
+            } finally {
+              setLoading(false);
+            }
+          },
+
+          onError: (err) => {
+            console.error('PayPal Subscription Button Error:', err);
+            const msg = 'PayPal encountered an error during subscription checkout. Please try again.';
             setPayError(msg);
             if (onError) onError(msg);
-            throw err;
+          },
+
+          onCancel: (data) => {
+            console.log('PayPal Subscription Cancelled:', data);
           }
-        },
+        }).render(containerRef.current);
+      } else {
+        // Standard One-Time Order Button Mode
+        window.paypal.Buttons({
+          style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'pill',
+            label: 'paypal',
+            height: 48
+          },
 
-        // 2. Capture authorized funds on backend
-        onApprove: async (data) => {
-          setPayError('');
-          setLoading(true);
-          try {
-            const res = await axios.post('/api/paypal/capture-order', {
-              orderId: data.orderID,
-              items,
-              buyerEmail: user?.email,
-              buyerUsername: user?.username
-            });
+          createOrder: async () => {
+            setPayError('');
+            try {
+              const res = await axios.post('/api/paypal/create-order', {
+                items,
+                totalAmount,
+                currency: currencyCode
+              });
 
-            if (res.data && res.data.success) {
-              if (onSuccess) onSuccess(res.data);
-            } else {
-              throw new Error(res.data?.error || 'Payment capture could not be verified.');
+              if (!res.data || !res.data.id) {
+                throw new Error('No order ID returned from PayPal server.');
+              }
+              return res.data.id;
+            } catch (err) {
+              const msg = err.response?.data?.error || err.message || 'Failed to initialize PayPal order.';
+              setPayError(msg);
+              if (onError) onError(msg);
+              throw err;
             }
-          } catch (err) {
-            const msg = err.response?.data?.error || err.message || 'Payment capture failed.';
+          },
+
+          onApprove: async (data) => {
+            setPayError('');
+            setLoading(true);
+            try {
+              const res = await axios.post('/api/paypal/capture-order', {
+                orderId: data.orderID,
+                items,
+                buyerEmail: user?.email,
+                buyerUsername: user?.username
+              });
+
+              if (res.data && res.data.success) {
+                if (onSuccess) onSuccess(res.data);
+              } else {
+                throw new Error(res.data?.error || 'Payment capture could not be verified.');
+              }
+            } catch (err) {
+              const msg = err.response?.data?.error || err.message || 'Payment capture failed.';
+              setPayError(msg);
+              if (onError) onError(msg);
+            } finally {
+              setLoading(false);
+            }
+          },
+
+          onError: (err) => {
+            console.error('PayPal Buttons Error:', err);
+            const msg = 'PayPal encountered an error during checkout. Please try again.';
             setPayError(msg);
             if (onError) onError(msg);
-          } finally {
-            setLoading(false);
+          },
+
+          onCancel: (data) => {
+            console.log('PayPal Checkout Cancelled:', data);
           }
-        },
-
-        onError: (err) => {
-          console.error('PayPal Buttons Error:', err);
-          const msg = 'PayPal encountered an error during checkout. Please try again.';
-          setPayError(msg);
-          if (onError) onError(msg);
-        },
-
-        onCancel: (data) => {
-          console.log('PayPal Checkout Cancelled:', data);
-        }
-      }).render(containerRef.current);
+        }).render(containerRef.current);
+      }
     } catch (renderErr) {
       console.warn('PayPal render error:', renderErr);
     }
-  }, [sdkReady, items, totalAmount, currencyCode, user, onSuccess, onError]);
+  }, [sdkReady, items, totalAmount, currencyCode, isSubscription, billingCycle, subscriptionPlanId, donation, user, onSuccess, onError]);
 
   return (
     <div className="space-y-3">

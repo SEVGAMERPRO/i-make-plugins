@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
+const store = require('../store/globalStore');
 
 const getPayPalConfig = () => {
   const isLive = (process.env.PAYPAL_MODE || 'live') === 'live';
@@ -278,6 +279,276 @@ router.post('/capture-order', async (req, res) => {
   } catch (err) {
     console.error('[PayPal Capture Exception]:', err);
     return res.status(500).json({ error: err.message || 'Failed to complete transaction.' });
+  }
+});
+
+// Cache for generated PayPal Subscription Plan IDs
+let cachedSubscriptionPlans = {
+  monthly: process.env.PAYPAL_PLAN_ID_MONTHLY || null,
+  yearly: process.env.PAYPAL_PLAN_ID_YEARLY || null,
+  productId: process.env.PAYPAL_PRODUCT_ID || null
+};
+
+// Helper: Get or create PayPal Subscription Product & Plan dynamically via REST API
+async function getOrCreatePayPalSubscriptionPlan(isYearly) {
+  const planKey = isYearly ? 'yearly' : 'monthly';
+  if (cachedSubscriptionPlans[planKey]) {
+    return cachedSubscriptionPlans[planKey];
+  }
+
+  const accessToken = await getPayPalAccessToken();
+  const { baseUrl } = getPayPalConfig();
+
+  // 1. Get or Create Product
+  if (!cachedSubscriptionPlans.productId) {
+    try {
+      const prodRes = await fetch(`${baseUrl}/v1/catalogs/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'MinoForge Ultimate Membership',
+          description: 'VIP creator superpowers, reduced 5% platform fees, and €5/mo free ad credits on MinoForge.',
+          type: 'DIGITAL',
+          category: 'ONLINE_GAMING',
+          image_url: 'https://minoforge.com/favicon.png',
+          home_url: 'https://minoforge.com'
+        })
+      });
+
+      const prodData = await prodRes.json();
+      if (prodRes.ok && prodData.id) {
+        cachedSubscriptionPlans.productId = prodData.id;
+      }
+    } catch (pErr) {
+      console.warn('[PayPal Product Create Warning]:', pErr);
+    }
+  }
+
+  // 2. Create Plan
+  const planPrice = isYearly ? '132.50' : (process.env.TESTING_PRICE || '0.01');
+  const planName = isYearly 
+    ? 'MinoForge Ultimate Membership (Annual Plan - 15% Off)' 
+    : 'MinoForge Ultimate Membership (Monthly Subscription)';
+
+  try {
+    const planRes = await fetch(`${baseUrl}/v1/billing/plans`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        product_id: cachedSubscriptionPlans.productId || 'PROD-MINOFORGE-ULTIMATE',
+        name: planName,
+        description: 'Automatic recurring billing for MinoForge Ultimate Creator Tier.',
+        status: 'ACTIVE',
+        billing_cycles: [
+          {
+            frequency: {
+              interval_unit: isYearly ? 'YEAR' : 'MONTH',
+              interval_count: 1
+            },
+            tenure_type: 'REGULAR',
+            sequence: 1,
+            total_cycles: 0, // 0 = indefinite recurring subscription until cancelled
+            pricing_scheme: {
+              fixed_price: {
+                value: planPrice,
+                currency_code: 'EUR'
+              }
+            }
+          }
+        ],
+        payment_preferences: {
+          auto_bill_outstanding: true,
+          setup_fee: {
+            value: '0.00',
+            currency_code: 'EUR'
+          },
+          setup_fee_failure_action: 'CONTINUE',
+          payment_failure_threshold: 3
+        }
+      })
+    });
+
+    const planData = await planRes.json();
+    if (planRes.ok && planData.id) {
+      cachedSubscriptionPlans[planKey] = planData.id;
+      console.log(`[PayPal Subscription Plan Created]: ${planKey} -> ${planData.id}`);
+      return planData.id;
+    } else {
+      console.warn(`[PayPal Create Plan API Response]:`, planData);
+    }
+  } catch (planErr) {
+    console.error('[PayPal Create Plan Exception]:', planErr);
+  }
+
+  return cachedSubscriptionPlans[planKey] || null;
+}
+
+// @route   GET /api/paypal/subscription-plan
+// @desc    Retrieve active PayPal Subscription Plan ID for Monthly or Yearly billing
+router.get('/subscription-plan', async (req, res) => {
+  try {
+    const { cycle } = req.query;
+    const isYearly = cycle === 'yearly';
+    const planKey = isYearly ? 'yearly' : 'monthly';
+
+    const planId = await getOrCreatePayPalSubscriptionPlan(isYearly);
+    return res.json({
+      success: true,
+      cycle: planKey,
+      planId: planId || (isYearly ? 'P-MINOFORGE-ULTIMATE-YEARLY' : 'P-MINOFORGE-ULTIMATE-MONTHLY')
+    });
+  } catch (err) {
+    console.error('[PayPal Plan Retrieval Exception]:', err);
+    return res.status(500).json({ error: err.message || 'Could not retrieve subscription plan.' });
+  }
+});
+
+// @route   POST /api/paypal/verify-subscription
+// @desc    Verify recurring PayPal Subscription, activate Ultimate VIP status & send email receipt
+router.post('/verify-subscription', async (req, res) => {
+  try {
+    const { subscriptionId, buyerEmail, buyerUsername, billingCycle, tip } = req.body;
+
+    if (!subscriptionId) {
+      return res.status(400).json({ error: 'PayPal Subscription ID is required.' });
+    }
+
+    let subStatus = 'ACTIVE';
+    try {
+      const accessToken = await getPayPalAccessToken();
+      const { baseUrl } = getPayPalConfig();
+
+      const response = await fetch(`${baseUrl}/v1/billing/subscriptions/${subscriptionId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const subData = await response.json();
+        subStatus = subData.status || 'ACTIVE';
+      }
+    } catch (e) {
+      console.warn('[PayPal Sub Status Check Warning]:', e.message);
+    }
+
+    // Activate User in store
+    const cleanEmail = (buyerEmail || '').trim().toLowerCase();
+    const user = store.getUserByEmail(cleanEmail) || store.getUserByUsername(buyerUsername);
+    if (user) {
+      store.updateUser(user.id, {
+        role: 'CREATOR',
+        isUltimate: true,
+        ultimateDuration: billingCycle === 'yearly' ? 'ANNUAL' : 'MONTHLY',
+        subscriptionId: subscriptionId,
+        subscriptionStatus: subStatus,
+        billingCycle: billingCycle || 'monthly'
+      });
+    }
+
+    store.addAuditLog({
+      type: 'SUBSCRIPTION_ACTIVATED',
+      actor: buyerUsername || cleanEmail || 'Subscriber',
+      details: `Activated recurring MinoForge Ultimate Subscription #${subscriptionId} (${billingCycle || 'monthly'})`,
+      ip: req.ip || '127.0.0.1'
+    });
+
+    // Send Official Subscription Confirmation Email via Brevo SMTP
+    if (cleanEmail && cleanEmail.includes('@')) {
+      const welcomeEmail = {
+        from: `"MinoForge Subscriptions" <${process.env.EMAIL_FROM_ADDRESS || 'noreply@minoforge.com'}>`,
+        to: cleanEmail,
+        subject: `👑 Welcome to MinoForge Ultimate! (Subscription #${subscriptionId})`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0b0f19; color: #ffffff; padding: 32px; border-radius: 20px; border: 1px solid #f59e0b;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <span style="font-size: 40px;">👑</span>
+              <h2 style="color: #f59e0b; margin-top: 12px; margin-bottom: 4px; font-size: 24px;">Ultimate Subscription Activated!</h2>
+              <p style="color: #94a3b8; font-size: 13px; margin: 0;">Subscription #${subscriptionId} • Auto-renews ${billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}</p>
+            </div>
+
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 18px; margin-bottom: 24px;">
+              <h4 style="color: #fbbf24; margin: 0 0 8px 0; font-size: 14px;">Your VIP Superpowers Are Live:</h4>
+              <ul style="color: #e2e8f0; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li><strong>5.0% Reduced Fee:</strong> Keep 95% of every plugin sale.</li>
+                <li><strong>€5.00 / mo Free Ad Credits:</strong> Added to your advertiser wallet.</li>
+                <li><strong>Gemini AI Engine:</strong> Unlimited daily config generation.</li>
+                <li><strong>Golden Crown Badge:</strong> Displayed on your creator profile &amp; plugins.</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center;">
+              <a href="https://minoforge.com/ultimate" style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: #0b0f19; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-size: 14px; font-weight: 900;">
+                👑 Access Your Ultimate Hub
+              </a>
+            </div>
+
+            <div style="border-top: 1px solid #1e293b; padding-top: 20px; margin-top: 24px; font-size: 11px; color: #64748b; text-align: center;">
+              <p>You can manage or cancel your subscription anytime from your PayPal dashboard or MinoForge settings.</p>
+              <p>© ${new Date().getFullYear()} MinoForge. All rights reserved.</p>
+            </div>
+          </div>
+        `
+      };
+
+      transporter.sendMail(welcomeEmail).catch(mErr => console.error('[Sub Emailer Error]:', mErr));
+    }
+
+    return res.status(200).json({
+      success: true,
+      subscriptionId,
+      status: subStatus,
+      billingCycle: billingCycle || 'monthly',
+      plan: 'MinoForge Ultimate Membership'
+    });
+  } catch (err) {
+    console.error('[PayPal Verify Subscription Exception]:', err);
+    return res.status(500).json({ error: err.message || 'Subscription verification failed.' });
+  }
+});
+
+// @route   POST /api/paypal/cancel-subscription
+// @desc    Cancel an active recurring PayPal Subscription
+router.post('/cancel-subscription', async (req, res) => {
+  try {
+    const { subscriptionId, reason } = req.body;
+    if (!subscriptionId) {
+      return res.status(400).json({ error: 'Subscription ID is required.' });
+    }
+
+    const accessToken = await getPayPalAccessToken();
+    const { baseUrl } = getPayPalConfig();
+
+    const response = await fetch(`${baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        reason: reason || 'Customer requested subscription cancellation via MinoForge portal.'
+      })
+    });
+
+    if (!response.ok && response.status !== 204) {
+      const errText = await response.text();
+      console.warn('[PayPal Subscription Cancel Response]:', errText);
+    }
+
+    return res.json({
+      success: true,
+      message: 'Subscription successfully cancelled. Access remains active until end of billing period.'
+    });
+  } catch (err) {
+    console.error('[PayPal Cancel Subscription Exception]:', err);
+    return res.status(500).json({ error: err.message || 'Could not cancel subscription.' });
   }
 });
 

@@ -610,6 +610,9 @@ export default function CheckoutPage() {
 
                   <PayPalSmartButtons
                     key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${finalTotalAmount}_${appliedPromo?.code || 'nopromo'}`}
+                    isSubscription={true}
+                    billingCycle={annualBilling ? 'yearly' : 'monthly'}
+                    donation={donation}
                     items={[{
                       id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
                       title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan' : 'Monthly Plan'})${appliedPromo ? ` [Code: ${appliedPromo.code}]` : ''}${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
@@ -619,6 +622,11 @@ export default function CheckoutPage() {
                     onSuccess={handleSuccessfulPayment}
                     onError={(err) => console.error('Ultimate checkout error:', err)}
                   />
+
+                  <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-center text-[10px] text-slate-400 space-y-0.5">
+                    <span className="font-semibold text-slate-300 block">🔁 Automatic Recurring Subscription</span>
+                    <span>Renews automatically every {annualBilling ? 'year' : 'month'}. Cancel anytime in 1 click from your PayPal dashboard.</span>
+                  </div>
                 </div>
               )}
 
