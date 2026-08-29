@@ -29,7 +29,7 @@ const TIERS = [
     id: 'ultimate',
     name: 'MinoForge Ultimate',
     badge: 'Pro Creator Tier • Most Popular',
-    priceMonthly: 0.01, // 🧪 Temporary Testing Price: 1 cent (Standard: 12.99/mo)
+    priceMonthly: 12.99,
     priceYearly: 132.50, // 15% discount on 12.99/mo (12.99 * 12 * 0.85 = 132.50)
     description: 'The definitive tier for elite developers. Cut platform fees to just 5%, receive monthly sponsored ad credits, and unlock full Forge superpowers.',
     buttonText: 'Unlock Ultimate Access',

@@ -259,6 +259,10 @@ router.post('/capture-order', async (req, res) => {
       });
     }
 
+    if (req.body.promoCode) {
+      store.usePromoCode(req.body.promoCode);
+    }
+
     console.log(`[PayPal Transaction Completed]: Order #${transactionId}, Paid: €${paidAmount} (MinoForge Fee: €${platformFee}, Creator Share: €${creatorEarnings})`);
 
     return res.status(200).json({

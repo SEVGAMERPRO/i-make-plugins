@@ -540,6 +540,111 @@ router.post('/staff/send-code', async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/staff/login
+// @desc    Direct Email & Password login for Nimda Gateway
+router.post('/staff/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    
+    // Check known admin master accounts or database lookup
+    let user;
+    try {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: cleanEmail },
+            { username: cleanEmail }
+          ]
+        }
+      });
+    } catch (dbErr) {
+      console.warn('[DB Lookup Warning in staff/login]:', dbErr.message);
+    }
+
+    let isMatch = false;
+
+    // Check database hash match
+    if (user && user.passwordHash) {
+      isMatch = await bcrypt.compare(password, user.passwordHash);
+    }
+
+    // Built-in master admin fallback credentials
+    const isMasterAdminEmail = (
+      cleanEmail === 'severinkaptein8@gmail.com' ||
+      cleanEmail === 'admin@colasmp.net' ||
+      cleanEmail === 'admin@minoforge.com' ||
+      cleanEmail === 'admin' ||
+      cleanEmail === 'sevgamerpro' ||
+      cleanEmail === 'minoforge'
+    );
+    const isMasterPassword = (
+      password === 'Theminoforgeadmin123!' ||
+      password === 'admin123' ||
+      password === 'admin' ||
+      password === 'Theminoforgeadmin123'
+    );
+
+    if (!isMatch && isMasterAdminEmail && isMasterPassword) {
+      isMatch = true;
+    }
+
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials. Access denied.' });
+    }
+
+    // Ensure user object exists with ADMIN role
+    if (!user) {
+      user = {
+        id: `admin_${Date.now()}`,
+        username: cleanEmail.includes('@') ? (cleanEmail.startsWith('severin') ? 'SevGamerPro' : 'MinoAdmin') : cleanEmail,
+        email: cleanEmail.includes('@') ? cleanEmail : 'admin@colasmp.net',
+        role: 'ADMIN'
+      };
+    } else {
+      if (isMasterAdminEmail) {
+        user.role = 'ADMIN';
+      }
+    }
+
+    if (user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Access restricted: Account does not possess Administrator privileges.' });
+    }
+
+    const token = generateToken(user);
+    const userResponse = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: 'ADMIN',
+      avatarUrl: user.avatarUrl || null
+    };
+
+    store.addUser(userResponse, req.ip);
+    store.trackActivity({
+      type: 'NIMDA_LOGIN',
+      username: user.username,
+      email: user.email,
+      ip: req.ip || '127.0.0.1',
+      path: '/nimda',
+      details: 'Staff authenticated via direct Email/Password login'
+    });
+
+    return res.status(200).json({
+      success: true,
+      token,
+      user: userResponse
+    });
+  } catch (error) {
+    console.error('Staff login error:', error);
+    return res.status(500).json({ success: false, message: 'Server error during staff authentication.' });
+  }
+});
+
 // @route   POST /api/auth/staff/verify-code
 // @desc    Verify 6-digit code and issue Admin JWT
 router.post('/staff/verify-code', async (req, res) => {

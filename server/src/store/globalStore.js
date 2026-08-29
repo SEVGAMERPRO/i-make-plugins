@@ -55,6 +55,9 @@ let users = [
     username: 'SevGamerPro', 
     email: 'severinkaptein8@gmail.com', 
     role: 'ADMIN', 
+    isUltimate: true,
+    ultimateDuration: 'LIFETIME',
+    ultimateExpiresAt: 'LIFETIME',
     registeredAt: 'Aug 2026', 
     ip: '127.0.0.1', 
     status: 'ACTIVE', 
@@ -74,6 +77,58 @@ let activityLogs = [
     path: '/nimda',
     details: 'Master 2FA Passcode verified successfully',
     timestamp: new Date().toISOString()
+  }
+];
+
+// Real Promo & Creator Codes Store
+let promoCodes = [
+  {
+    id: 'promo-sev50',
+    code: 'SEV50',
+    discountType: 'PERCENT',
+    discountPercent: 50,
+    discountAmount: 0,
+    creatorName: 'SevGamerPro',
+    creatorPercentage: 10,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString(),
+    maxUses: 500,
+    usedCount: 14,
+    active: true,
+    description: 'SevGamerPro Official Partner Creator Code — 50% OFF',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'promo-welcome10',
+    code: 'WELCOME10',
+    discountType: 'PERCENT',
+    discountPercent: 10,
+    discountAmount: 0,
+    creatorName: null,
+    creatorPercentage: 0,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString(),
+    maxUses: null,
+    usedCount: 42,
+    active: true,
+    description: 'Welcome 10% Discount Code',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'promo-launch100',
+    code: 'LAUNCH100',
+    discountType: 'PERCENT',
+    discountPercent: 100,
+    discountAmount: 0,
+    creatorName: 'Founder VIP',
+    creatorPercentage: 0,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+    maxUses: 100,
+    usedCount: 9,
+    active: true,
+    description: '100% Free Complete Checkout Waiver',
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -175,6 +230,21 @@ module.exports = {
     }
     return null;
   },
+  updateUserUltimate: (id, { isUltimate, duration, expiresAt, plan }) => {
+    const idx = users.findIndex(u => u.id === id || u.email === id || u.username === id);
+    if (idx !== -1) {
+      users[idx] = {
+        ...users[idx],
+        isUltimate: Boolean(isUltimate),
+        ultimateDuration: duration || (isUltimate ? '1_MONTH' : null),
+        ultimateExpiresAt: expiresAt || null,
+        ultimatePlan: plan || (isUltimate ? 'GIFTED_BY_ADMIN' : null),
+        role: isUltimate && users[idx].role === 'USER' ? 'CREATOR' : users[idx].role
+      };
+      return users[idx];
+    }
+    return null;
+  },
   
   // Real Analytics & Tracking Methods
   trackActivity: (event) => {
@@ -260,5 +330,169 @@ module.exports = {
 
     return newPurchase;
   },
-  getPurchases: () => purchases
+  getPurchases: () => purchases,
+
+  // ==========================================
+  // 🏷️ PROMO & CREATOR CODES METHODS
+  // ==========================================
+  getPromoCodes: () => {
+    const now = Date.now();
+    return promoCodes.map(p => {
+      const isExpired = p.endDate ? now > new Date(p.endDate).getTime() : false;
+      const isExhausted = p.maxUses ? p.usedCount >= p.maxUses : false;
+      return {
+        ...p,
+        isExpired,
+        isExhausted,
+        statusLabel: !p.active ? 'INACTIVE' : isExpired ? 'EXPIRED' : isExhausted ? 'EXHAUSTED' : 'ACTIVE'
+      };
+    });
+  },
+
+  createPromoCode: (data) => {
+    const cleanCode = (data.code || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+    if (!cleanCode) {
+      throw new Error('Promo code name is required.');
+    }
+
+    const existing = promoCodes.find(p => p.code === cleanCode);
+    if (existing) {
+      throw new Error(`Promo code "${cleanCode}" already exists.`);
+    }
+
+    const isFixed = data.discountType === 'FIXED';
+    const newPromo = {
+      id: `promo-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      code: cleanCode,
+      discountType: isFixed ? 'FIXED' : 'PERCENT',
+      discountPercent: isFixed ? 0 : Math.min(100, Math.max(1, parseFloat(data.discountPercent || 10))),
+      discountAmount: isFixed ? Math.max(0.1, parseFloat(data.discountAmount || 5)) : 0,
+      creatorName: data.creatorName ? data.creatorName.trim() : null,
+      creatorPercentage: data.creatorPercentage ? Math.min(100, Math.max(0, parseFloat(data.creatorPercentage))) : (data.creatorName ? 10 : 0),
+      startDate: data.startDate || new Date().toISOString(),
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : null,
+      maxUses: data.maxUses && Number(data.maxUses) > 0 ? parseInt(data.maxUses, 10) : null,
+      usedCount: 0,
+      active: data.active !== false,
+      description: data.description ? data.description.trim() : (data.creatorName ? `Creator Code for ${data.creatorName}` : `${cleanCode} Promo Code`),
+      createdAt: new Date().toISOString()
+    };
+
+    promoCodes.unshift(newPromo);
+
+    activityLogs.unshift({
+      id: `evt-${Date.now()}`,
+      type: 'PROMO_CREATED',
+      username: 'SevGamerPro (Admin)',
+      email: 'severinkaptein8@gmail.com',
+      ip: '127.0.0.1',
+      path: '/nimda',
+      details: `Created new promo/creator code "${newPromo.code}" (${newPromo.discountType === 'PERCENT' ? newPromo.discountPercent + '%' : '$' + newPromo.discountAmount} off, end date: ${newPromo.endDate ? new Date(newPromo.endDate).toLocaleDateString() : 'Never'})`,
+      timestamp: new Date().toISOString()
+    });
+
+    return newPromo;
+  },
+
+  updatePromoCode: (id, updateData) => {
+    const idx = promoCodes.findIndex(p => p.id === id || p.code === id.toUpperCase());
+    if (idx === -1) return null;
+
+    const current = promoCodes[idx];
+    const isFixed = updateData.discountType !== undefined ? updateData.discountType === 'FIXED' : current.discountType === 'FIXED';
+
+    promoCodes[idx] = {
+      ...current,
+      ...updateData,
+      discountType: isFixed ? 'FIXED' : 'PERCENT',
+      discountPercent: updateData.discountPercent !== undefined ? Math.min(100, Math.max(1, parseFloat(updateData.discountPercent))) : current.discountPercent,
+      discountAmount: updateData.discountAmount !== undefined ? Math.max(0, parseFloat(updateData.discountAmount)) : current.discountAmount,
+      creatorName: updateData.creatorName !== undefined ? (updateData.creatorName ? updateData.creatorName.trim() : null) : current.creatorName,
+      creatorPercentage: updateData.creatorPercentage !== undefined ? Math.min(100, Math.max(0, parseFloat(updateData.creatorPercentage))) : current.creatorPercentage,
+      endDate: updateData.endDate !== undefined ? (updateData.endDate ? new Date(updateData.endDate).toISOString() : null) : current.endDate,
+      maxUses: updateData.maxUses !== undefined ? (updateData.maxUses ? parseInt(updateData.maxUses, 10) : null) : current.maxUses,
+      active: updateData.active !== undefined ? Boolean(updateData.active) : current.active,
+      updatedAt: new Date().toISOString()
+    };
+
+    return promoCodes[idx];
+  },
+
+  deletePromoCode: (id) => {
+    const idx = promoCodes.findIndex(p => p.id === id || p.code === id.toUpperCase());
+    if (idx === -1) return false;
+    const deleted = promoCodes.splice(idx, 1)[0];
+    return deleted;
+  },
+
+  validatePromoCode: (codeStr, rawPrice = 0) => {
+    if (!codeStr || typeof codeStr !== 'string') {
+      return { valid: false, message: 'Please enter a promo or creator code.' };
+    }
+
+    const clean = codeStr.trim().toUpperCase();
+    const promo = promoCodes.find(p => p.code === clean);
+
+    if (!promo) {
+      return { valid: false, message: `Code "${clean}" is invalid or does not exist.` };
+    }
+
+    if (!promo.active) {
+      return { valid: false, message: `Code "${clean}" is currently disabled.` };
+    }
+
+    if (promo.endDate && Date.now() > new Date(promo.endDate).getTime()) {
+      return { 
+        valid: false, 
+        message: `Code "${clean}" expired on ${new Date(promo.endDate).toLocaleDateString()}.` 
+      };
+    }
+
+    if (promo.maxUses && promo.usedCount >= promo.maxUses) {
+      return { 
+        valid: false, 
+        message: `Code "${clean}" has reached its maximum usage limit.` 
+      };
+    }
+
+    const price = Math.max(0, parseFloat(rawPrice || 0));
+    let discount = 0;
+
+    if (promo.discountType === 'FIXED') {
+      discount = Math.min(price, promo.discountAmount || 0);
+    } else {
+      const pct = Math.min(100, Math.max(0, promo.discountPercent || 0));
+      discount = (price * pct) / 100;
+    }
+
+    discount = parseFloat(discount.toFixed(2));
+    const finalPrice = parseFloat(Math.max(0, price - discount).toFixed(2));
+
+    return {
+      valid: true,
+      id: promo.id,
+      code: promo.code,
+      discountType: promo.discountType,
+      discountPercent: promo.discountPercent,
+      discountAmount: promo.discountAmount,
+      discountCalculated: discount,
+      finalPrice: finalPrice,
+      creatorName: promo.creatorName,
+      creatorPercentage: promo.creatorPercentage,
+      endDate: promo.endDate,
+      description: promo.description,
+      isFree: finalPrice <= 0 || promo.discountPercent === 100
+    };
+  },
+
+  usePromoCode: (codeStr) => {
+    if (!codeStr) return null;
+    const clean = codeStr.trim().toUpperCase();
+    const promo = promoCodes.find(p => p.code === clean);
+    if (promo) {
+      promo.usedCount = (promo.usedCount || 0) + 1;
+      return promo;
+    }
+    return null;
+  }
 };

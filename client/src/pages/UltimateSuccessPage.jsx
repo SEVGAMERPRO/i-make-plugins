@@ -272,7 +272,7 @@ const UltimateSuccessPage = () => {
   // ================= ACTIVE SINGLE-USE RECEIPT VIEW =================
   const planName = orderData?.plan || 'MinoForge Ultimate';
   const orderId = orderData?.orderId || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
-  const rawAmount = parseFloat(orderData?.amount || '0.01');
+  const rawAmount = parseFloat(orderData?.amount || '12.99');
   const tipAmount = parseFloat(orderData?.tip || '0');
   const billingCycle = orderData?.cycle || 'Monthly';
 

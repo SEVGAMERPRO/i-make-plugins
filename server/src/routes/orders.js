@@ -117,7 +117,62 @@ router.post('/payout-request', async (req, res) => {
 
   } catch (error) {
     console.error('[Payout Request Error]:', error);
-    res.status(500).json({ success: false, message: 'Failed to submit payout request.' });
+// @route   POST /api/orders/validate-promo
+// @desc    Validate promo or creator code live for checkout
+router.post('/validate-promo', (req, res) => {
+  const { code, price = 0 } = req.body;
+  const result = store.validatePromoCode(code, price);
+  if (!result.valid) {
+    return res.status(400).json({ success: false, message: result.message });
+  }
+
+  res.json({
+    success: true,
+    ...result
+  });
+});
+
+// @route   POST /api/orders/apply-free-checkout
+// @desc    Complete 100% free checkout waiver without requiring PayPal payment
+router.post('/apply-free-checkout', async (req, res) => {
+  try {
+    const { buyerEmail, buyerUsername, code, items = [], planName = 'Order Purchase' } = req.body;
+
+    const validation = store.validatePromoCode(code, 100);
+    if (!validation.valid || (!validation.isFree && validation.discountPercent < 100)) {
+      return res.status(400).json({ success: false, message: validation.message || 'Valid 100% discount promo code required.' });
+    }
+
+    // Increment promo code usage
+    store.usePromoCode(code);
+
+    const transactionId = `FREE-${code.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    store.addPurchase({
+      buyerUsername: buyerUsername || 'FreeMember',
+      buyerEmail: buyerEmail || 'free@minoforge.com',
+      pluginId: items[0]?.id || 'free-grant',
+      pluginTitle: items[0]?.title || planName,
+      amount: 0,
+      currency: 'USD',
+      paymentMethod: `Promo Code (${code.toUpperCase()})`,
+      transactionId,
+      ip: req.ip || '127.0.0.1'
+    });
+
+    res.json({
+      success: true,
+      transactionId,
+      message: '100% Free order processed successfully!',
+      order: {
+        orderId: transactionId,
+        amount: '0.00',
+        code: code.toUpperCase()
+      }
+    });
+  } catch (err) {
+    console.error('Free checkout error:', err);
+    res.status(500).json({ success: false, message: 'Failed to process free checkout.' });
   }
 });
 

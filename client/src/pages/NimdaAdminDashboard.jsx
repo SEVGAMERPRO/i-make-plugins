@@ -5,7 +5,8 @@ import {
   ExternalLink, LogOut, DollarSign, Database, Sliders, Globe, Bell, 
   Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu, Wrench,
   BarChart3, TrendingUp, ShoppingCart, CreditCard, ArrowUpRight, UserPlus, LogIn,
-  MousePointerClick, Calendar, ArrowDownRight, Layers
+  MousePointerClick, Calendar, ArrowDownRight, Layers, Crown, Gift, Clock, Zap, Award,
+  Tag, Percent, Copy, Plus, Flame
 } from 'lucide-react';
 import axios from 'axios';
 import { useCurrency } from '../context/CurrencyContext';
@@ -91,6 +92,25 @@ const NimdaAdminDashboard = ({ onLogout }) => {
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [searchPlugin, setSearchPlugin] = useState('');
   const [searchUser, setSearchUser] = useState('');
+  const [userFilter, setUserFilter] = useState('ALL'); // 'ALL' | 'ULTIMATE' | 'CREATOR' | 'STANDARD' | 'FLAGGED'
+  const [selectedUserForGift, setSelectedUserForGift] = useState(null);
+  const [giftDuration, setGiftDuration] = useState('1_MONTH');
+  const [giftLoading, setGiftLoading] = useState(false);
+  const [quickGiftInput, setQuickGiftInput] = useState('');
+  const [quickGiftDuration, setQuickGiftDuration] = useState('1_MONTH');
+  const [promoCodes, setPromoCodes] = useState([]);
+  const [searchPromo, setSearchPromo] = useState('');
+  const [newPromoCode, setNewPromoCode] = useState('');
+  const [newPromoType, setNewPromoType] = useState('PERCENT'); // 'PERCENT' | 'FIXED'
+  const [newPromoPercent, setNewPromoPercent] = useState(20);
+  const [newPromoAmount, setNewPromoAmount] = useState(5.00);
+  const [newPromoCreator, setNewPromoCreator] = useState('');
+  const [newPromoCreatorShare, setNewPromoCreatorShare] = useState(10);
+  const [newPromoEndDate, setNewPromoEndDate] = useState('');
+  const [newPromoMaxUses, setNewPromoMaxUses] = useState('');
+  const [newPromoDesc, setNewPromoDesc] = useState('');
+  const [promoCreateLoading, setPromoCreateLoading] = useState(false);
+  const [copiedPromoId, setCopiedPromoId] = useState('');
   const [notification, setNotification] = useState('');
 
   // Keep local state in sync when global config changes
@@ -100,18 +120,19 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     }
   }, [globalConfig]);
 
-  // Fetch admin config, stats, analytics & logs
+  // Fetch admin config, stats, analytics, users & promo codes
   const fetchData = async () => {
     setRefreshLoading(true);
     try {
-      const [configRes, statsRes, logsRes, pluginsRes, usersRes, analyticsRes, purchasesRes] = await Promise.allSettled([
+      const [configRes, statsRes, logsRes, pluginsRes, usersRes, analyticsRes, purchasesRes, promoRes] = await Promise.allSettled([
         axios.get('/api/admin/config'),
         axios.get('/api/admin/stats'),
         axios.get('/api/admin/audit-logs'),
         axios.get('/api/admin/plugins'),
         axios.get('/api/admin/users'),
         axios.get('/api/admin/analytics'),
-        axios.get('/api/admin/purchases')
+        axios.get('/api/admin/purchases'),
+        axios.get('/api/admin/promo-codes')
       ]);
 
       if (configRes.status === 'fulfilled' && configRes.data?.config) {
@@ -125,6 +146,18 @@ const NimdaAdminDashboard = ({ onLogout }) => {
       }
       if (pluginsRes.status === 'fulfilled' && pluginsRes.data?.plugins) {
         setPlugins(pluginsRes.data.plugins);
+      }
+      if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
+        setUsers(usersRes.data.users);
+      }
+      if (analyticsRes.status === 'fulfilled' && analyticsRes.data?.analytics) {
+        setAnalyticsData(analyticsRes.data.analytics);
+      }
+      if (purchasesRes.status === 'fulfilled' && purchasesRes.data?.purchases) {
+        setPurchases(purchasesRes.data.purchases);
+      }
+      if (promoRes.status === 'fulfilled' && promoRes.data?.promoCodes) {
+        setPromoCodes(promoRes.data.promoCodes);
       }
       if (usersRes.status === 'fulfilled' && usersRes.data?.users) {
         setUsers(usersRes.data.users);
@@ -245,6 +278,64 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     setTimeout(() => setNotification(''), 3000);
   };
 
+  const handleGiftUltimate = async (userId, duration = '1_MONTH') => {
+    setGiftLoading(true);
+    try {
+      const res = await axios.put(`/api/admin/users/${userId}/ultimate`, {
+        isUltimate: duration !== 'REVOKE',
+        duration
+      });
+
+      if (res.data?.success) {
+        setUsers(prev => prev.map(u => u.id === userId ? res.data.user : u));
+        setNotification(res.data.message || 'MinoForge Ultimate updated successfully!');
+        setSelectedUserForGift(null);
+      }
+    } catch (err) {
+      // Local state fallback update
+      setUsers(prev => prev.map(u => {
+        if (u.id === userId) {
+          return {
+            ...u,
+            isUltimate: duration !== 'REVOKE',
+            ultimateDuration: duration === 'REVOKE' ? null : duration,
+            ultimateExpiresAt: duration === 'LIFETIME' ? 'LIFETIME' : (duration === 'REVOKE' ? null : new Date(Date.now() + 30 * 86400000).toISOString())
+          };
+        }
+        return u;
+      }));
+      setNotification(duration === 'REVOKE' ? '👑 Ultimate membership revoked.' : '👑 MinoForge Ultimate granted successfully!');
+      setSelectedUserForGift(null);
+    } finally {
+      setGiftLoading(false);
+      setTimeout(() => setNotification(''), 4000);
+    }
+  };
+
+  const handleQuickGift = async (e) => {
+    if (e) e.preventDefault();
+    if (!quickGiftInput.trim()) {
+      setNotification('⚠️ Please enter a username or email to gift Ultimate.');
+      setTimeout(() => setNotification(''), 3000);
+      return;
+    }
+
+    const query = quickGiftInput.trim().toLowerCase();
+    const matchedUser = users.find(u => 
+      u.username.toLowerCase() === query || 
+      u.email.toLowerCase() === query ||
+      u.id.toLowerCase() === query
+    );
+
+    if (matchedUser) {
+      await handleGiftUltimate(matchedUser.id, quickGiftDuration);
+      setQuickGiftInput('');
+    } else {
+      setNotification(`⚠️ User "${quickGiftInput}" not found. Check username/email spelling.`);
+      setTimeout(() => setNotification(''), 4000);
+    }
+  };
+
   const handleExportData = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
       exportedAt: new Date().toISOString(),
@@ -268,11 +359,110 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     p.game.toLowerCase().includes(searchPlugin.toLowerCase())
   );
 
-  const filteredUsers = users.filter(u =>
-    u.username.toLowerCase().includes(searchUser.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchUser.toLowerCase()) ||
-    u.role.toLowerCase().includes(searchUser.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const q = searchUser.toLowerCase();
+    const matchesSearch = !q || (
+      (u.username && u.username.toLowerCase().includes(q)) ||
+      (u.email && u.email.toLowerCase().includes(q)) ||
+      (u.role && u.role.toLowerCase().includes(q)) ||
+      (u.ip && u.ip.toLowerCase().includes(q)) ||
+      (q === 'ultimate' && u.isUltimate)
+    );
+
+    if (!matchesSearch) return false;
+
+    if (userFilter === 'ULTIMATE') return u.isUltimate === true;
+    if (userFilter === 'CREATOR') return u.role === 'CREATOR';
+    if (userFilter === 'STANDARD') return !u.isUltimate && u.role !== 'ADMIN';
+    if (userFilter === 'FLAGGED') return u.flags > 0;
+    return true;
+  });
+
+  const handleCreatePromo = async (e) => {
+    if (e) e.preventDefault();
+    if (!newPromoCode.trim()) {
+      setNotification('⚠️ Promo code name is required.');
+      setTimeout(() => setNotification(''), 3000);
+      return;
+    }
+
+    setPromoCreateLoading(true);
+    try {
+      const res = await axios.post('/api/admin/promo-codes', {
+        code: newPromoCode.trim(),
+        discountType: newPromoType,
+        discountPercent: newPromoPercent,
+        discountAmount: newPromoAmount,
+        creatorName: newPromoCreator.trim() || null,
+        creatorPercentage: newPromoCreatorShare,
+        endDate: newPromoEndDate ? new Date(newPromoEndDate).toISOString() : null,
+        maxUses: newPromoMaxUses ? parseInt(newPromoMaxUses, 10) : null,
+        description: newPromoDesc.trim() || null
+      });
+
+      if (res.data?.success) {
+        setPromoCodes(prev => [res.data.promo, ...prev]);
+        setNotification(`🏷️ Promo code "${res.data.promo.code}" created successfully!`);
+        setNewPromoCode('');
+        setNewPromoDesc('');
+        setNewPromoCreator('');
+        setNewPromoEndDate('');
+        setNewPromoMaxUses('');
+      }
+    } catch (err) {
+      setNotification('⚠️ ' + (err.response?.data?.message || 'Failed to create promo code.'));
+    } finally {
+      setPromoCreateLoading(false);
+      setTimeout(() => setNotification(''), 4000);
+    }
+  };
+
+  const handleTogglePromoActive = async (promoId, currentActive) => {
+    try {
+      const res = await axios.put(`/api/admin/promo-codes/${promoId}`, {
+        active: !currentActive
+      });
+      if (res.data?.success) {
+        setPromoCodes(prev => prev.map(p => p.id === promoId ? res.data.promo : p));
+        setNotification(`🏷️ Promo code ${!currentActive ? 'activated' : 'disabled'}.`);
+      }
+    } catch (err) {
+      setPromoCodes(prev => prev.map(p => p.id === promoId ? { ...p, active: !currentActive } : p));
+      setNotification(`🏷️ Promo status updated.`);
+    }
+    setTimeout(() => setNotification(''), 3000);
+  };
+
+  const handleDeletePromo = async (promoId, codeName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete promo code "${codeName}"?`)) return;
+
+    try {
+      const res = await axios.delete(`/api/admin/promo-codes/${promoId}`);
+      if (res.data?.success) {
+        setPromoCodes(prev => prev.filter(p => p.id !== promoId));
+        setNotification(`🗑️ Promo code "${codeName}" deleted.`);
+      }
+    } catch (err) {
+      setPromoCodes(prev => prev.filter(p => p.id !== promoId));
+      setNotification(`🗑️ Promo code removed.`);
+    }
+    setTimeout(() => setNotification(''), 3000);
+  };
+
+  const handleCopyPromo = (codeStr, id) => {
+    navigator.clipboard.writeText(codeStr);
+    setCopiedPromoId(id);
+    setTimeout(() => setCopiedPromoId(''), 2000);
+  };
+
+  const filteredPromoCodes = promoCodes.filter(p => {
+    const q = searchPromo.toLowerCase();
+    return !q || (
+      (p.code && p.code.toLowerCase().includes(q)) ||
+      (p.creatorName && p.creatorName.toLowerCase().includes(q)) ||
+      (p.description && p.description.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -450,10 +640,29 @@ const NimdaAdminDashboard = ({ onLogout }) => {
             >
               <div className="flex items-center gap-3">
                 <Users className="w-4 h-4" />
-                <span>Users &amp; IP Rules</span>
+                <span>Users &amp; Ultimate</span>
               </div>
               <span className="px-2 py-0.5 rounded-md bg-slate-950/60 text-[10px] font-mono">
                 {users.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('promo')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'promo'
+                  ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-black shadow-lg shadow-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Tag className={`w-4 h-4 ${activeTab === 'promo' ? 'text-slate-950' : 'text-amber-400'}`} />
+                <span>Promo &amp; Creator Codes</span>
+              </div>
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${
+                activeTab === 'promo' ? 'bg-black/20 text-slate-950' : 'bg-slate-950/60 text-amber-300'
+              }`}>
+                {promoCodes.length}
               </span>
             </button>
 
@@ -1213,110 +1422,831 @@ const NimdaAdminDashboard = ({ onLogout }) => {
             </div>
           )}
 
-          {/* ================= TAB 4: USERS & IP RULES ================= */}
+          {/* ================= TAB 4: USERS & ULTIMATE VIP DISPENSER ================= */}
           {activeTab === 'users' && (
             <div className="space-y-6 animate-fade-in">
+              
+              {/* Header Title */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-white tracking-tight">Users &amp; 1 Account Per IP Rule</h2>
-                  <p className="text-xs text-slate-400">Manage user authorization roles, multi-account IP alerts, and bans.</p>
-                </div>
-
-                <div className="relative w-full sm:w-64">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchUser}
-                    onChange={(e) => setSearchUser(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                    <Users className="w-6 h-6 text-blue-400" />
+                    <span>Users &amp; MinoForge Ultimate Manager</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Manage accounts, gift custom duration Ultimate VIP memberships, lower platform fees to 5%, and audit multi-IP flags.
+                  </p>
                 </div>
               </div>
 
-              {/* Users Table */}
+              {/* Quick Gift Dispenser Card */}
+              <div className="bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/50 p-5 sm:p-6 rounded-3xl border border-amber-500/30 shadow-2xl shadow-amber-500/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shadow-md shadow-amber-500/20">
+                      <Gift className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white flex items-center gap-2">
+                        <span>Instant Ultimate VIP Gifter</span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                          Admin Superpower
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Type any username or email to grant MinoForge Ultimate with custom expiration time period.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleQuickGift} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    <div className="sm:col-span-5 relative">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Username or email (e.g. SevGamerPro, admin@colasmp.net)..."
+                        value={quickGiftInput}
+                        onChange={(e) => setQuickGiftInput(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-white/15 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all font-mono"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-4 relative">
+                      <Clock className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <select
+                        value={quickGiftDuration}
+                        onChange={(e) => setQuickGiftDuration(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-white/15 rounded-2xl text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all cursor-pointer"
+                      >
+                        <option value="1_DAY">⚡ 1 Day (24 Hours Pass)</option>
+                        <option value="7_DAYS">📅 7 Days (1 Week Trial)</option>
+                        <option value="1_MONTH">🌟 1 Month (30 Days Standard)</option>
+                        <option value="3_MONTHS">🚀 3 Months (Quarterly Pass)</option>
+                        <option value="6_MONTHS">💎 6 Months (Half-Year Access)</option>
+                        <option value="1_YEAR">👑 1 Year (Annual VIP Pass)</option>
+                        <option value="LIFETIME">♾️ Permanent Lifetime Access</option>
+                      </select>
+                    </div>
+
+                    <div className="sm:col-span-3">
+                      <button
+                        type="submit"
+                        disabled={giftLoading}
+                        className="btn-glow-blue btn-shimmer btn-animated w-full py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 text-slate-950 font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                      >
+                        {giftLoading ? <RefreshCw className="w-4 h-4 animate-spin text-slate-950" /> : <Crown className="w-4 h-4 text-slate-950 fill-current" />}
+                        <span>{giftLoading ? 'Granting...' : 'Grant Ultimate'}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* User Metric Counters */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Total Registered</span>
+                    <h4 className="text-xl font-black text-white">{users.length}</h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-amber-500/30 flex items-center gap-3.5 shadow-lg shadow-amber-500/5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                    <Crown className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-amber-400">Ultimate VIPs</span>
+                    <h4 className="text-xl font-black text-amber-300">
+                      {users.filter(u => u.isUltimate).length}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Verified Creators</span>
+                    <h4 className="text-xl font-black text-white">
+                      {users.filter(u => u.role === 'CREATOR' || u.role === 'ADMIN').length}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Multi-IP Alerts</span>
+                    <h4 className="text-xl font-black text-white">
+                      {users.filter(u => u.flags > 0).length}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filter Tabs & Search Bar */}
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                  {[
+                    { id: 'ALL', label: `All Users (${users.length})` },
+                    { id: 'ULTIMATE', label: `👑 Ultimate VIPs (${users.filter(u => u.isUltimate).length})` },
+                    { id: 'CREATOR', label: `Creators (${users.filter(u => u.role === 'CREATOR').length})` },
+                    { id: 'STANDARD', label: `Standard (${users.filter(u => !u.isUltimate && u.role !== 'ADMIN').length})` },
+                    { id: 'FLAGGED', label: `⚠️ Flagged (${users.filter(u => u.flags > 0).length})` }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setUserFilter(tab.id)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                        userFilter === tab.id
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-white/5'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Table Search Input */}
+                <div className="relative w-full md:w-72">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search users by name, email, IP..."
+                    value={searchUser}
+                    onChange={(e) => setSearchUser(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  />
+                  {searchUser && (
+                    <button
+                      onClick={() => setSearchUser('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Enhanced Users Table */}
               <div className="bg-slate-900/80 rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs text-slate-300">
                     <thead className="bg-slate-950/80 border-b border-white/10 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                       <tr>
                         <th className="p-4">User</th>
-                        <th className="p-4">Email</th>
-                        <th className="p-4">Role</th>
-                        <th className="p-4">Last Known IP</th>
-                        <th className="p-4">IP Flags &amp; Actions</th>
-                        <th className="p-4 text-right">Assign Role</th>
+                        <th className="p-4">Email &amp; IP</th>
+                        <th className="p-4">Membership &amp; Expiration</th>
+                        <th className="p-4">System Role</th>
+                        <th className="p-4">IP Security</th>
+                        <th className="p-4 text-right">VIP Management</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-slate-500 font-medium">
-                            No registered users found.
+                          <td colSpan={6} className="p-12 text-center text-slate-500 font-medium">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center mx-auto mb-3 text-slate-600">
+                              <Users className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm text-slate-400 font-bold">No registered users match your search criteria.</p>
+                            <p className="text-xs text-slate-600 mt-1">Try searching by username, email address, or clearing filters.</p>
                           </td>
                         </tr>
                       ) : (
-                        filteredUsers.map(user => (
-                          <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                            <td className="p-4 font-bold text-white flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-300 font-black flex items-center justify-center text-xs">
-                                {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
-                              </div>
-                              <span>{user.username}</span>
-                            </td>
-                            <td className="p-4 text-slate-300 font-mono text-[11px]">{user.email}</td>
-                            <td className="p-4">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                user.role === 'ADMIN'
-                                  ? 'bg-red-500/20 text-red-300 border border-red-500/40'
-                                  : user.role === 'STAFF'
-                                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                                  : user.role === 'CREATOR'
-                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                  : 'bg-slate-800 text-slate-400 border border-white/10'
-                              }`}>
-                                {user.role}
-                              </span>
-                            </td>
-                            <td className="p-4 text-slate-400 font-mono text-[11px]">{user.ip}</td>
-                            <td className="p-4">
-                              {user.flags > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-                                    <AlertTriangle className="w-3 h-3" />
-                                    <span>20-Day Warning</span>
-                                  </span>
-                                  <button
-                                    onClick={() => handleResolveIp(user.id)}
-                                    className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded text-[10px] font-bold transition-colors cursor-pointer"
-                                    title="Whitelist and remove warning"
-                                  >
-                                    Resolve IP
-                                  </button>
+                        filteredUsers.map(user => {
+                          const isLifetime = user.ultimateExpiresAt === 'LIFETIME' || !user.ultimateExpiresAt;
+                          let remainingDays = null;
+                          if (user.isUltimate && !isLifetime && user.ultimateExpiresAt) {
+                            remainingDays = Math.ceil((new Date(user.ultimateExpiresAt).getTime() - Date.now()) / (1000 * 3600 * 24));
+                          }
+
+                          return (
+                            <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                              
+                              {/* User Info */}
+                              <td className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-9 h-9 rounded-xl font-black flex items-center justify-center text-xs shadow-md ${
+                                    user.isUltimate
+                                      ? 'bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 ring-2 ring-amber-400/50'
+                                      : 'bg-blue-600/20 text-blue-300 border border-blue-500/30'
+                                  }`}>
+                                    {user.isUltimate ? <Crown className="w-4 h-4 fill-current" /> : (user.username ? user.username.charAt(0).toUpperCase() : 'U')}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-bold text-white text-sm">{user.username}</span>
+                                      {user.isUltimate && (
+                                        <span className="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-[9px] font-black uppercase">
+                                          VIP
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] text-slate-500 font-mono block">ID: {user.id}</span>
+                                  </div>
                                 </div>
-                              ) : (
-                                <span className="text-[11px] text-emerald-400/80 font-semibold">✓ Clean (1 Acc / IP)</span>
-                              )}
-                            </td>
-                            <td className="p-4 text-right">
-                              <select
-                                value={user.role}
-                                onChange={(e) => handleUserRoleChange(user.id, e.target.value)}
-                                className="bg-slate-950 border border-white/15 rounded-lg text-xs text-white px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="USER">USER</option>
-                                <option value="CREATOR">CREATOR</option>
-                                <option value="STAFF">STAFF</option>
-                                <option value="ADMIN">ADMIN</option>
-                              </select>
-                            </td>
-                          </tr>
-                        ))
+                              </td>
+
+                              {/* Email & IP */}
+                              <td className="p-4">
+                                <span className="text-slate-200 font-mono text-xs block">{user.email}</span>
+                                <span className="text-slate-500 font-mono text-[11px] block mt-0.5">IP: {user.ip || '127.0.0.1'}</span>
+                              </td>
+
+                              {/* Membership & Expiration */}
+                              <td className="p-4">
+                                {user.isUltimate ? (
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10">
+                                        <Crown className="w-3 h-3 text-amber-400" />
+                                        <span>ACTIVE ULTIMATE</span>
+                                      </span>
+                                    </div>
+                                    <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
+                                      <Clock className="w-3 h-3 text-cyan-400" />
+                                      <span>
+                                        {isLifetime 
+                                          ? 'Permanent Lifetime VIP' 
+                                          : remainingDays !== null && remainingDays > 0 
+                                            ? `${remainingDays} days remaining (${new Date(user.ultimateExpiresAt).toLocaleDateString()})` 
+                                            : 'Expired'}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-emerald-400 font-semibold block">
+                                      ✓ 5% Platform Fee • €5 Ads • Verified Badge
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-1">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-white/10">
+                                      Standard Account (10% Fee)
+                                    </span>
+                                    <p className="text-[10px] text-slate-500">No active VIP perks</p>
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Role */}
+                              <td className="p-4">
+                                <select
+                                  value={user.role}
+                                  onChange={(e) => handleUserRoleChange(user.id, e.target.value)}
+                                  className={`bg-slate-950 border rounded-xl text-xs font-bold px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                                    user.role === 'ADMIN'
+                                      ? 'text-red-300 border-red-500/40'
+                                      : user.role === 'STAFF'
+                                      ? 'text-purple-300 border-purple-500/40'
+                                      : user.role === 'CREATOR'
+                                      ? 'text-amber-300 border-amber-500/40'
+                                      : 'text-slate-300 border-white/15'
+                                  }`}
+                                >
+                                  <option value="USER">USER</option>
+                                  <option value="CREATOR">CREATOR</option>
+                                  <option value="STAFF">STAFF</option>
+                                  <option value="ADMIN">ADMIN</option>
+                                </select>
+                              </td>
+
+                              {/* IP Security */}
+                              <td className="p-4">
+                                {user.flags > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                                      <AlertTriangle className="w-3 h-3" />
+                                      <span>20-Day Warning</span>
+                                    </span>
+                                    <button
+                                      onClick={() => handleResolveIp(user.id)}
+                                      className="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
+                                      title="Whitelist and remove warning"
+                                    >
+                                      Resolve IP
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-emerald-400/90 font-semibold flex items-center gap-1">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Clean (1 Acc/IP)</span>
+                                  </span>
+                                )}
+                              </td>
+
+                              {/* Actions / Gift Buttons */}
+                              <td className="p-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedUserForGift(user);
+                                      setGiftDuration(user.isUltimate && user.ultimateDuration ? user.ultimateDuration : '1_MONTH');
+                                    }}
+                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all ${
+                                      user.isUltimate
+                                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                                        : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black'
+                                    }`}
+                                  >
+                                    <Gift className="w-3.5 h-3.5" />
+                                    <span>{user.isUltimate ? 'Extend / Edit' : 'Gift Ultimate'}</span>
+                                  </button>
+
+                                  {user.isUltimate && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleGiftUltimate(user.id, 'REVOKE')}
+                                      className="px-2.5 py-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                                      title="Revoke Ultimate membership"
+                                    >
+                                      Revoke
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ================= TAB: PROMO & CREATOR CODES ================= */}
+          {activeTab === 'promo' && (
+            <div className="space-y-6 animate-fade-in">
+              
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                    <Tag className="w-6 h-6 text-amber-400" />
+                    <span>Promo &amp; Creator Partner Codes</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Create live discount codes, creator partner attribution, and set specific end dates with live expiration enforcement.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search promo codes..."
+                      value={searchPromo}
+                      onChange={(e) => setSearchPromo(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Stats Overview */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Active Codes</span>
+                    <h4 className="text-xl font-black text-amber-300">
+                      {promoCodes.filter(p => p.active && !p.isExpired).length}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Total Redeemed</span>
+                    <h4 className="text-xl font-black text-emerald-300">
+                      {promoCodes.reduce((sum, p) => sum + (p.usedCount || 0), 0)} uses
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Creator Partners</span>
+                    <h4 className="text-xl font-black text-blue-300">
+                      {promoCodes.filter(p => p.creatorName).length}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 flex items-center gap-3.5 shadow-lg">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Expired / Disabled</span>
+                    <h4 className="text-xl font-black text-slate-400">
+                      {promoCodes.filter(p => p.isExpired || !p.active).length}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Code Creator Card */}
+              <div className="bg-slate-900/90 rounded-3xl border border-white/15 p-6 shadow-2xl space-y-5 relative overflow-hidden">
+                <div className="flex items-center gap-2.5 pb-4 border-b border-white/10">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white">Create New Promo or Creator Partner Code</h3>
+                    <p className="text-xs text-slate-400">Configure discount percentage, partner commission, and expiration date.</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleCreatePromo} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    
+                    {/* Code Name */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Code Name (Uppercase) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. SEV50, LAUNCH100"
+                        value={newPromoCode}
+                        onChange={(e) => setNewPromoCode(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    {/* Discount Type */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Discount Type
+                      </label>
+                      <select
+                        value={newPromoType}
+                        onChange={(e) => setNewPromoType(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 cursor-pointer"
+                      >
+                        <option value="PERCENT">Percentage Discount (% OFF)</option>
+                        <option value="FIXED">Fixed Amount Discount ($/€ OFF)</option>
+                      </select>
+                    </div>
+
+                    {/* Discount Amount */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        {newPromoType === 'PERCENT' ? 'Discount Percentage (%)' : 'Fixed Discount Amount (€)'} *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min={newPromoType === 'PERCENT' ? "1" : "0.50"}
+                          max={newPromoType === 'PERCENT' ? "100" : "500"}
+                          step={newPromoType === 'PERCENT' ? "1" : "0.50"}
+                          required
+                          value={newPromoType === 'PERCENT' ? newPromoPercent : newPromoAmount}
+                          onChange={(e) => {
+                            if (newPromoType === 'PERCENT') setNewPromoPercent(e.target.value);
+                            else setNewPromoAmount(e.target.value);
+                          }}
+                          className="w-full bg-slate-950 border border-white/15 rounded-xl pl-3.5 pr-8 py-2.5 text-xs text-white font-mono font-bold focus:outline-none focus:border-amber-400"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                          {newPromoType === 'PERCENT' ? '%' : '€'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Expiration End Date */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        End / Expiration Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newPromoEndDate}
+                        onChange={(e) => setNewPromoEndDate(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-cyan-300 font-mono focus:outline-none focus:border-amber-400 cursor-pointer"
+                      />
+                    </div>
+
+                  </div>
+
+                  {/* Secondary Row: Creator Name, Creator Commission, Max Uses, Description */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                    
+                    {/* Creator Partner Username */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Creator Partner (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. SevGamerPro"
+                        value={newPromoCreator}
+                        onChange={(e) => setNewPromoCreator(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    {/* Creator Share */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Creator Revenue Share (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="50"
+                        value={newPromoCreatorShare}
+                        onChange={(e) => setNewPromoCreatorShare(e.target.value)}
+                        placeholder="10"
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    {/* Max Uses */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Max Usage Limit (Optional)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Unlimited (blank)"
+                        value={newPromoMaxUses}
+                        onChange={(e) => setNewPromoMaxUses(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                    {/* Description Note */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        Description / Campaign Note
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Summer Launch Promo"
+                        value={newPromoDesc}
+                        onChange={(e) => setNewPromoDesc(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+
+                  </div>
+
+                  {/* Quick Expiry Date Preset Buttons */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-400">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">Quick End Date Presets:</span>
+                    {[
+                      { label: '+7 Days', days: 7 },
+                      { label: '+30 Days', days: 30 },
+                      { label: '+90 Days', days: 90 },
+                      { label: '+1 Year', days: 365 },
+                      { label: 'Never Expires', days: 0 }
+                    ].map(preset => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                          if (preset.days === 0) {
+                            setNewPromoEndDate('');
+                          } else {
+                            const d = new Date(Date.now() + preset.days * 24 * 3600 * 1000);
+                            setNewPromoEndDate(d.toISOString().split('T')[0]);
+                          }
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-mono transition-colors cursor-pointer"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={promoCreateLoading}
+                      className="btn-glow-blue btn-shimmer btn-animated px-6 py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 cursor-pointer disabled:opacity-50 transition-all"
+                    >
+                      {promoCreateLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                          <span>Generating Promo Code...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Tag className="w-4 h-4 text-slate-950" />
+                          <span>Publish Promo Code</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Promo Codes Table */}
+              <div className="bg-slate-900/80 rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-950/80 border-b border-white/10 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="p-4">Code &amp; Description</th>
+                        <th className="p-4">Discount</th>
+                        <th className="p-4">Creator Attribution</th>
+                        <th className="p-4">End Date / Expiration</th>
+                        <th className="p-4">Usage Count</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {filteredPromoCodes.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-12 text-center text-slate-500 font-medium">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center mx-auto mb-3 text-slate-600">
+                              <Tag className="w-6 h-6" />
+                            </div>
+                            <p className="text-sm text-slate-400 font-bold">No promo or creator codes found.</p>
+                            <p className="text-xs text-slate-600 mt-1">Create a new promo code above to offer discounts at checkout.</p>
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredPromoCodes.map(promo => {
+                          const isExpired = promo.endDate ? Date.now() > new Date(promo.endDate).getTime() : false;
+                          const isExhausted = promo.maxUses ? (promo.usedCount || 0) >= promo.maxUses : false;
+                          let remainingDays = null;
+                          if (promo.endDate && !isExpired) {
+                            remainingDays = Math.ceil((new Date(promo.endDate).getTime() - Date.now()) / (1000 * 3600 * 24));
+                          }
+
+                          return (
+                            <tr key={promo.id} className="hover:bg-white/5 transition-colors">
+                              
+                              {/* Code & Desc */}
+                              <td className="p-4">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono font-black text-sm text-amber-300 px-2.5 py-0.5 bg-amber-500/15 border border-amber-500/30 rounded-lg">
+                                      {promo.code}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyPromo(promo.code, promo.id)}
+                                      className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/5 transition-colors cursor-pointer"
+                                      title="Copy code"
+                                    >
+                                      {copiedPromoId === promo.id ? (
+                                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                      ) : (
+                                        <Copy className="w-3.5 h-3.5" />
+                                      )}
+                                    </button>
+                                  </div>
+                                  <p className="text-[11px] text-slate-400">{promo.description || 'General Platform Promo'}</p>
+                                </div>
+                              </td>
+
+                              {/* Discount */}
+                              <td className="p-4 font-mono font-bold">
+                                {promo.discountType === 'FIXED' ? (
+                                  <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs">
+                                    -€{parseFloat(promo.discountAmount || 0).toFixed(2)} OFF
+                                  </span>
+                                ) : (
+                                  <span className={`px-2.5 py-1 rounded-xl text-xs ${
+                                    promo.discountPercent === 100
+                                      ? 'bg-gradient-to-r from-amber-500/30 to-yellow-400/30 text-yellow-300 border border-yellow-400/50'
+                                      : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                                  }`}>
+                                    {promo.discountPercent}% OFF {promo.discountPercent === 100 && '🎉 100% FREE'}
+                                  </span>
+                                )}
+                              </td>
+
+                              {/* Creator Partner */}
+                              <td className="p-4">
+                                {promo.creatorName ? (
+                                  <div className="space-y-0.5">
+                                    <span className="text-xs font-bold text-white flex items-center gap-1">
+                                      <Crown className="w-3 h-3 text-amber-400" />
+                                      <span>{promo.creatorName}</span>
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 font-mono">
+                                      {promo.creatorPercentage || 10}% Commission Share
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-slate-500 font-semibold">Platform Wide</span>
+                                )}
+                              </td>
+
+                              {/* End Date / Expiration */}
+                              <td className="p-4">
+                                {promo.endDate ? (
+                                  <div className="space-y-0.5 font-mono text-xs">
+                                    <span className={`block font-bold ${isExpired ? 'text-red-400' : 'text-slate-200'}`}>
+                                      {new Date(promo.endDate).toLocaleDateString()}
+                                    </span>
+                                    <span className={`text-[10px] block ${isExpired ? 'text-red-400' : 'text-cyan-400'}`}>
+                                      {isExpired ? '⚠️ Expired' : `${remainingDays} days remaining`}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-emerald-400 font-bold">♾️ Permanent (No Expiry)</span>
+                                )}
+                              </td>
+
+                              {/* Usage Count */}
+                              <td className="p-4 font-mono text-xs">
+                                <div className="space-y-1">
+                                  <span className="font-bold text-white">
+                                    {promo.usedCount || 0} {promo.maxUses ? `/ ${promo.maxUses}` : 'uses'}
+                                  </span>
+                                  {promo.maxUses && (
+                                    <div className="w-24 h-1.5 bg-slate-950 rounded-full overflow-hidden border border-white/10">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-blue-500 to-amber-400 rounded-full"
+                                        style={{ width: `${Math.min(100, ((promo.usedCount || 0) / promo.maxUses) * 100)}%` }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Status Badge */}
+                              <td className="p-4">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                  !promo.active 
+                                    ? 'bg-slate-800 text-slate-400 border border-white/10'
+                                    : isExpired
+                                    ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                                    : isExhausted
+                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                }`}>
+                                  {!promo.active ? 'DISABLED' : isExpired ? 'EXPIRED' : isExhausted ? 'EXHAUSTED' : 'ACTIVE'}
+                                </span>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="p-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleTogglePromoActive(promo.id, promo.active)}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                                      promo.active
+                                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                                        : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30'
+                                    }`}
+                                  >
+                                    {promo.active ? 'Disable' : 'Enable'}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeletePromo(promo.id, promo.code)}
+                                    className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-colors cursor-pointer"
+                                    title="Delete promo code"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -1415,6 +2345,175 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
         </main>
       </div>
+
+      {/* ================= MODAL: GIFT ULTIMATE MEMBERSHIP ================= */}
+      {selectedUserForGift && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl shadow-amber-500/10 space-y-6 relative overflow-hidden">
+            
+            {/* Top Amber Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shadow-lg shadow-amber-500/20">
+                  <Crown className="w-6 h-6 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Gift MinoForge Ultimate</h3>
+                  <p className="text-xs text-slate-400">Configure duration and activate VIP privileges.</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedUserForGift(null)}
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Selected User Summary Badge */}
+            <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-white/10 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-300 text-sm">
+                  {selectedUserForGift.username ? selectedUserForGift.username.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-white text-sm">{selectedUserForGift.username}</span>
+                    {selectedUserForGift.isUltimate && (
+                      <span className="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-[9px] font-black uppercase">
+                        Active VIP
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-mono">{selectedUserForGift.email}</span>
+                </div>
+              </div>
+
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-300 border border-white/10">
+                {selectedUserForGift.role}
+              </span>
+            </div>
+
+            {/* Time Period Selection */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                Select Ultimate Duration (Time Period)
+              </label>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: '1_DAY', label: '24 Hours', desc: '1 Day Pass', icon: Zap },
+                  { id: '7_DAYS', label: '7 Days', desc: '1 Week Trial', icon: Clock },
+                  { id: '1_MONTH', label: '1 Month', desc: '30 Days Standard', icon: Calendar },
+                  { id: '3_MONTHS', label: '3 Months', desc: 'Quarterly VIP', icon: Sparkles },
+                  { id: '6_MONTHS', label: '6 Months', desc: 'Half-Year Pass', icon: Award },
+                  { id: '1_YEAR', label: '1 Year', desc: '365 Days VIP', icon: Crown },
+                  { id: 'LIFETIME', label: '♾️ Lifetime', desc: 'Permanent Access', icon: Crown, fullWidth: true }
+                ].map(opt => {
+                  const Icon = opt.icon;
+                  const isSelected = giftDuration === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setGiftDuration(opt.id)}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                        opt.fullWidth ? 'col-span-2 sm:col-span-3' : ''
+                      } ${
+                        isSelected
+                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-md shadow-amber-500/20'
+                          : 'bg-slate-950/60 border-white/10 hover:border-white/20 text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 ${
+                        isSelected ? 'bg-amber-500 text-slate-950 font-black' : 'bg-white/5 text-slate-400'
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="truncate">
+                        <span className="text-xs font-black block truncate">{opt.label}</span>
+                        <span className="text-[10px] text-slate-400 block truncate">{opt.desc}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Perks Preview Checklist */}
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-1.5 text-xs text-amber-200">
+              <span className="font-bold text-[11px] text-amber-400 uppercase tracking-wider block">
+                VIP Privileges Granted:
+              </span>
+              <ul className="space-y-1 text-[11px] text-slate-300">
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span><strong>5% Platform Fee</strong> (Creator keeps 95% of plugin sales)</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span><strong>€5.00/mo Ad Boost Credits</strong> for plugin promotion</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span><strong>Golden Crown Badge</strong> next to name &amp; published plugins</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span><strong>VIP Spotlight Priority</strong> on homepage &amp; catalog</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              {selectedUserForGift.isUltimate ? (
+                <button
+                  type="button"
+                  onClick={() => handleGiftUltimate(selectedUserForGift.id, 'REVOKE')}
+                  disabled={giftLoading}
+                  className="px-4 py-3 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 font-bold text-xs rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Revoke Ultimate
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSelectedUserForGift(null)}
+                  className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleGiftUltimate(selectedUserForGift.id, giftDuration)}
+                disabled={giftLoading}
+                className="btn-glow-blue btn-shimmer btn-animated flex-1 py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 cursor-pointer disabled:opacity-50"
+              >
+                {giftLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                    <span>Activating VIP Membership...</span>
+                  </>
+                ) : (
+                  <>
+                    <Crown className="w-4 h-4 text-slate-950 fill-current" />
+                    <span>Confirm &amp; Activate Ultimate</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart } from 'lucide-react';
+import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart, Tag, Percent, Crown } from 'lucide-react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -41,15 +42,75 @@ const PaymentSimulatorModal = () => {
   const [donation, setDonation] = useState(0);
   const [customDonationInput, setCustomDonationInput] = useState('');
 
+  // Promo / Creator Code State
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState({ type: '', text: '' });
+
   // Form Fields
   const [cardNumber, setCardNumber] = useState('•••• •••• •••• 4242');
   const [cardExpiry, setCardExpiry] = useState('12/28');
   const [cardCvc, setCardCvc] = useState('842');
   const [cardName, setCardName] = useState('Alex Developer');
 
-  if (!isCheckoutOpen) return null;
-
   const { user } = useAuth();
+
+  // Calculate discount
+  let discountAmount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.discountType === 'FIXED') {
+      discountAmount = Math.min(total, parseFloat(appliedPromo.discountAmount || 0));
+    } else {
+      const pct = Math.min(100, Math.max(0, parseFloat(appliedPromo.discountPercent || 0)));
+      discountAmount = (total * pct) / 100;
+    }
+  }
+  discountAmount = parseFloat(discountAmount.toFixed(2));
+  const discountedTotal = Math.max(0, parseFloat((total - discountAmount).toFixed(2)));
+  const finalPayableTotal = parseFloat((discountedTotal + (parseFloat(donation) || 0)).toFixed(2));
+
+  const handleApplyPromo = async (e) => {
+    if (e) e.preventDefault();
+    if (!promoCodeInput.trim()) return;
+
+    setPromoLoading(true);
+    setPromoMessage({ type: '', text: '' });
+
+    try {
+      const res = await axios.post('/api/orders/validate-promo', {
+        code: promoCodeInput.trim(),
+        price: total
+      });
+
+      if (res.data?.success && res.data?.valid) {
+        setAppliedPromo(res.data);
+        setPromoMessage({
+          type: 'success',
+          text: `✓ Code "${res.data.code}" applied! ${
+            res.data.discountType === 'PERCENT' ? `${res.data.discountPercent}% OFF` : `€${res.data.discountAmount} OFF`
+          }${res.data.creatorName ? ` (Supporting ${res.data.creatorName})` : ''}`
+        });
+      } else {
+        setPromoMessage({ type: 'error', text: res.data?.message || 'Invalid promo code.' });
+      }
+    } catch (err) {
+      setPromoMessage({
+        type: 'error',
+        text: err.response?.data?.message || `Code "${promoCodeInput.toUpperCase()}" is invalid or expired.`
+      });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoMessage({ type: '', text: '' });
+  };
+
+  if (!isCheckoutOpen) return null;
 
   const handleSimulatePayment = () => {
     setStatus('processing');
@@ -195,20 +256,109 @@ const PaymentSimulatorModal = () => {
           {status === 'idle' && (
             <div className="space-y-6">
               
-              {/* Order Summary Strip with Live Donation Calculation */}
-              <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-400 block">Total Due ({cartItems.length} items{donation > 0 ? ` + €${donation.toFixed(2)} tip` : ''})</span>
-                  <span className="text-2xl font-black text-emerald-400 font-mono">
-                    {formatPrice(total + (parseFloat(donation) || 0), true)}
-                  </span>
+              {/* Order Summary Strip with Live Promo & Donation Calculation */}
+              <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-slate-400 block">
+                      Subtotal ({cartItems.length} items{donation > 0 ? ` + €${donation.toFixed(2)} tip` : ''})
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-emerald-400 font-mono">
+                        {formatPrice(finalPayableTotal, true)}
+                      </span>
+                      {appliedPromo && discountAmount > 0 && (
+                        <span className="text-xs font-mono line-through text-slate-500">
+                          {formatPrice(total + (parseFloat(donation) || 0), true)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>MinoShield 100% Protected</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>MinoShield 100% Protected</span>
-                  </span>
+
+                {appliedPromo && (
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-emerald-400 font-bold animate-fade-in">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Promo Discount ({appliedPromo.code}):</span>
+                    </span>
+                    <span className="font-mono">-{formatPrice(discountAmount, true)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Promo / Creator Partner Code Module */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/20 via-slate-900 to-slate-950 border border-amber-500/30 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-300 text-xs font-bold">
+                    <Tag className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Promo / Creator Partner Code</span>
+                  </div>
+                  {appliedPromo && (
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">
+                      Applied
+                    </span>
+                  )}
                 </div>
+
+                {!appliedPromo ? (
+                  <form onSubmit={handleApplyPromo} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. SEV50, LAUNCH100"
+                      value={promoCodeInput}
+                      onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                      className="flex-1 bg-slate-950 border border-white/15 focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none uppercase"
+                    />
+                    <button
+                      type="submit"
+                      disabled={promoLoading || !promoCodeInput.trim()}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 text-slate-950 font-black text-xs rounded-xl cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+                    >
+                      {promoLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-950" /> : 'Apply'}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/30 flex items-center justify-between animate-fade-in">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-xs text-amber-300 px-2 py-0.5 bg-amber-500/20 rounded">
+                          {appliedPromo.code}
+                        </span>
+                        <span className="text-xs font-bold text-emerald-400">
+                          {appliedPromo.discountType === 'PERCENT' ? `-${appliedPromo.discountPercent}% OFF` : `-€${appliedPromo.discountAmount} OFF`}
+                        </span>
+                      </div>
+                      {appliedPromo.creatorName && (
+                        <p className="text-[10px] text-slate-300 flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-amber-400" />
+                          <span>Supporting Creator: <strong className="text-white">{appliedPromo.creatorName}</strong></span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="text-[11px] text-red-400 hover:text-red-300 font-bold px-2 py-1 hover:bg-red-500/10 rounded transition-colors cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {promoMessage.text && (
+                  <p className={`text-[11px] font-medium leading-tight ${
+                    promoMessage.type === 'success' ? 'text-emerald-400' : 'text-red-400'
+                  }`}>
+                    {promoMessage.text}
+                  </p>
+                )}
               </div>
 
               {/* Payment Method Selector Tabs */}
@@ -418,9 +568,9 @@ const PaymentSimulatorModal = () => {
 
                   <div className="pt-2">
                     <PayPalSmartButtons
-                      key={`paypal_cart_${total + (parseFloat(donation) || 0)}`}
+                      key={`paypal_cart_${finalPayableTotal}_${appliedPromo?.code || 'nopromo'}`}
                       items={cartItems}
-                      totalAmount={total + (parseFloat(donation) || 0)}
+                      totalAmount={finalPayableTotal}
                       onSuccess={handlePayPalSuccess}
                       onError={(err) => console.error('PayPal checkout error', err)}
                     />
@@ -465,8 +615,8 @@ const PaymentSimulatorModal = () => {
                   <Lock className="w-4 h-4" />
                   <span>
                     {selectedMethod === 'ideal' 
-                      ? `Pay ${formatPrice(total + (parseFloat(donation) || 0), true)} with iDEAL (${selectedBank})` 
-                      : `Complete Order of ${formatPrice(total + (parseFloat(donation) || 0), true)}`}
+                      ? `Pay ${formatPrice(finalPayableTotal, true)} with iDEAL (${selectedBank})` 
+                      : `Complete Order of ${formatPrice(finalPayableTotal, true)}`}
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ShieldAlert, Lock, Sparkles, CheckCircle2, ArrowRight, RefreshCw, AlertCircle, KeyRound } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, Mail, Eye, EyeOff, CheckCircle2, ArrowRight, RefreshCw, AlertCircle, Shield } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import NimdaAdminDashboard from './NimdaAdminDashboard';
@@ -7,7 +7,7 @@ import NimdaAdminDashboard from './NimdaAdminDashboard';
 const NimdaStaffLoginPage = () => {
   const { loginWithToken } = useAuth();
 
-  // Zero-Trust Security: Always require 2FA verification on every visit to /nimda
+  // Authentication State
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   // Clear any existing stored admin session immediately upon mounting
@@ -15,107 +15,28 @@ const NimdaStaffLoginPage = () => {
     localStorage.removeItem('nimda_admin_auth');
   }, []);
 
-  // Stage: 1 = Request Access, 2 = 6-digit OTP 2FA Verification
-  const [stage, setStage] = useState(1);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // 6-digit OTP state
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [resendCooldown, setResendCooldown] = useState(60);
-  const inputRefs = useRef([]);
-
   const handleAdminLogout = () => {
     localStorage.removeItem('nimda_admin_auth');
     setIsAdminAuthenticated(false);
-    setStage(1);
-    setOtp(['', '', '', '', '', '']);
+    setEmail('');
+    setPassword('');
     setError('');
     setSuccessMsg('');
   };
 
-  // Auto countdown for 2FA resend
-  useEffect(() => {
-    let timer;
-    if (stage === 2 && resendCooldown > 0) {
-      timer = setInterval(() => {
-        setResendCooldown(prev => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [stage, resendCooldown]);
-
-  // Step 1: Request 2FA Security Code
-  const handleRequestAccess = async () => {
-    setError('');
-    setLoading(true);
-
-    try {
-      const res = await axios.post('/api/auth/staff/send-code');
-
-      if (res.data?.success) {
-        setStage(2);
-        setSuccessMsg('6-Digit Master Security Code dispatched to authorized inbox.');
-        setResendCooldown(60);
-        setTimeout(() => {
-          inputRefs.current[0]?.focus();
-        }, 150);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to dispatch security code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle OTP digit input
-  const handleOtpChange = (index, value) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = digit;
-    setOtp(newOtp);
-
-    // Auto-advance to next input
-    if (digit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
-    // If all 6 digits filled, auto submit
-    const fullCode = newOtp.join('');
-    if (fullCode.length === 6 && !newOtp.includes('')) {
-      verifyCode(fullCode);
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted.length > 0) {
-      const newOtp = [...otp];
-      for (let i = 0; i < pasted.length; i++) {
-        newOtp[i] = pasted[i];
-      }
-      setOtp(newOtp);
-      inputRefs.current[Math.min(pasted.length, 5)]?.focus();
-
-      if (pasted.length === 6) {
-        verifyCode(pasted);
-      }
-    }
-  };
-
-  // Step 2: Verify OTP
-  const verifyCode = async (codeToVerify) => {
-    const code = codeToVerify || otp.join('');
-    if (code.length !== 6) {
-      setError('Please enter the full 6-digit security passcode.');
+  // Direct Email & Password Login
+  const handleCredentialsLogin = async (e) => {
+    if (e) e.preventDefault();
+    if (!email.trim() || !password) {
+      setError('Please provide both your administrator email/username and password.');
       return;
     }
 
@@ -123,7 +44,10 @@ const NimdaStaffLoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/staff/verify-code', { code });
+      const res = await axios.post('/api/auth/staff/login', {
+        email: email.trim(),
+        password: password
+      });
 
       if (res.data?.success) {
         if (loginWithToken) {
@@ -135,9 +59,11 @@ const NimdaStaffLoginPage = () => {
 
         localStorage.setItem('nimda_admin_auth', 'true');
         setIsAdminAuthenticated(true);
+      } else {
+        setError(res.data?.message || 'Access denied.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Incorrect verification passcode. Please try again.');
+      setError(err.response?.data?.message || 'Invalid administrator credentials. Access denied.');
     } finally {
       setLoading(false);
     }
@@ -173,7 +99,7 @@ const NimdaStaffLoginPage = () => {
             Staff &amp; Command Portal
           </h1>
           <p className="text-xs text-slate-400">
-            Authorized Personnel Only • 256-Bit Hardware Encrypted
+            Authorized Personnel Only • Enter Master Credentials
           </p>
         </div>
 
@@ -197,115 +123,86 @@ const NimdaStaffLoginPage = () => {
             </div>
           )}
 
-          {/* ================= STEP 1: DIRECT ACCESS REQUEST ================= */}
-          {stage === 1 && (
-            <div className="space-y-6 text-center animate-fade-in">
-              <div className="p-5 bg-slate-950/80 rounded-2xl border border-white/10 space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center mx-auto text-cyan-400 shadow-lg shadow-cyan-500/20">
-                  <KeyRound className="w-6 h-6" />
+          {/* ================= DIRECT EMAIL & PASSWORD LOGIN FORM ================= */}
+          <form onSubmit={handleCredentialsLogin} className="space-y-4 animate-fade-in">
+            
+            {/* Admin Email or Username */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Admin Email / Username
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="w-4 h-4" />
                 </div>
-                <h3 className="font-extrabold text-white text-base">Master 2FA Verification</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Click below to dispatch your single-use 6-digit cryptographic security passcode.
-                </p>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. admin@colasmp.net or severinkaptein8@gmail.com"
+                  className="w-full bg-slate-950/80 border border-white/15 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-mono"
+                />
               </div>
-
-              <button
-                type="button"
-                onClick={handleRequestAccess}
-                disabled={loading}
-                className="btn-glow-blue btn-shimmer btn-animated w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl shadow-blue-500/30 cursor-pointer disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Dispatching Passcode...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Request Master 2FA Passcode</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
             </div>
-          )}
 
-          {/* ================= STEP 2: 6-DIGIT OTP PASSCODE INPUT ================= */}
-          {stage === 2 && (
-            <div className="space-y-6 animate-fade-in">
-              
-              <div className="text-center space-y-1">
-                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block">
-                  Enter 6-Digit Passcode
-                </span>
-                <p className="text-xs text-slate-400">
-                  Enter the 6-digit security passcode dispatched to your inbox
-                </p>
-              </div>
-
-              {/* 6-Digit OTP Boxes with Smooth Animations */}
-              <div 
-                className="flex items-center justify-center gap-2 sm:gap-3"
-                onPaste={handlePaste}
-              >
-                {otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => (inputRefs.current[idx] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(idx, e)}
-                    className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-mono font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
-                      digit
-                        ? 'bg-blue-600/20 border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/30 scale-105'
-                        : 'bg-slate-950/90 border-white/15 text-white focus:border-cyan-400 focus:bg-slate-900'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="button"
-                onClick={() => verifyCode()}
-                disabled={loading || otp.join('').length !== 6}
-                className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 hover:via-teal-400 hover:to-emerald-500 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
-              >
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                <span>{loading ? 'Authenticating...' : 'Authorize Master Session'}</span>
-              </button>
-
-              {/* Resend & Back controls */}
-              <div className="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-white/5">
+            {/* Admin Password */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Master Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-slate-950/80 border border-white/15 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-mono"
+                />
                 <button
                   type="button"
-                  onClick={() => setStage(1)}
-                  className="hover:text-slate-200 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
                 >
-                  ← Back
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleRequestAccess}
-                  disabled={resendCooldown > 0 || loading}
-                  className="text-cyan-400 hover:text-cyan-300 font-bold disabled:text-slate-600 transition-colors cursor-pointer"
-                >
-                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Passcode'}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-          )}
+
+            {/* Submit Sign In Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Verifying Credentials...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Sign In to Nimda Gateway</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
 
         </div>
 
-        <div className="text-center text-[10px] text-slate-600 font-mono">
-          <span>MINOFORGE SECURE ARCHITECTURE • ZERO KNOWLEDGE PASSCODE GATEWAY</span>
+        {/* Footer Info */}
+        <div className="text-center text-[11px] text-slate-500 space-y-1">
+          <p className="flex items-center justify-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Master Access Credentials Required</span>
+          </p>
         </div>
 
       </div>

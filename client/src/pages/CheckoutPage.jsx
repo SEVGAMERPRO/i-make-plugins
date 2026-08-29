@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   Crown, Sparkles, CheckCircle2, ShieldCheck, ArrowRight, 
   ArrowLeft, Lock, Heart, Zap, Rocket, Megaphone, Check, 
-  CreditCard, ExternalLink, HelpCircle, Shield, AlertCircle
+  CreditCard, ExternalLink, HelpCircle, Shield, AlertCircle,
+  Tag, Percent, RefreshCw, X, Gift
 } from 'lucide-react';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -23,16 +25,110 @@ export default function CheckoutPage() {
   const [donation, setDonation] = useState(0);
   const [customDonationInput, setCustomDonationInput] = useState('');
 
-  // Plan Pricing (Testing: 0.01 / mo; Standard: 12.99 / mo)
-  const baseMonthlyPrice = 0.01;
+  // Promo / Creator Code State
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState({ type: '', text: '' });
+  const [freeCheckoutLoading, setFreeCheckoutLoading] = useState(false);
+
+  // Plan Pricing (Standard: 12.99 / mo)
+  const baseMonthlyPrice = 12.99;
   const baseYearlyPrice = 132.50; // 15% off
 
   const currentBasePrice = annualBilling ? baseYearlyPrice : baseMonthlyPrice;
-  const finalTotalAmount = currentBasePrice + (parseFloat(donation) || 0);
+
+  // Calculate discount dynamically based on applied promo code
+  let discountAmount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.discountType === 'FIXED') {
+      discountAmount = Math.min(currentBasePrice, parseFloat(appliedPromo.discountAmount || 0));
+    } else {
+      const pct = Math.min(100, Math.max(0, parseFloat(appliedPromo.discountPercent || 0)));
+      discountAmount = (currentBasePrice * pct) / 100;
+    }
+  }
+  discountAmount = parseFloat(discountAmount.toFixed(2));
+  const discountedBasePrice = Math.max(0, parseFloat((currentBasePrice - discountAmount).toFixed(2)));
+  const finalTotalAmount = parseFloat((discountedBasePrice + (parseFloat(donation) || 0)).toFixed(2));
+  const isFreeOrder = finalTotalAmount <= 0;
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const handleApplyPromo = async (e) => {
+    if (e) e.preventDefault();
+    if (!promoCodeInput.trim()) {
+      setPromoMessage({ type: 'error', text: 'Please enter a promo or creator code.' });
+      return;
+    }
+
+    setPromoLoading(true);
+    setPromoMessage({ type: '', text: '' });
+
+    try {
+      const res = await axios.post('/api/orders/validate-promo', {
+        code: promoCodeInput.trim(),
+        price: currentBasePrice
+      });
+
+      if (res.data?.success && res.data?.valid) {
+        setAppliedPromo(res.data);
+        setPromoMessage({
+          type: 'success',
+          text: `✓ Code "${res.data.code}" applied! ${
+            res.data.discountType === 'PERCENT' ? `${res.data.discountPercent}% OFF` : `€${res.data.discountAmount} OFF`
+          }${res.data.creatorName ? ` (Supporting Creator: ${res.data.creatorName})` : ''}`
+        });
+      } else {
+        setPromoMessage({ type: 'error', text: res.data?.message || 'Invalid promo code.' });
+      }
+    } catch (err) {
+      setPromoMessage({
+        type: 'error',
+        text: err.response?.data?.message || `Code "${promoCodeInput.toUpperCase()}" is invalid, expired, or disabled.`
+      });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoMessage({ type: '', text: '' });
+  };
+
+  const handleFreeCheckout = async () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+
+    setFreeCheckoutLoading(true);
+    try {
+      const res = await axios.post('/api/orders/apply-free-checkout', {
+        buyerEmail: user.email,
+        buyerUsername: user.username,
+        code: appliedPromo?.code || 'LAUNCH100',
+        planName: 'MinoForge Ultimate Membership'
+      });
+
+      if (res.data?.success) {
+        handleSuccessfulPayment({
+          orderID: res.data.transactionId,
+          transactionId: res.data.transactionId
+        });
+      } else {
+        alert(res.data?.message || 'Failed to complete free checkout.');
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error completing free checkout.');
+    } finally {
+      setFreeCheckoutLoading(false);
+    }
+  };
 
   const handleSuccessfulPayment = (data) => {
     const generatedRef = data?.orderID || data?.transactionId || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -268,9 +364,19 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
+                {appliedPromo && discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-bold animate-fade-in">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Promo Discount ({appliedPromo.code}):</span>
+                    </span>
+                    <span className="font-mono font-bold">-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-emerald-400">
                   <span>Platform Fee Rate:</span>
-                  <span className="font-bold">5.0% (Save 50%)</span>
+                  <span className="font-bold">5.0% (Save 50% more)</span>
                 </div>
 
                 <div className="flex justify-between text-amber-300">
@@ -294,10 +400,84 @@ export default function CheckoutPage() {
                     <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Total Due Today</span>
                     <span className="text-[10px] text-slate-400">Tax / VAT included</span>
                   </div>
-                  <span className="text-2xl sm:text-3xl font-black text-amber-300 font-mono">
-                    {formatPrice(finalTotalAmount)}
+                  <span className={`text-2xl sm:text-3xl font-black font-mono ${isFreeOrder ? 'text-emerald-400' : 'text-amber-300'}`}>
+                    {isFreeOrder ? 'FREE (€0.00)' : formatPrice(finalTotalAmount)}
                   </span>
                 </div>
+              </div>
+
+              {/* Promo / Creator Partner Code Module */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-950/20 via-slate-950 to-slate-950 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-300 text-xs font-bold">
+                    <Tag className="w-4 h-4 text-amber-400" />
+                    <span>Have a Promo / Creator Code?</span>
+                  </div>
+                  {appliedPromo && (
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30 animate-fade-in">
+                      Applied
+                    </span>
+                  )}
+                </div>
+
+                {!appliedPromo ? (
+                  <form onSubmit={handleApplyPromo} className="flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder="e.g. SEV50, LAUNCH100"
+                        value={promoCodeInput}
+                        onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                        className="w-full pl-3 pr-3 py-2.5 bg-slate-900 border border-white/15 focus:border-amber-400 rounded-xl text-xs text-amber-300 font-mono font-bold placeholder-slate-600 focus:outline-none uppercase"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={promoLoading || !promoCodeInput.trim()}
+                      className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
+                    >
+                      {promoLoading ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                      ) : (
+                        <span>Apply</span>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 flex items-center justify-between animate-fade-in">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-xs text-amber-300 px-2 py-0.5 bg-amber-500/20 rounded">
+                          {appliedPromo.code}
+                        </span>
+                        <span className="text-xs font-bold text-emerald-400">
+                          {appliedPromo.discountType === 'PERCENT' ? `-${appliedPromo.discountPercent}% OFF` : `-€${appliedPromo.discountAmount} OFF`}
+                        </span>
+                      </div>
+                      {appliedPromo.creatorName && (
+                        <p className="text-[11px] text-slate-300 flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-amber-400" />
+                          <span>Supporting Creator: <strong className="text-white">{appliedPromo.creatorName}</strong></span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="text-[11px] text-red-400 hover:text-red-300 font-bold px-2 py-1 hover:bg-red-500/10 rounded transition-colors cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {promoMessage.text && (
+                  <p className={`text-[11px] font-medium leading-tight ${
+                    promoMessage.type === 'success' ? 'text-emerald-400' : 'text-red-400'
+                  }`}>
+                    {promoMessage.text}
+                  </p>
+                )}
               </div>
 
               {/* Voluntary Platform Tip / Donation Module */}
@@ -357,7 +537,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Section: Login gate if guest, PayPal terminal if logged in */}
+              {/* Payment Section: Login gate if guest, 1-Click Free button if 100% off, or PayPal terminal */}
               {!user ? (
                 <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-950/50 via-slate-900 to-slate-950 border-2 border-blue-500/40 text-center space-y-4 shadow-xl">
                   <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-400/30 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
@@ -388,6 +568,38 @@ export default function CheckoutPage() {
                     </Link>
                   </div>
                 </div>
+              ) : isFreeOrder ? (
+                <div className="space-y-3 pt-2">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border-2 border-yellow-400/50 text-center space-y-2 shadow-xl animate-fade-in">
+                    <div className="w-10 h-10 rounded-full bg-yellow-400 text-slate-950 flex items-center justify-center mx-auto font-black shadow-lg shadow-yellow-500/30">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <h4 className="text-sm font-black text-yellow-300">100% Free Order Promo Waiver Applied!</h4>
+                    <p className="text-[11px] text-slate-300 leading-snug">
+                      No payment gateway required. Your Ultimate VIP privileges will activate immediately upon confirmation.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleFreeCheckout}
+                    disabled={freeCheckoutLoading}
+                    className="btn-glow-blue btn-shimmer btn-animated w-full py-4 px-4 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/30 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+                  >
+                    {freeCheckoutLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                        <span>Activating Free Ultimate Membership...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-4 h-4 text-slate-950 fill-current" />
+                        <span>Claim 100% Free Ultimate VIP</span>
+                        <ArrowRight className="w-4 h-4 text-slate-950" />
+                      </>
+                    )}
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-3 pt-2">
                   <div className="text-center">
@@ -397,10 +609,10 @@ export default function CheckoutPage() {
                   </div>
 
                   <PayPalSmartButtons
-                    key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${donation}`}
+                    key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${finalTotalAmount}_${appliedPromo?.code || 'nopromo'}`}
                     items={[{
                       id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
-                      title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan - 15% Off' : 'Monthly Plan'})${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
+                      title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan' : 'Monthly Plan'})${appliedPromo ? ` [Code: ${appliedPromo.code}]` : ''}${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
                       price: finalTotalAmount
                     }]}
                     totalAmount={finalTotalAmount}

@@ -169,6 +169,97 @@ router.post('/users/:id/resolve-ip', (req, res) => {
   });
 });
 
+// @route   PUT /api/admin/users/:id/ultimate
+// @desc    Gift or revoke MinoForge Ultimate for a user with custom time period
+router.put('/users/:id/ultimate', (req, res) => {
+  const { id } = req.params;
+  const { isUltimate = true, duration = '1_MONTH' } = req.body;
+
+  let expiresAt = null;
+  let durationLabel = '1 Month';
+
+  if (!isUltimate || duration === 'REVOKE') {
+    durationLabel = 'Revoked';
+  } else {
+    const now = Date.now();
+    switch (duration) {
+      case '1_DAY':
+        expiresAt = new Date(now + 1 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '24 Hours (1 Day)';
+        break;
+      case '7_DAYS':
+        expiresAt = new Date(now + 7 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '7 Days (1 Week)';
+        break;
+      case '1_MONTH':
+        expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '30 Days (1 Month)';
+        break;
+      case '3_MONTHS':
+        expiresAt = new Date(now + 90 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '90 Days (3 Months)';
+        break;
+      case '6_MONTHS':
+        expiresAt = new Date(now + 180 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '180 Days (6 Months)';
+        break;
+      case '1_YEAR':
+        expiresAt = new Date(now + 365 * 24 * 3600 * 1000).toISOString();
+        durationLabel = '365 Days (1 Year)';
+        break;
+      case 'LIFETIME':
+      default:
+        if (duration === 'LIFETIME') {
+          expiresAt = 'LIFETIME';
+          durationLabel = 'Lifetime VIP';
+        } else {
+          expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
+          durationLabel = '30 Days (1 Month)';
+        }
+        break;
+    }
+  }
+
+  const updated = store.updateUserUltimate(id, {
+    isUltimate: duration !== 'REVOKE' && Boolean(isUltimate),
+    duration: duration === 'REVOKE' ? null : duration,
+    expiresAt: duration === 'REVOKE' ? null : expiresAt,
+    plan: duration === 'REVOKE' ? null : `ADMIN_GIFT_${duration}`
+  });
+
+  if (!updated) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const actionDetails = duration === 'REVOKE' 
+    ? `Revoked MinoForge Ultimate from ${updated.username} (${updated.email})`
+    : `Gifted ${durationLabel} MinoForge Ultimate access to ${updated.username} (${updated.email})`;
+
+  store.addAuditLog({
+    type: duration === 'REVOKE' ? 'ULTIMATE_REVOKE' : 'ULTIMATE_GIFT',
+    actor: 'Master Administrator',
+    details: actionDetails,
+    ip: req.ip || '127.0.0.1'
+  });
+
+  store.trackActivity({
+    type: 'ADMIN_ACTION',
+    username: updated.username,
+    email: updated.email,
+    ip: req.ip || '127.0.0.1',
+    path: '/nimda',
+    details: actionDetails
+  });
+
+  res.json({
+    success: true,
+    message: duration === 'REVOKE' 
+      ? `Ultimate membership revoked for ${updated.username}` 
+      : `Successfully gifted ${durationLabel} Ultimate to ${updated.username}!`,
+    user: updated
+  });
+});
+
 // @route   GET /api/admin/stats
 // @desc    Get live operational stats & analytics
 router.get('/stats', (req, res) => {
@@ -258,9 +349,65 @@ router.post('/purge-cache', (req, res) => {
     details: 'Full edge and local memory cache purge triggered'
   });
 
+// ==========================================
+// 🏷️ PROMO & CREATOR CODE ADMIN ROUTES
+// ==========================================
+
+// @route   GET /api/admin/promo-codes
+// @desc    Get all promo and creator codes
+router.get('/promo-codes', (req, res) => {
   res.json({
     success: true,
-    message: 'Cache purged successfully. 0 stale entries removed.'
+    promoCodes: store.getPromoCodes()
+  });
+});
+
+// @route   POST /api/admin/promo-codes
+// @desc    Create a new promo or creator code with end date & discount
+router.post('/promo-codes', (req, res) => {
+  try {
+    const newPromo = store.createPromoCode(req.body);
+    res.status(201).json({
+      success: true,
+      message: `Promo code "${newPromo.code}" created successfully!`,
+      promo: newPromo
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message || 'Failed to create promo code.'
+    });
+  }
+});
+
+// @route   PUT /api/admin/promo-codes/:id
+// @desc    Update promo code or toggle active state
+router.put('/promo-codes/:id', (req, res) => {
+  const { id } = req.params;
+  const updated = store.updatePromoCode(id, req.body);
+  if (!updated) {
+    return res.status(404).json({ success: false, message: 'Promo code not found.' });
+  }
+
+  res.json({
+    success: true,
+    message: `Promo code "${updated.code}" updated successfully!`,
+    promo: updated
+  });
+});
+
+// @route   DELETE /api/admin/promo-codes/:id
+// @desc    Delete a promo code
+router.delete('/promo-codes/:id', (req, res) => {
+  const { id } = req.params;
+  const deleted = store.deletePromoCode(id);
+  if (!deleted) {
+    return res.status(404).json({ success: false, message: 'Promo code not found.' });
+  }
+
+  res.json({
+    success: true,
+    message: `Promo code "${deleted.code}" deleted successfully.`
   });
 });
 
