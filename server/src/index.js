@@ -103,11 +103,34 @@ const clientDistPath = clientDistCandidates.find(p => fs.existsSync(p)) || clien
 console.log('[Server] Static Frontend Path:', clientDistPath, 'Exists:', fs.existsSync(clientDistPath));
 
 if (fs.existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
+  // Static assets (CSS, JS, Images) get long-term caching
+  app.use('/assets', express.static(path.join(clientDistPath, 'assets'), {
+    maxAge: '1y',
+    immutable: true
+  }));
+
+  app.use(express.static(clientDistPath, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
+  }));
+
+  // Handle SPA routing
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) {
       return next();
     }
+    // Never send HTML if a static file was requested but not found
+    if (req.path.startsWith('/assets/') || req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|json|woff|woff2|ttf|eot)$/i)) {
+      return res.status(404).send('Asset not found');
+    }
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(clientDistPath, 'index.html'));
   });
 }
