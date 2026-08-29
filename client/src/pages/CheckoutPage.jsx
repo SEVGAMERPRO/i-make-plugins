@@ -272,8 +272,8 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <span>Yearly</span>
-                    <span className="text-[9px] bg-emerald-500/30 text-emerald-300 px-1.5 py-0.5 rounded font-black uppercase">
-                      -15%
+                    <span className="text-[9px] bg-emerald-500/30 text-emerald-300 px-1.5 py-0.5 rounded font-black uppercase whitespace-nowrap">
+                      Save 15%
                     </span>
                   </button>
                 </div>
