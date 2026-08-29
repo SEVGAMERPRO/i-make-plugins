@@ -106,7 +106,7 @@ const SECTIONS = [
   }
 ];
 
-function PricingPage() {
+export default function PricingPage() {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
@@ -285,7 +285,5 @@ function PricingPage() {
       </div>
     </div>
   );
-};
-
-export default PricingPage;
+}
 

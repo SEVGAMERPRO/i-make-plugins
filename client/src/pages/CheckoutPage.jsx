@@ -7,9 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
-
-function CheckoutPage() {
+export default function CheckoutPage() {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
@@ -380,6 +378,4 @@ function CheckoutPage() {
       </div>
     </div>
   );
-};
-
-export default PricingPage;
+}
