@@ -35,7 +35,10 @@ export const ConfigProvider = ({ children }) => {
   const [config, setConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('nimda_system_config');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_CONFIG, ...parsed, maintenanceMode: false }; // Never default to locked maintenance on load
+      }
     } catch {}
     return DEFAULT_CONFIG;
   });
