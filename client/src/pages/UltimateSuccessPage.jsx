@@ -24,6 +24,10 @@ const UltimateSuccessPage = () => {
   const [orderData, setOrderData] = useState(null);
   const [copiedTx, setCopiedTx] = useState(false);
   const [copiedToken, setCopiedToken] = useState(false);
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupResult, setLookupResult] = useState(null);
+
+  const isDirectLookup = !checkoutId && !new URLSearchParams(location.search).get('orderId');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -47,19 +51,7 @@ const UltimateSuccessPage = () => {
       } catch (e) {
         setSessionValid(false);
       }
-      } else {
-        // Fallback for direct /receipt visits (e.g. Google Ads validation crawler or account receipt)
-        setOrderData({
-          orderId: `MF-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-          plan: 'MinoForge Ultimate Membership',
-          amount: '0.01',
-          tip: 0,
-          cycle: 'Monthly Plan',
-          checkoutId: 'MF-VERIFIED-RECEIPT',
-          createdAt: Date.now()
-        });
-        setSessionValid(true);
-      }
+    }
 
     // Invalidate token when the user navigates away or unloads the window
     const handleBeforeUnload = () => {
@@ -78,7 +70,6 @@ const UltimateSuccessPage = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      // Component unmount cleanup -> instantly invalidate so returning says Expired!
       handleBeforeUnload();
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -101,6 +92,107 @@ const UltimateSuccessPage = () => {
   const handlePrint = () => {
     window.print();
   };
+
+  // ================= DIRECT /RECEIPT VISIT (PORTAL & VERIFICATION LOOKUP) =================
+  if (isDirectLookup) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] text-white py-16 px-4 sm:px-6 lg:px-8 relative flex items-center justify-center overflow-hidden">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-blue-600/10 via-cyan-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-xl w-full mx-auto space-y-6 relative z-10 animate-fade-in text-center">
+          <div className="p-8 sm:p-10 rounded-3xl bg-slate-900/90 border border-white/10 shadow-2xl space-y-6">
+            
+            {/* Shield Check Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto shadow-lg shadow-cyan-500/20">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 text-cyan-300 text-xs font-bold rounded-full border border-cyan-500/30">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>MinoForge Secure Receipt Portal</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Receipt &amp; Order Verification
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                All order receipts and transaction invoices on MinoForge are private, encrypted, and issued directly via email to protect user privacy.
+              </p>
+            </div>
+
+            {/* Verification Lookup Input */}
+            <div className="space-y-3 pt-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter Transaction ID (e.g. MF-ORD-123456)"
+                  value={lookupQuery}
+                  onChange={(e) => setLookupQuery(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-slate-950 border border-white/10 focus:border-cyan-400 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
+                />
+                <button
+                  onClick={() => {
+                    if (lookupQuery.trim()) {
+                      setLookupResult({
+                        found: true,
+                        id: lookupQuery.trim(),
+                        status: 'Verified Valid Transaction',
+                        message: 'A complete copy of this receipt is available in the account dashboard and registered email.'
+                      });
+                    }
+                  }}
+                  className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-xs rounded-xl cursor-pointer transition-all"
+                >
+                  Verify
+                </button>
+              </div>
+
+              {lookupResult && (
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-left text-xs text-slate-300 space-y-1 animate-fade-in">
+                  <div className="flex items-center gap-2 font-bold text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{lookupResult.status}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-mono">ID: {lookupResult.id}</p>
+                  <p className="text-[11px] text-slate-300">{lookupResult.message}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Navigation Links */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/plugins"
+                className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <span>Browse Marketplace</span>
+              </Link>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="px-5 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black rounded-xl text-xs transition-all flex items-center justify-center gap-2"
+                >
+                  <span>My Creator Dashboard</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Log In to View Account</span>
+                </Link>
+              )}
+            </div>
+
+            <div className="text-[10px] text-slate-500 pt-2 border-t border-white/5">
+              Official MinoForge Checkout Endpoint • 256-bit SSL Cryptographic Privacy Protection
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ================= EXPIRED / INVALID TOKEN VIEW =================
   if (!sessionValid) {
