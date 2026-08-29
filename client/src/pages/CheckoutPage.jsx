@@ -612,7 +612,7 @@ export default function CheckoutPage() {
                     key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${finalTotalAmount}_${appliedPromo?.code || 'nopromo'}`}
                     isSubscription={true}
                     billingCycle={annualBilling ? 'yearly' : 'monthly'}
-                    subscriptionPlanId={annualBilling ? null : 'P-6N334537WX7871409NKJRIKY'}
+                    subscriptionPlanId={annualBilling ? 'P-03X31846PF270403XNKJRJUQ' : 'P-6N334537WX7871409NKJRIKY'}
                     donation={donation}
                     items={[{
                       id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
