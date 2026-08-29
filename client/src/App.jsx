@@ -91,7 +91,9 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/ultimate" element={<YourUltimatePage />} />
           <Route path="/your-ultimate" element={<YourUltimatePage />} />
+          <Route path="/receipt" element={<UltimateSuccessPage />} />
           <Route path="/receipt/:checkoutId" element={<UltimateSuccessPage />} />
+          <Route path="/checkout/success" element={<UltimateSuccessPage />} />
           <Route path="/checkout/success/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/order-success/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/checkout/:checkoutId" element={<UltimateSuccessPage />} />
