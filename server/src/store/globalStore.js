@@ -275,6 +275,17 @@ module.exports = {
   },
   
   // Real Analytics & Tracking Methods
+  addAuditLog: (log) => {
+    const newLog = {
+      id: `audit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString(),
+      ...log
+    };
+    activityLogs.unshift(newLog);
+    if (activityLogs.length > 200) activityLogs.pop();
+    return newLog;
+  },
+  getAuditLogs: () => activityLogs,
   trackActivity: (event) => {
     const newEvt = {
       id: `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
