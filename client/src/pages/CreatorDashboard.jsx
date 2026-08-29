@@ -223,16 +223,6 @@ const CreatorDashboard = () => {
             <span>&gt;</span>
             <span className="text-blue-400 font-semibold capitalize">{currentSection.replace('-', ' ')}</span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Link 
-              to="/upgrade" 
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 font-bold rounded-lg border border-amber-500/30 hover:brightness-110 transition-all"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
-              <span>Go Ultimate (0% Fees)</span>
-            </Link>
-          </div>
         </div>
 
         {/* Dashboard Main Grid with Left Sidebar */}

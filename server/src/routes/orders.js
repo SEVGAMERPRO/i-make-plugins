@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { sendPurchaseReceiptEmail, sendPluginSoldEmail, sendPayoutRequestEmail } = require('../utils/mailer');
+const { postToDiscordWebhook } = require('./developer');
 const store = require('../store/globalStore');
 
 // @route   POST /api/orders/confirm-purchase
@@ -35,14 +36,29 @@ router.post('/confirm-purchase', async (req, res) => {
       console.warn('Failed to send buyer receipt email:', buyerErr.message);
     }
 
-    // 2. Send sale notification email to each plugin's Creator
+    // 2. Send sale notification email & Discord Webhook to each plugin's Creator
     for (const item of items) {
       try {
-        const creatorEmail = item.authorEmail || process.env.ADMIN_EMAIL || 'minoforge.requests@gmail.com';
-        const creatorName = item.authorName || 'MinoCreator';
+        const creatorEmail = (item.authorEmail || item.author?.email || process.env.ADMIN_EMAIL || 'severinkaptein8@gmail.com').trim().toLowerCase();
+        const creatorName = item.authorName || item.author?.username || 'MinoCreator';
         const itemPrice = parseFloat(item.price) || 0;
         const creatorEarnings = itemPrice * 0.95; // 95% payout rate
 
+        // Log developer sale event
+        store.addDeveloperEvent({
+          type: 'PLUGIN_PURCHASED',
+          orderId,
+          pluginId: item.id,
+          pluginTitle: item.title,
+          price: itemPrice,
+          earnings: creatorEarnings,
+          buyerUsername: cleanUsername,
+          buyerEmail: cleanEmail,
+          creatorEmail,
+          creatorUsername: creatorName
+        });
+
+        // Send Email
         await sendPluginSoldEmail({
           creatorEmail,
           creatorUsername: creatorName,
@@ -51,8 +67,41 @@ router.post('/confirm-purchase', async (req, res) => {
           amount: itemPrice,
           earnings: creatorEarnings
         });
+
+        // Trigger Creator's Discord Bot Webhook
+        const webhookConfig = store.getDiscordWebhook(creatorEmail);
+        if (webhookConfig && webhookConfig.enabled && webhookConfig.webhookUrl) {
+          const discordEmbed = {
+            username: 'MinoForge Sales Bot',
+            avatar_url: 'https://minoforge.com/favicon.png',
+            embeds: [
+              {
+                title: `💰 Plugin Sold! — ${item.title}`,
+                description: `A customer has just purchased **${item.title}** on the marketplace!`,
+                color: 0x10B981, // Emerald green
+                fields: [
+                  { name: '📦 Resource', value: `**${item.title}**`, inline: true },
+                  { name: '👤 Customer', value: `\`${cleanUsername}\``, inline: true },
+                  { name: '💵 Sale Price', value: `**€${itemPrice.toFixed(2)}**`, inline: true },
+                  { name: '📈 Your Net Earnings (95%)', value: `**€${creatorEarnings.toFixed(2)}**`, inline: true },
+                  { name: '🧾 Order ID', value: `\`${orderId}\``, inline: true },
+                  { name: '⚡ Event', value: '`order.completed`', inline: true }
+                ],
+                footer: {
+                  text: 'MinoForge Developer API Engine • Automated Discord Sale Alert',
+                  icon_url: 'https://minoforge.com/favicon.png'
+                },
+                timestamp: new Date().toISOString()
+              }
+            ]
+          };
+
+          postToDiscordWebhook(webhookConfig.webhookUrl, discordEmbed)
+            .catch(whErr => console.warn('[Discord Webhook Error]:', whErr.message));
+        }
+
       } catch (creatorErr) {
-        console.warn(`Failed to send creator sale email for ${item.title}:`, creatorErr.message);
+        console.warn(`Failed to process creator sale for ${item.title}:`, creatorErr.message);
       }
     }
 

@@ -5,7 +5,7 @@ const GameCard = ({ slug, name, image, accentColor = '#2196F3' }) => {
   return (
     <Link 
       to={`/games/${slug}`} 
-      className="group relative block w-56 h-36 sm:w-64 sm:h-40 md:w-72 md:h-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 transform hover:-translate-y-2 flex-shrink-0 border border-white/10 bg-slate-900"
+      className="group relative block w-48 h-32 sm:w-60 sm:h-38 md:w-72 md:h-44 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 transform hover:-translate-y-2 flex-shrink-0 border border-white/10 bg-slate-900"
     >
       {/* Category Image (100% full view) */}
       <img 

@@ -59,7 +59,7 @@ export default function HomePage() {
   return (
     <div className="flex-grow flex flex-col bg-[#0b0f19] text-white">
       {/* Hero Section */}
-      <div className="relative pt-24 pb-52 px-4 min-h-[660px] md:min-h-[720px] flex flex-col items-center justify-center overflow-visible">
+      <div className="relative pt-20 sm:pt-24 pb-40 sm:pb-52 px-3 sm:px-4 min-h-[580px] sm:min-h-[660px] md:min-h-[720px] flex flex-col items-center justify-center overflow-visible">
         {/* Animated In-Game Hero Wallpapers */}
         {HERO_IMAGES.map((bg, idx) => (
           <div
@@ -88,25 +88,25 @@ export default function HomePage() {
         />
 
         {/* Hero Content */}
-        <div className="relative z-30 w-full max-w-4xl mx-auto text-center animate-fade-in">
+        <div className="relative z-30 w-full max-w-4xl mx-auto text-center animate-fade-in px-2">
           {/* Note: Website Heavy Development Notice Banner */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-amber-500/10 backdrop-blur-md rounded-2xl text-xs md:text-sm text-amber-300 font-medium mb-4 border border-amber-500/30 shadow-lg shadow-amber-500/10 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/10 backdrop-blur-md rounded-2xl text-xs md:text-sm text-amber-300 font-medium mb-4 border border-amber-500/30 shadow-lg shadow-amber-500/10 max-w-2xl mx-auto">
             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span className="text-left text-xs md:text-sm leading-snug">
-              <strong className="text-amber-300 uppercase tracking-wide mr-1.5 font-bold">Note:</strong>
-              This website is still under heavy development, and not everything is working so some features of the subscription aren't fully working yet!
+              <strong className="text-amber-300 uppercase tracking-wide mr-1 font-bold">Note:</strong>
+              This website is still under heavy development, and some subscription features aren't fully active yet!
             </span>
           </div>
 
           <br />
 
           {/* Marketplace Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 backdrop-blur-md rounded-full text-xs md:text-sm text-blue-300 font-semibold mb-6 border border-blue-500/20 shadow-lg shadow-blue-500/10">
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span>The #1 Game Plugin & Mod Marketplace</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-500/10 backdrop-blur-md rounded-full text-xs sm:text-sm text-blue-300 font-semibold mb-4 sm:mb-6 border border-blue-500/20 shadow-lg shadow-blue-500/10">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
+            <span>The #1 Game Plugin &amp; Mod Marketplace</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 tracking-tight leading-tight drop-shadow-2xl">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-2xl">
             Find the best plugins
             <br />
             <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
@@ -114,25 +114,25 @@ export default function HomePage() {
             </span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
+          <p className="text-sm sm:text-base md:text-xl text-slate-300 mb-6 sm:mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
             Discover, download, and sell high-performance plugins for Minecraft, FiveM, Rust, and more.
           </p>
 
           {/* Upgraded Glassmorphism Search Bar */}
-          <div className="max-w-2xl mx-auto mb-6 relative z-50">
+          <div className="max-w-2xl mx-auto mb-5 sm:mb-6 relative z-50">
             <SearchBar onSearch={handleSearch} suggestions={GAMES} />
           </div>
 
           {/* Popular Quick Search Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs md:text-sm">
-            <span className="text-slate-400 flex items-center gap-1 font-medium mr-1">
-              <TrendingUp className="w-3.5 h-3.5 text-blue-400" /> Popular:
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs md:text-sm">
+            <span className="text-slate-400 flex items-center gap-1 font-medium mr-1 text-[11px] sm:text-xs">
+              <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400" /> Popular:
             </span>
             {['Economy', 'Staff Admin', 'PvP Kits', 'Anti-Cheat', 'Custom Vehicles', 'Discord Sync'].map(tag => (
               <button
                 key={tag}
                 onClick={() => handleSearch(tag)}
-                className="btn-tag-animated text-slate-300 hover:text-white bg-slate-800/80 hover:bg-blue-600/25 border border-white/10 hover:border-blue-400/50 px-3.5 py-1.5 rounded-xl font-medium shadow-sm transition-all"
+                className="btn-tag-animated text-slate-300 hover:text-white bg-slate-800/80 hover:bg-blue-600/25 border border-white/10 hover:border-blue-400/50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-medium shadow-sm transition-all"
               >
                 {tag}
               </button>
@@ -141,11 +141,11 @@ export default function HomePage() {
         </div>
 
         {/* 100% Seamless Endless Moving Game Categories Marquee */}
-        <div className="absolute -bottom-24 md:-bottom-28 left-0 right-0 z-20 px-2 sm:px-4 pointer-events-none">
+        <div className="absolute -bottom-20 sm:-bottom-24 md:-bottom-28 left-0 right-0 z-20 px-1 sm:px-4 pointer-events-none">
           <div className="max-w-7xl mx-auto relative group/carousel pointer-events-auto overflow-hidden">
             {/* Seamless Endless Infinite Moving Track */}
             <div className="overflow-hidden pb-4 pt-2 px-2 select-none w-full">
-              <div className="animate-marquee-infinite flex gap-3 md:gap-4">
+              <div className="animate-marquee-infinite flex gap-2.5 sm:gap-4">
                 {/* First Half */}
                 {[...GAMES, ...GAMES].map((game, index) => (
                   <GameCard key={`${game.slug}-a-${index}`} {...game} />
@@ -161,7 +161,7 @@ export default function HomePage() {
       </div>
 
       {/* Spacer for overlapping game cards */}
-      <div className="h-32 md:h-36 bg-[#0b0f19]" />
+      <div className="h-24 sm:h-32 md:h-36 bg-[#0b0f19]" />
 
       {/* Sponsored & Promoted Plugins Spotlight Section */}
       <section className="py-12 px-4 max-w-7xl mx-auto w-full">

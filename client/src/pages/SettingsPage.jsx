@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Settings, ShieldCheck, Lock, Smartphone, User, Sparkles, Bell, 
   Key, Copy, Check, Download, AlertTriangle, ChevronRight, CheckCircle2, 
-  ExternalLink, Bot, Zap, Globe, Mail, Eye, EyeOff, Save
+  ExternalLink, Bot, Zap, Globe, Mail, Eye, EyeOff, Save, Search, RefreshCw,
+  Code, Terminal, Webhook, Plus, Trash2, Send, Activity, FileCode, Play, Radio
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -13,11 +14,12 @@ import axios from 'axios';
 const SettingsPage = () => {
   const { user } = useAuth();
   const { currency, setCurrency } = useCurrency();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, t, languages = [], currentLanguageObj } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [langSuccess, setLangSuccess] = useState('');
+  const [langSearchQuery, setLangSearchQuery] = useState('');
   
-  // Active Tab: 'security' | 'profile' | 'language' | 'integrations' | 'notifications'
+  // Active Tab: 'security' | 'profile' | 'language' | 'developer' | 'integrations' | 'notifications'
   const initialTab = searchParams.get('tab') || 'security';
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -45,6 +47,26 @@ const SettingsPage = () => {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [profileSuccess, setProfileSuccess] = useState('');
 
+  // ================= DEVELOPER API & DISCORD BOT STATE =================
+  const [apiKeys, setApiKeys] = useState([]);
+  const [keysLoading, setKeysLoading] = useState(false);
+  const [keySuccess, setKeySuccess] = useState('');
+  const [keyError, setKeyError] = useState('');
+  const [newKeyLabel, setNewKeyLabel] = useState('');
+  const [copiedKeyId, setCopiedKeyId] = useState(null);
+  const [visibleKeyIds, setVisibleKeyIds] = useState(new Set());
+  
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
+  const [webhookEnabled, setWebhookEnabled] = useState(true);
+  const [webhookLoading, setWebhookLoading] = useState(false);
+  const [webhookSuccess, setWebhookSuccess] = useState('');
+  const [webhookError, setWebhookError] = useState('');
+  const [webhookTesting, setWebhookTesting] = useState(false);
+  
+  const [activeSnippetTab, setActiveSnippetTab] = useState('nodejs');
+  const [devEvents, setDevEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
+
   // ================= INTEGRATIONS STATE =================
   const [discordLinked, setDiscordLinked] = useState(() => {
     try {
@@ -54,7 +76,7 @@ const SettingsPage = () => {
     }
   });
 
-  // Fetch 2FA status on mount
+  // Fetch 2FA status and Developer Keys on mount
   useEffect(() => {
     axios.get(`/api/auth/2fa/status/${encodeURIComponent(email)}`)
       .then(res => {
@@ -72,7 +94,132 @@ const SettingsPage = () => {
           setEnabledAt(parsed.enabledAt);
         }
       });
+
+    // Fetch Developer Keys & Webhooks
+    fetchDeveloperData();
   }, [email]);
+
+  const fetchDeveloperData = async () => {
+    setKeysLoading(true);
+    try {
+      const [keysRes, whRes, evRes] = await Promise.allSettled([
+        axios.get(`/api/developer/keys?email=${encodeURIComponent(email)}`),
+        axios.get(`/api/developer/webhook?email=${encodeURIComponent(email)}`),
+        axios.get(`/api/developer/events?email=${encodeURIComponent(email)}&limit=10`)
+      ]);
+
+      if (keysRes.status === 'fulfilled' && keysRes.value.data?.keys) {
+        setApiKeys(keysRes.value.data.keys);
+      }
+      if (whRes.status === 'fulfilled' && whRes.value.data?.webhook) {
+        setDiscordWebhookUrl(whRes.value.data.webhook.webhookUrl || '');
+        setWebhookEnabled(whRes.value.data.webhook.enabled ?? true);
+      }
+      if (evRes.status === 'fulfilled' && evRes.value.data?.events) {
+        setDevEvents(evRes.value.data.events);
+      }
+    } catch (err) {
+      console.warn('Developer data fetch error:', err);
+    } finally {
+      setKeysLoading(false);
+    }
+  };
+
+  const handleGenerateKey = async (e) => {
+    if (e) e.preventDefault();
+    setKeysLoading(true);
+    setKeyError('');
+    try {
+      const res = await axios.post('/api/developer/keys/generate', {
+        email,
+        username,
+        label: newKeyLabel.trim() || 'Discord Bot Key'
+      });
+      if (res.data && res.data.success) {
+        setApiKeys(prev => [res.data.key, ...prev]);
+        setNewKeyLabel('');
+        setKeySuccess('New API Key created successfully!');
+        setTimeout(() => setKeySuccess(''), 3500);
+      }
+    } catch (err) {
+      setKeyError(err.response?.data?.message || 'Failed to generate new API key.');
+    } finally {
+      setKeysLoading(false);
+    }
+  };
+
+  const handleRevokeKey = async (keyId) => {
+    if (!window.confirm('Are you sure you want to revoke this API Key? Any Discord bot or script using it will lose access immediately.')) {
+      return;
+    }
+    try {
+      const res = await axios.delete(`/api/developer/keys/${keyId}`, { data: { email } });
+      if (res.data?.success) {
+        setApiKeys(prev => prev.filter(k => k.id !== keyId));
+        setKeySuccess('API key revoked.');
+        setTimeout(() => setKeySuccess(''), 3000);
+      }
+    } catch (err) {
+      setKeyError('Failed to revoke API key.');
+    }
+  };
+
+  const toggleKeyVisibility = (keyId) => {
+    setVisibleKeyIds(prev => {
+      const next = new Set(prev);
+      if (next.has(keyId)) next.delete(keyId);
+      else next.add(keyId);
+      return next;
+    });
+  };
+
+  const handleSaveWebhook = async (e) => {
+    if (e) e.preventDefault();
+    setWebhookLoading(true);
+    setWebhookError('');
+    setWebhookSuccess('');
+    try {
+      const res = await axios.post('/api/developer/webhook', {
+        email,
+        username,
+        webhookUrl: discordWebhookUrl.trim(),
+        enabled: webhookEnabled,
+        notifyOnPurchase: true
+      });
+      if (res.data?.success) {
+        setWebhookSuccess('Discord webhook settings saved successfully!');
+        setTimeout(() => setWebhookSuccess(''), 3500);
+      }
+    } catch (err) {
+      setWebhookError(err.response?.data?.message || 'Failed to save Discord webhook.');
+    } finally {
+      setWebhookLoading(false);
+    }
+  };
+
+  const handleTestWebhook = async () => {
+    if (!discordWebhookUrl.trim() || !discordWebhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+      setWebhookError('Please enter a valid Discord Webhook URL starting with https://discord.com/api/webhooks/');
+      return;
+    }
+    setWebhookTesting(true);
+    setWebhookError('');
+    setWebhookSuccess('');
+    try {
+      const res = await axios.post('/api/developer/webhook/test', {
+        webhookUrl: discordWebhookUrl.trim(),
+        username
+      });
+      if (res.data?.success) {
+        setWebhookSuccess('✓ Test alert sent to Discord channel successfully!');
+        setTimeout(() => setWebhookSuccess(''), 4000);
+      }
+    } catch (err) {
+      setWebhookError(err.response?.data?.message || 'Failed to reach Discord webhook.');
+    } finally {
+      setWebhookTesting(false);
+    }
+  };
 
   const handleStart2FASetup = async () => {
     setTwoFaLoading(true);
@@ -216,13 +363,14 @@ MinoForge Security Engine • https://minoforge.com
         </div>
 
         {/* Multi-Tab Navigation Bar */}
-        <div className="flex flex-wrap gap-2 p-2 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/10">
+        <div className="flex overflow-x-auto sm:flex-wrap gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/10 hide-scrollbar">
           {[
-            { id: 'security', label: '🔒 Security & 2FA (Google Authenticator)', icon: ShieldCheck },
-            { id: 'profile', label: '👤 Profile & Bio', icon: User },
-            { id: 'language', label: '🌍 Language / Taal (Google Cloud Translate)', icon: Globe },
-            { id: 'integrations', label: '🤖 Discord & Webhooks', icon: Sparkles },
-            { id: 'notifications', label: '🔔 Notifications & Regional', icon: Bell },
+            { id: 'security', label: '🔒 Security & 2FA', fullLabel: '🔒 Security & 2FA (Google Authenticator)', icon: ShieldCheck },
+            { id: 'profile', label: '👤 Profile & Bio', fullLabel: '👤 Profile & Bio', icon: User },
+            { id: 'language', label: '🌍 Language / Taal', fullLabel: '🌍 Language / Taal (Google Cloud Translate)', icon: Globe },
+            { id: 'developer', label: '🔑 Developer API', fullLabel: '🔑 Developer API & Discord Bot', icon: Code },
+            { id: 'integrations', label: '🤖 Discord', fullLabel: '🤖 Discord & Webhooks', icon: Sparkles },
+            { id: 'notifications', label: '🔔 Preferences', fullLabel: '🔔 Notifications & Regional', icon: Bell },
           ].map(tab => {
             const Icon = tab.icon;
             const isCurrent = activeTab === tab.id;
@@ -230,14 +378,15 @@ MinoForge Security Engine • https://minoforge.com
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
                   isCurrent
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden md:inline">{tab.fullLabel}</span>
+                <span className="md:hidden">{tab.label}</span>
               </button>
             );
           })}
@@ -558,88 +707,787 @@ MinoForge Security Engine • https://minoforge.com
           </form>
         )}
 
-        {/* TAB: LANGUAGE & GOOGLE CLOUD TRANSLATE */}
-        {activeTab === 'language' && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <div>
-                <h2 className="text-lg font-black text-white flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-cyan-400" />
-                  <span>{t('selectLanguage')}</span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Powered by Google Cloud Instant Translation. Automatically translates Marketplace listings, configs, and creator portals.
-                </p>
+        {/* TAB: LANGUAGE & GOOGLE MULTI-LANGUAGE TRANSLATOR */}
+        {activeTab === 'language' && (() => {
+          const filteredLanguages = languages.filter(l => 
+            l.name.toLowerCase().includes(langSearchQuery.toLowerCase()) ||
+            l.native.toLowerCase().includes(langSearchQuery.toLowerCase()) ||
+            l.code.toLowerCase().includes(langSearchQuery.toLowerCase())
+          );
+
+          return (
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6 animate-fade-in">
+              
+              {/* Header Banner */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-white/10">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-black text-white flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-cyan-400" />
+                      <span>{t('selectLanguage')}</span>
+                    </h2>
+                    <span className="px-2.5 py-0.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[10px] font-black rounded-lg uppercase tracking-wider">
+                      Google Pro AI Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+                    Powered by <strong>Google Multi-Language Cloud Translator</strong>. Select from 60+ world languages in alphabetical order (A–Z) to instantly translate all marketplace plugins, server configurations, creator portals, and forum docs.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 self-start lg:self-center">
+                  <div className="px-3.5 py-2 rounded-2xl bg-slate-950 border border-white/10 flex items-center gap-2.5 shadow-inner">
+                    <span className="text-2xl">{currentLanguageObj?.flag || '🌐'}</span>
+                    <div className="text-left">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Active Language</span>
+                      <strong className="text-xs font-black text-cyan-300">
+                        {currentLanguageObj?.native || currentLanguageObj?.name || 'English'} ({language.toUpperCase()})
+                      </strong>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span className="px-3 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Google Cloud Translate</span>
-              </span>
+
+              {/* Success Notification */}
+              {langSuccess && (
+                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center justify-between gap-2 animate-fade-in shadow-lg shadow-emerald-500/10">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span>{langSuccess}</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400/80 font-mono">Google Cloud Synced ✓</span>
+                </div>
+              )}
+
+              {/* Search & Action Bar */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-slate-950/80 rounded-2xl border border-white/10">
+                <div className="relative w-full sm:w-80">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={langSearchQuery}
+                    onChange={(e) => setLangSearchQuery(e.target.value)}
+                    placeholder="Search 60+ languages (e.g. Dutch, Spanish, Arabic)..."
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl pl-9.5 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                  />
+                  {langSearchQuery && (
+                    <button 
+                      onClick={() => setLangSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between w-full sm:w-auto gap-3 text-xs">
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    Showing <strong className="text-cyan-300">{filteredLanguages.length}</strong> of {languages.length} (A-Z)
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLanguage('en');
+                      setLangSuccess('Language reset to English (US)!');
+                      setTimeout(() => setLangSuccess(''), 3000);
+                    }}
+                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Reset to default language"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Reset (EN)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Alphabetical Grid of Languages */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
+                {filteredLanguages.map((item) => {
+                  const isSelected = language === item.code;
+                  return (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(item.code);
+                        setLangSuccess(`Switched to ${item.name} (${item.native}) via Google Cloud Translator!`);
+                        setTimeout(() => setLangSuccess(''), 3500);
+                      }}
+                      className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between group relative overflow-hidden ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-blue-600/30 to-cyan-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20 ring-1 ring-cyan-400/50'
+                          : 'bg-slate-950/60 border-white/10 hover:border-white/20 hover:bg-slate-800/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
+                          {item.flag}
+                        </span>
+                        <div className="min-w-0">
+                          <strong className="text-xs font-bold text-white block truncate group-hover:text-cyan-300 transition-colors">
+                            {item.native}
+                          </strong>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
+                            <span>{item.name}</span>
+                            <span className="px-1 py-0.2 bg-slate-800 text-[9px] font-mono text-slate-400 rounded">
+                              {item.code}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {isSelected ? (
+                        <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center font-bold flex-shrink-0 shadow">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        </div>
+                      ) : (
+                        <span className="text-slate-600 group-hover:text-slate-400 text-xs flex-shrink-0 transition-colors">
+                          →
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {filteredLanguages.length === 0 && (
+                  <div className="col-span-full py-12 text-center space-y-2">
+                    <p className="text-sm text-slate-400">No language matching "{langSearchQuery}" found.</p>
+                    <button
+                      onClick={() => setLangSearchQuery('')}
+                      className="text-xs text-cyan-400 hover:underline font-bold"
+                    >
+                      Clear search filter
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Confirmation Bar */}
+              <div className="p-4 bg-slate-950/90 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <span>
+                    Current site language: <strong className="text-cyan-300 uppercase font-mono">{language}</strong> ({currentLanguageObj?.name || 'English'})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLangSuccess(`Language preference (${currentLanguageObj?.name}) saved across all sessions!`);
+                    setTimeout(() => setLangSuccess(''), 3000);
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-500/25 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{t('saveLanguage')}</span>
+                </button>
+              </div>
+
+            </div>
+          );
+        })()}
+
+        {/* TAB: DEVELOPER API & DISCORD BOT */}
+        {activeTab === 'developer' && (
+          <div className="space-y-8 animate-fade-in">
+            
+            {/* Header Hero Banner */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-950/40 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                <div className="space-y-1.5">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-bold text-cyan-300">
+                    <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>MinoForge REST API v1 &amp; Webhook Gateway</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                    <span>Developer API &amp; Discord Bot Engine</span>
+                  </h2>
+                  <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                    Connect your Discord bots, external server daemons, or websites to MinoForge. Receive instant sale webhook alerts when players purchase your plugins, or query your catalog programmatically.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={fetchDeveloperData}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-bold text-slate-200 rounded-xl transition-all flex items-center gap-2 flex-shrink-0"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${keysLoading ? 'animate-spin text-cyan-400' : ''}`} />
+                  <span>Refresh API</span>
+                </button>
+              </div>
             </div>
 
-            {langSuccess && (
-              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{langSuccess}</span>
+            {/* Notifications & Feedback */}
+            {keySuccess && (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>{keySuccess}</span>
+              </div>
+            )}
+            {keyError && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-xs font-bold text-red-300 flex items-center gap-2 animate-fade-in">
+                <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <span>{keyError}</span>
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { code: 'en', name: 'English (US & UK)', flag: '🇺🇸', native: 'English' },
-                { code: 'nl', name: 'Nederlands (Dutch)', flag: '🇳🇱', native: 'Nederlands' },
-                { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪', native: 'Deutsch' },
-                { code: 'fr', name: 'Français (French)', flag: '🇫🇷', native: 'Français' },
-                { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸', native: 'Español' },
-              ].map((item) => {
-                const isSelected = language === item.code;
-                return (
-                  <button
-                    key={item.code}
-                    type="button"
-                    onClick={() => {
-                      setLanguage(item.code);
-                      setLangSuccess(`Language switched to ${item.name}!`);
-                      setTimeout(() => setLangSuccess(''), 3000);
-                    }}
-                    className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between group ${
-                      isSelected
-                        ? 'bg-blue-600/30 border-cyan-400 shadow-lg shadow-blue-500/20'
-                        : 'bg-slate-950/60 border-white/10 hover:border-white/20 hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">{item.flag}</span>
-                      <div>
-                        <strong className="text-sm font-bold text-white block group-hover:text-cyan-300 transition-colors">
-                          {item.native}
-                        </strong>
-                        <span className="text-[11px] text-slate-400">{item.name}</span>
-                      </div>
+            {/* SECTION 1: DISCORD BOT WEBHOOK (SALES ALERTS) */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    <Webhook className="w-4 h-4 text-[#5865F2]" />
+                    <span>Instant Discord Sales Webhook</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Automatically send a rich embed alert into your Discord channel whenever someone buys or downloads your plugin.
+                  </p>
+                </div>
+                <span className="px-2.5 py-1 bg-[#5865F2]/10 border border-[#5865F2]/30 text-[#5865F2] text-[11px] font-bold rounded-lg self-start sm:self-auto">
+                  Discord Embed v2
+                </span>
+              </div>
+
+              {webhookSuccess && (
+                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-bold text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>{webhookSuccess}</span>
+                </div>
+              )}
+              {webhookError && (
+                <div className="p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs font-bold text-red-300 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                  <span>{webhookError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveWebhook} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                    Discord Webhook URL
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="url"
+                        value={discordWebhookUrl}
+                        onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                        placeholder="https://discord.com/api/webhooks/1234567890/abcde..."
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-cyan-300 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#5865F2] focus:border-transparent transition-all"
+                      />
                     </div>
-                    {isSelected && (
-                      <div className="w-6 h-6 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center font-bold">
-                        <Check className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+
+                    <button
+                      type="button"
+                      onClick={handleTestWebhook}
+                      disabled={webhookTesting || !discordWebhookUrl}
+                      className="px-4 py-3 bg-slate-800 hover:bg-[#5865F2]/20 border border-[#5865F2]/40 text-[#5865F2] hover:text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <Send className={`w-3.5 h-3.5 ${webhookTesting ? 'animate-bounce' : ''}`} />
+                      <span>{webhookTesting ? 'Sending Test...' : 'Send Test Alert'}</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={webhookLoading}
+                      className="px-5 py-3 bg-gradient-to-r from-blue-600 to-[#5865F2] hover:from-blue-500 hover:to-[#4752c4] text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-[#5865F2]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{webhookLoading ? 'Saving...' : 'Save Webhook'}</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-2">
+                    How to get your webhook: In Discord, go to Server Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-950 rounded-2xl border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Radio className={`w-4 h-4 ${webhookEnabled ? 'text-emerald-400' : 'text-slate-600'}`} />
+                    <div>
+                      <strong className="text-xs font-bold text-white block">Send Instant Purchase Alerts</strong>
+                      <span className="text-[11px] text-slate-400">Trigger webhook when someone completes a purchase of your plugin</span>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={webhookEnabled}
+                    onChange={(e) => setWebhookEnabled(e.target.checked)}
+                    className="w-4 h-4 accent-[#5865F2] rounded cursor-pointer"
+                  />
+                </div>
+              </form>
+
+              {/* Discord Embed Preview Mockup */}
+              <div className="mt-4 p-4 rounded-2xl bg-[#2B2D31] border border-white/5 space-y-3">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discord Channel Preview:</span>
+                <div className="p-4 rounded-xl bg-[#1E1F22] border-l-4 border-emerald-500 space-y-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center">M</span>
+                    <strong className="text-emerald-400 font-black">💰 Plugin Sold! — Ultra Vaults &amp; Bank System</strong>
+                  </div>
+                  <p className="text-slate-300 text-[11px]">
+                    A customer has just purchased **Ultra Vaults &amp; Bank System** on MinoForge Marketplace!
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-white/5 text-[11px]">
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">CUSTOMER</span>
+                      <strong className="text-white font-mono">Steve_Gamer</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">SALE PRICE</span>
+                      <strong className="text-emerald-400">€14.99</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">NET EARNINGS</span>
+                      <strong className="text-cyan-300">€14.24 (95%)</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">STATUS</span>
+                      <span className="text-emerald-400 font-bold">✓ DELIVERED</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 bg-slate-950/80 rounded-2xl border border-white/5 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Current active site language: <strong className="text-cyan-300 uppercase">{language}</strong></span>
-              <button
-                type="button"
-                onClick={() => {
-                  setLangSuccess('Language preference saved!');
-                  setTimeout(() => setLangSuccess(''), 3000);
-                }}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-md cursor-pointer"
-              >
-                {t('saveLanguage')}
-              </button>
+            {/* SECTION 2: API KEYS MANAGEMENT */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    <Key className="w-4 h-4 text-cyan-400" />
+                    <span>Personal API Keys</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Use these secret keys to authenticate your Discord bot scripts and fetch orders via REST API.
+                  </p>
+                </div>
+
+                <form onSubmit={handleGenerateKey} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newKeyLabel}
+                    onChange={(e) => setNewKeyLabel(e.target.value)}
+                    placeholder="Key Label (e.g. Discord Bot)"
+                    className="bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={keysLoading}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 cursor-pointer disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create Key</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* API Keys List */}
+              <div className="space-y-3">
+                {apiKeys.length === 0 ? (
+                  <div className="p-8 text-center bg-slate-950/60 rounded-2xl border border-white/5">
+                    <Key className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <p className="text-xs text-slate-400">No API keys created yet. Generate one above to connect your bot!</p>
+                  </div>
+                ) : (
+                  apiKeys.map((k) => {
+                    const isVisible = visibleKeyIds.has(k.id);
+                    const isCopied = copiedKeyId === k.id;
+                    const maskedKey = isVisible ? k.key : `${k.key.substring(0, 10)}••••••••••••••••••••••••••••••`;
+
+                    return (
+                      <div
+                        key={k.id}
+                        className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-white/10 hover:border-cyan-500/30 transition-all space-y-3"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                              <Code className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <strong className="text-xs font-bold text-white block">{k.label || 'API Key'}</strong>
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                Created: {new Date(k.createdAt).toLocaleDateString()} • Status: <span className="text-emerald-400 font-bold">{k.status}</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 text-[10px] font-mono rounded">
+                              orders.read
+                            </span>
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-mono rounded">
+                              plugins.read
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Secret Key Row */}
+                        <div className="flex items-center gap-2 bg-slate-900/90 border border-white/5 rounded-xl px-3 py-2">
+                          <span className="flex-1 font-mono text-xs text-cyan-300 truncate select-all">
+                            {maskedKey}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleKeyVisibility(k.id)}
+                            className="p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer rounded-lg hover:bg-slate-800"
+                            title={isVisible ? 'Hide Key' : 'Reveal Key'}
+                          >
+                            {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-cyan-400" />}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(k.key);
+                              setCopiedKeyId(k.id);
+                              setTimeout(() => setCopiedKeyId(null), 2500);
+                            }}
+                            className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {isCopied ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                <span className="text-emerald-400">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRevokeKey(k.id)}
+                            className="p-1.5 text-slate-500 hover:text-red-400 transition-colors cursor-pointer rounded-lg hover:bg-red-500/10"
+                            title="Revoke API Key"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
+
+            {/* SECTION 3: DISCORD BOT CODE TEMPLATES */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    <FileCode className="w-4 h-4 text-amber-400" />
+                    <span>Discord Bot Starter Code (Copy &amp; Paste)</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Ready-to-use bot script templates for Node.js (Discord.js), Python, and HTTP REST queries.
+                  </p>
+                </div>
+
+                {/* Subtabs */}
+                <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-white/10 text-xs">
+                  {[
+                    { id: 'nodejs', label: 'Node.js (Discord.js v14)' },
+                    { id: 'python', label: 'Python (discord.py)' },
+                    { id: 'curl', label: 'cURL / REST' },
+                    { id: 'webhook', label: 'Webhook JSON' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveSnippetTab(tab.id)}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                        activeSnippetTab === tab.id
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Code Box */}
+              <div className="relative rounded-2xl bg-slate-950 border border-white/10 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/90 border-b border-white/10 text-xs text-slate-400">
+                  <span className="font-mono text-cyan-300">
+                    {activeSnippetTab === 'nodejs' && 'bot.js — Node.js & Discord.js v14'}
+                    {activeSnippetTab === 'python' && 'bot.py — Python discord.py & aiohttp'}
+                    {activeSnippetTab === 'curl' && 'Terminal — cURL Request'}
+                    {activeSnippetTab === 'webhook' && 'payload.json — Discord Webhook Payload'}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      let code = '';
+                      const keyToUse = apiKeys[0]?.key || 'mf_live_YOUR_API_KEY';
+                      if (activeSnippetTab === 'nodejs') {
+                        code = `// MinoForge Discord Bot Sale Listener (Node.js & Discord.js v14)
+// Run: npm install discord.js axios dotenv
+
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const axios = require('axios');
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const MINOFORGE_API_KEY = '${keyToUse}';
+const DISCORD_CHANNEL_ID = '123456789012345678'; // Replace with your target channel ID
+
+client.once('ready', () => {
+  console.log(\`🤖 Logged in as \${client.user.tag}\`);
+  console.log('⚡ Listening for new MinoForge plugin purchases...');
+
+  // Poll MinoForge API for new sales every 30 seconds
+  setInterval(async () => {
+    try {
+      const response = await axios.get('https://minoforge.com/api/developer/events', {
+        headers: { 'X-API-Key': MINOFORGE_API_KEY }
+      });
+
+      if (response.data && response.data.events) {
+        const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
+        // Process new sales and send Discord Embed
+      }
+    } catch (err) {
+      console.error('API Error:', err.message);
+    }
+  }, 30000);
+});
+
+client.login('YOUR_DISCORD_BOT_TOKEN');`;
+                      } else if (activeSnippetTab === 'python') {
+                        code = `# MinoForge Discord Bot Sale Listener (Python discord.py)
+# Run: pip install discord.py aiohttp
+
+import discord
+from discord.ext import tasks, commands
+import aiohttp
+
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
+
+API_KEY = "${keyToUse}"
+CHANNEL_ID = 123456789012345678 # Replace with your channel ID
+
+@bot.event
+async def on_ready():
+    print(f"🤖 Bot online as {bot.user}")
+    poll_minoforge_sales.start()
+
+@tasks.loop(seconds=30)
+async def poll_minoforge_sales():
+    async with aiohttp.ClientSession() as session:
+        headers = {"X-API-Key": API_KEY}
+        async with session.get("https://minoforge.com/api/developer/events", headers=headers) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                channel = bot.get_channel(CHANNEL_ID)
+                # Send rich embed into Discord channel
+
+bot.run("YOUR_DISCORD_BOT_TOKEN")`;
+                      } else if (activeSnippetTab === 'curl') {
+                        code = `# 1. Query Store Events & Purchases
+curl -X GET "https://minoforge.com/api/developer/events?limit=20" \\
+  -H "X-API-Key: ${keyToUse}"
+
+# 2. Test Discord Webhook
+curl -X POST "https://minoforge.com/api/developer/webhook/test" \\
+  -H "Content-Type: application/json" \\
+  -d '{"webhookUrl": "https://discord.com/api/webhooks/...", "username": "${username}"}'`;
+                      } else {
+                        code = `{
+  "username": "MinoForge Sales Bot",
+  "avatar_url": "https://minoforge.com/favicon.png",
+  "embeds": [
+    {
+      "title": "💰 Plugin Sold! — Ultra Vaults",
+      "description": "A player has purchased your plugin on MinoForge Marketplace!",
+      "color": 1096065,
+      "fields": [
+        { "name": "📦 Resource", "value": "Ultra Vaults", "inline": true },
+        { "name": "👤 Customer", "value": "Steve_Gamer", "inline": true },
+        { "name": "💵 Sale Price", "value": "€14.99", "inline": true },
+        { "name": "📈 Your Net Earnings (95%)", "value": "€14.24", "inline": true }
+      ],
+      "timestamp": "2026-08-29T20:30:00.000Z"
+    }
+  ]
+}`;
+                      }
+
+                      navigator.clipboard.writeText(code);
+                      setKeySuccess('Code copied to clipboard!');
+                      setTimeout(() => setKeySuccess(''), 2500);
+                    }}
+                    className="flex items-center gap-1 text-cyan-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Code</span>
+                  </button>
+                </div>
+
+                <pre className="p-4 text-xs font-mono text-slate-300 overflow-x-auto leading-relaxed">
+                  {activeSnippetTab === 'nodejs' && `// MinoForge Discord Bot Sale Listener (Node.js & Discord.js v14)
+// Run: npm install discord.js axios dotenv
+
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const axios = require('axios');
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const MINOFORGE_API_KEY = '${apiKeys[0]?.key || 'mf_live_YOUR_API_KEY'}';
+const DISCORD_CHANNEL_ID = '123456789012345678'; // Replace with your target channel ID
+
+client.once('ready', () => {
+  console.log(\`🤖 Logged in as \${client.user.tag}\`);
+  console.log('⚡ Listening for new MinoForge plugin purchases...');
+
+  // Poll MinoForge API for new sales every 30 seconds
+  setInterval(async () => {
+    try {
+      const response = await axios.get('https://minoforge.com/api/developer/events', {
+        headers: { 'X-API-Key': MINOFORGE_API_KEY }
+      });
+
+      if (response.data && response.data.events) {
+        const channel = await client.channels.fetch(DISCORD_CHANNEL_ID);
+        // Process new sales and send Discord Embed
+      }
+    } catch (err) {
+      console.error('API Error:', err.message);
+    }
+  }, 30000);
+});
+
+client.login('YOUR_DISCORD_BOT_TOKEN');`}
+
+                  {activeSnippetTab === 'python' && `# MinoForge Discord Bot Sale Listener (Python discord.py)
+# Run: pip install discord.py aiohttp
+
+import discord
+from discord.ext import tasks, commands
+import aiohttp
+
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
+
+API_KEY = "${apiKeys[0]?.key || 'mf_live_YOUR_API_KEY'}"
+CHANNEL_ID = 123456789012345678 # Replace with your channel ID
+
+@bot.event
+async def on_ready():
+    print(f"🤖 Bot online as {bot.user}")
+    poll_minoforge_sales.start()
+
+@tasks.loop(seconds=30)
+async def poll_minoforge_sales():
+    async with aiohttp.ClientSession() as session:
+        headers = {"X-API-Key": API_KEY}
+        async with session.get("https://minoforge.com/api/developer/events", headers=headers) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                channel = bot.get_channel(CHANNEL_ID)
+                # Send rich embed into Discord channel
+
+bot.run("YOUR_DISCORD_BOT_TOKEN")`}
+
+                  {activeSnippetTab === 'curl' && `# 1. Query Store Events & Purchases
+curl -X GET "https://minoforge.com/api/developer/events?limit=20" \\
+  -H "X-API-Key: ${apiKeys[0]?.key || 'mf_live_YOUR_API_KEY'}"
+
+# 2. Test Discord Webhook
+curl -X POST "https://minoforge.com/api/developer/webhook/test" \\
+  -H "Content-Type: application/json" \\
+  -d '{"webhookUrl": "https://discord.com/api/webhooks/...", "username": "${username}"}'`}
+
+                  {activeSnippetTab === 'webhook' && `{
+  "username": "MinoForge Sales Bot",
+  "avatar_url": "https://minoforge.com/favicon.png",
+  "embeds": [
+    {
+      "title": "💰 Plugin Sold! — Ultra Vaults",
+      "description": "A player has purchased your plugin on MinoForge Marketplace!",
+      "color": 1096065,
+      "fields": [
+        { "name": "📦 Resource", "value": "Ultra Vaults", "inline": true },
+        { "name": "👤 Customer", "value": "Steve_Gamer", "inline": true },
+        { "name": "💵 Sale Price", "value": "€14.99", "inline": true },
+        { "name": "📈 Your Net Earnings (95%)", "value": "€14.24", "inline": true }
+      ],
+      "timestamp": "2026-08-29T20:30:00.000Z"
+    }
+  ]
+}`}
+                </pre>
+              </div>
+            </div>
+
+            {/* SECTION 4: REAL-TIME API EVENT STREAM */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-400" />
+                    <span>Real-Time Developer Event Stream</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Live record of webhook dispatches and purchases received by your API key.
+                  </p>
+                </div>
+                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-300 text-[10px] font-mono font-bold rounded-lg border border-emerald-500/20">
+                  LIVE STREAM ACTIVE
+                </span>
+              </div>
+
+              {devEvents.length === 0 ? (
+                <div className="p-6 text-center bg-slate-950/60 rounded-2xl border border-white/5">
+                  <Activity className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No events logged yet. Place a test order or send a test webhook to see live data!</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs font-mono">
+                    <thead className="bg-slate-950 text-slate-400 border-b border-white/10">
+                      <tr>
+                        <th className="p-3">EVENT TYPE</th>
+                        <th className="p-3">RESOURCE</th>
+                        <th className="p-3">CUSTOMER</th>
+                        <th className="p-3">PRICE / EARNINGS</th>
+                        <th className="p-3">TIMESTAMP</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {devEvents.map((evt) => (
+                        <tr key={evt.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-bold">
+                              {evt.type || 'PLUGIN_PURCHASED'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-white font-sans font-bold">{evt.pluginTitle || 'Plugin Sale'}</td>
+                          <td className="p-3 text-cyan-300">{evt.buyerUsername || 'Customer'}</td>
+                          <td className="p-3 text-emerald-400 font-bold">
+                            €{(evt.price || 0).toFixed(2)} <span className="text-[10px] text-slate-400 font-normal">(+€{(evt.earnings || 0).toFixed(2)})</span>
+                          </td>
+                          <td className="p-3 text-slate-500">{new Date(evt.timestamp).toLocaleTimeString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 

@@ -45,11 +45,11 @@ const CartDrawer = () => {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-slate-950/95 backdrop-blur-2xl border-l border-white/10 text-white flex flex-col shadow-2xl">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-md bg-slate-950/98 backdrop-blur-2xl border-l border-white/10 text-white flex flex-col shadow-2xl">
           
           {/* Header */}
-          <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-900/50">
+          <div className="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-slate-900/50">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                 <ShoppingCart className="w-5 h-5" />

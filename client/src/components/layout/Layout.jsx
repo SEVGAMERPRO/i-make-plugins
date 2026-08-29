@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full max-w-[100vw] overflow-x-hidden">
       {/* Global Top Broadcast Announcement */}
       <GlobalAnnouncementBanner />
 
@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
       <Navbar onMenuClick={() => setSidebarOpen(true)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <main className="flex-grow pt-16 flex flex-col">
+      <main className="flex-grow pt-16 flex flex-col w-full max-w-[100vw] overflow-x-hidden">
         <IpMultiAccountWarningBanner />
         {children}
       </main>

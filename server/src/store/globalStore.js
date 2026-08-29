@@ -135,6 +135,11 @@ let promoCodes = [
 // Real Purchases Record
 let purchases = [];
 
+// Developer API Keys, Webhooks & Real-time Events
+let apiKeys = [];
+let discordWebhooks = [];
+let developerEvents = [];
+
 // Traffic & Metrics History
 let pageViewsCount = 12;
 let uniqueVisitors = new Set(['127.0.0.1']);
@@ -533,5 +538,120 @@ module.exports = {
       return promo;
     }
     return null;
+  },
+
+  // ================= DEVELOPER API KEYS & DISCORD BOT WEBHOOKS =================
+  getApiKeysByUser: (userEmail) => {
+    if (!userEmail) return [];
+    const clean = userEmail.trim().toLowerCase();
+    let keys = apiKeys.filter(k => (k.userEmail || '').toLowerCase() === clean);
+    if (keys.length === 0) {
+      // Auto-generate initial developer API Key for seamless onboarding
+      const initialKey = {
+        id: `key-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        userEmail: clean,
+        username: clean.split('@')[0],
+        key: `mf_live_${require('crypto').randomBytes(16).toString('hex')}`,
+        label: 'My Discord Bot Key',
+        permissions: ['orders.read', 'plugins.read', 'webhooks.manage'],
+        createdAt: new Date().toISOString(),
+        lastUsedAt: null,
+        status: 'ACTIVE'
+      };
+      apiKeys.push(initialKey);
+      keys = [initialKey];
+    }
+    return keys;
+  },
+
+  generateApiKey: (userEmail, username, label = 'Discord Bot API Key') => {
+    const clean = (userEmail || '').trim().toLowerCase();
+    const newKey = {
+      id: `key-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      userEmail: clean,
+      username: username || clean.split('@')[0],
+      key: `mf_live_${require('crypto').randomBytes(16).toString('hex')}`,
+      label: label.trim() || 'Discord Bot Key',
+      permissions: ['orders.read', 'plugins.read', 'webhooks.manage'],
+      createdAt: new Date().toISOString(),
+      lastUsedAt: null,
+      status: 'ACTIVE'
+    };
+    apiKeys.push(newKey);
+    return newKey;
+  },
+
+  revokeApiKey: (keyId, userEmail) => {
+    const clean = (userEmail || '').trim().toLowerCase();
+    const initialLen = apiKeys.length;
+    apiKeys = apiKeys.filter(k => !(k.id === keyId && (k.userEmail || '').toLowerCase() === clean));
+    return apiKeys.length < initialLen;
+  },
+
+  validateApiKey: (keyString) => {
+    if (!keyString) return null;
+    const clean = keyString.trim();
+    const found = apiKeys.find(k => k.key === clean && k.status === 'ACTIVE');
+    if (found) {
+      found.lastUsedAt = new Date().toISOString();
+      return found;
+    }
+    return null;
+  },
+
+  getDiscordWebhook: (userEmail) => {
+    if (!userEmail) return null;
+    const clean = userEmail.trim().toLowerCase();
+    return discordWebhooks.find(w => (w.userEmail || '').toLowerCase() === clean) || {
+      userEmail: clean,
+      webhookUrl: '',
+      enabled: false,
+      notifyOnPurchase: true,
+      notifyOnReview: true
+    };
+  },
+
+  saveDiscordWebhook: (userEmail, username, webhookUrl, options = {}) => {
+    const clean = (userEmail || '').trim().toLowerCase();
+    let wh = discordWebhooks.find(w => (w.userEmail || '').toLowerCase() === clean);
+    if (!wh) {
+      wh = {
+        id: `wh-${Date.now()}`,
+        userEmail: clean,
+        username: username || clean.split('@')[0],
+        webhookUrl: (webhookUrl || '').trim(),
+        enabled: options.enabled !== undefined ? options.enabled : true,
+        notifyOnPurchase: options.notifyOnPurchase !== undefined ? options.notifyOnPurchase : true,
+        notifyOnReview: options.notifyOnReview !== undefined ? options.notifyOnReview : true,
+        updatedAt: new Date().toISOString()
+      };
+      discordWebhooks.push(wh);
+    } else {
+      wh.webhookUrl = (webhookUrl !== undefined ? webhookUrl : wh.webhookUrl).trim();
+      if (options.enabled !== undefined) wh.enabled = options.enabled;
+      if (options.notifyOnPurchase !== undefined) wh.notifyOnPurchase = options.notifyOnPurchase;
+      if (options.notifyOnReview !== undefined) wh.notifyOnReview = options.notifyOnReview;
+      wh.updatedAt = new Date().toISOString();
+    }
+    return wh;
+  },
+
+  addDeveloperEvent: (eventData) => {
+    const evt = {
+      id: `evt-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      timestamp: new Date().toISOString(),
+      ...eventData
+    };
+    developerEvents.unshift(evt);
+    if (developerEvents.length > 200) developerEvents.pop();
+    return evt;
+  },
+
+  getDeveloperEvents: (userEmail, limit = 20) => {
+    const clean = (userEmail || '').trim().toLowerCase();
+    if (!clean) return developerEvents.slice(0, limit);
+    return developerEvents
+      .filter(e => (e.creatorEmail || '').toLowerCase() === clean || (e.buyerEmail || '').toLowerCase() === clean || !e.creatorEmail)
+      .slice(0, limit);
   }
 };

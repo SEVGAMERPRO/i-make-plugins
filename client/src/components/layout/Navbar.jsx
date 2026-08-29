@@ -261,13 +261,13 @@ const Navbar = ({ onMenuClick }) => {
                   />
 
                   {/* Popover Card with Top Pointer Arrow */}
-                  <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-500/30 z-30 divide-y divide-white/5 animate-fade-in text-xs overflow-hidden">
+                  <div className="absolute right-0 mt-3 w-[calc(100vw-24px)] max-w-[360px] sm:max-w-[390px] bg-slate-950/98 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-500/30 z-30 divide-y divide-white/5 animate-fade-in text-xs overflow-hidden">
                     
                     {/* Top Pointer Arrow */}
-                    <div className="absolute -top-2 right-5 w-4 h-4 bg-slate-950 border-t border-l border-cyan-500/30 transform rotate-45" />
+                    <div className="absolute -top-2 right-4 sm:right-6 w-4 h-4 bg-slate-950 border-t border-l border-cyan-500/30 transform rotate-45" />
 
                     {/* Section 1: User Profile & Identity Banner */}
-                    <div className="p-5 bg-gradient-to-b from-slate-900/90 to-slate-950 flex items-start gap-4">
+                    <div className="p-4 sm:p-5 bg-gradient-to-b from-slate-900/90 to-slate-950 flex items-start gap-3 sm:gap-4">
                       
                       {/* Avatar with Glow & Online Status */}
                       <div className="relative flex-shrink-0">
@@ -327,7 +327,7 @@ const Navbar = ({ onMenuClick }) => {
                     </div>
 
                     {/* Section 2: Two-Column Quick Actions (BuiltByBit Style Refined) */}
-                    <div className="p-4 grid grid-cols-2 gap-2 bg-slate-950/80">
+                    <div className="p-3 sm:p-4 grid grid-cols-2 gap-1.5 sm:gap-2 bg-slate-950/80">
                       
                       {/* Left Column */}
                       <div className="space-y-1">
