@@ -142,12 +142,13 @@ https://minoforge.com`,
       `
     };
 
-    // Send email asynchronously and log result
-    transporter.sendMail(mailOptions).then(() => {
-      console.log(`[MinoForge Verification 2FA] Verification code delivered to ${cleanEmail}: ${code}`);
-    }).catch(err => {
-      console.error('[MinoForge 2FA Mailer Error]:', err);
-    });
+    // Send email via Brevo and log result
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`[MinoForge Verification 2FA] Verification code sent to ${cleanEmail}: ${code} (MessageId: ${info.messageId})`);
+    } catch (mailErr) {
+      console.error('[MinoForge 2FA Mailer Error]:', mailErr.message);
+    }
 
     return res.status(200).json({
       success: true,
