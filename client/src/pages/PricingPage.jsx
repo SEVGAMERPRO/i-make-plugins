@@ -112,13 +112,10 @@ const PricingPage = () => {
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [annualBilling, setAnnualBilling] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [donation, setDonation] = useState(0);
-  const [customDonationInput, setCustomDonationInput] = useState('');
 
   const handleCheckout = (tier) => {
     if (tier.id === 'free') return;
-    setSelectedPlan(tier);
+    navigate(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`);
   };
 
   return (
@@ -286,189 +283,10 @@ const PricingPage = () => {
           </div>
         </div>
 
-        {/* Checkout Modal */}
-        {/* Checkout Modal with Live Donation / Tip Calculation */}
-        {selectedPlan && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <Crown className="w-6 h-6 text-amber-400" />
-                  <h3 className="text-xl font-bold text-white">Upgrade to {selectedPlan.name}</h3>
-                </div>
-                <button 
-                  onClick={() => { setSelectedPlan(null); setDonation(0); setCustomDonationInput(''); }}
-                  className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Pricing Breakdown Summary */}
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
-                <div className="flex justify-between font-bold text-white">
-                  <span>Membership Tier:</span>
-                  <span>{selectedPlan.name} ({annualBilling ? 'Yearly (15% Saved)' : 'Monthly'})</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Platform Sales Fee:</span>
-                  <span className="font-bold text-emerald-400">Only 5% (You keep 95%)</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Free Monthly Ad Credits:</span>
-                  <span className="font-bold text-emerald-400">+€5.00 / mo Included</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Base Plan Price:</span>
-                  <span className="font-mono text-slate-200">
-                    {formatPrice(annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly)}
-                  </span>
-                </div>
-
-                {donation > 0 && (
-                  <div className="flex justify-between text-pink-300 font-semibold pt-1 border-t border-white/5">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3 fill-pink-400 text-pink-400" />
-                      <span>Platform Tip / Donation:</span>
-                    </span>
-                    <span className="font-mono font-bold">+{formatPrice(donation)}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between font-black text-amber-300 text-sm pt-2 border-t border-amber-500/30">
-                  <span>Total Due Today:</span>
-                  <span className="text-base font-mono">
-                    {formatPrice((annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly) + (parseFloat(donation) || 0))}
-                  </span>
-                </div>
-              </div>
-
-              {/* Optional Voluntary Support / Tip Box */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-950/30 via-slate-950 to-pink-950/20 border border-pink-500/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-pink-300 text-xs font-bold">
-                    <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
-                    <span>Support MinoForge Development</span>
-                  </div>
-                  <span className="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full font-bold">
-                    Optional Tip
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-slate-400 leading-snug">
-                  Choose an optional tip to support fast servers, Gemini AI tools, and 24/7 creator support. The total updates immediately:
-                </p>
-
-                {/* Quick Preset Buttons */}
-                <div className="grid grid-cols-4 gap-1.5 text-xs">
-                  {[0, 1.00, 2.50, 5.00].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => { 
-                        setDonation(val); 
-                        setCustomDonationInput(val > 0 ? val.toString() : ''); 
-                      }}
-                      className={`py-1.5 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
-                        donation === val && customDonationInput === (val > 0 ? val.toString() : '')
-                          ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30 border border-pink-400'
-                          : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-white/10'
-                      }`}
-                    >
-                      {val === 0 ? 'No Tip' : `+€${val.toFixed(2)}`}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Input */}
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-pink-400">€</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.50"
-                    placeholder="Custom tip amount (e.g. 10.00)"
-                    value={customDonationInput}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setCustomDonationInput(val);
-                      const num = parseFloat(val);
-                      setDonation(!isNaN(num) && num > 0 ? num : 0);
-                    }}
-                    className="w-full pl-7 pr-3 py-2 bg-slate-900 border border-pink-500/30 focus:border-pink-400 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* Real PayPal Smart Buttons Gateway with Dynamic Live Amount */}
-              <div className="space-y-3 pt-1">
-                <div className="text-center pb-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Official Checkout Gateway
-                  </span>
-                </div>
-
-                <PayPalSmartButtons
-                  key={`paypal_sub_${annualBilling ? 'yearly' : 'monthly'}_${donation}`}
-                  items={[{
-                    id: `membership_${selectedPlan.id}_${annualBilling ? 'yearly' : 'monthly'}`,
-                    title: `MinoForge ${selectedPlan.name} (${annualBilling ? 'Annual Plan - 15% Off' : 'Monthly Plan'})${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
-                    price: (annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly) + (parseFloat(donation) || 0)
-                  }]}
-                  totalAmount={(annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly) + (parseFloat(donation) || 0)}
-                  onSuccess={(data) => {
-                    const generatedRef = data?.orderID || data?.transactionId || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
-                    const calculatedTotal = (annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly) + (parseFloat(donation) || 0);
-                    
-                    // Generate unique single-use checkout token with special chars (%#@*!&$)
-                    const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789%#@*!&$';
-                    let uniqueToken = '';
-                    for (let i = 0; i < 16; i++) {
-                      uniqueToken += chars.charAt(Math.floor(Math.random() * chars.length));
-                    }
-
-                    const orderSession = {
-                      checkoutId: uniqueToken,
-                      orderId: generatedRef,
-                      plan: selectedPlan.name,
-                      amount: calculatedTotal.toFixed(2),
-                      tip: donation,
-                      cycle: annualBilling ? 'Annual' : 'Monthly',
-                      createdAt: Date.now(),
-                      active: true
-                    };
-
-                    try {
-                      sessionStorage.setItem(`mf_receipt_${uniqueToken}`, JSON.stringify(orderSession));
-                      sessionStorage.setItem('mf_current_token', uniqueToken);
-                      
-                      const updatedUser = { ...(user || {}), role: 'CREATOR', isUltimate: true };
-                      localStorage.setItem('minoforge_user', JSON.stringify(updatedUser));
-                      const curCredits = parseFloat(localStorage.getItem('minoforge_ad_credits') || '0');
-                      localStorage.setItem('minoforge_ad_credits', (curCredits + 5.0).toFixed(2));
-                    } catch (e) {}
-
-                    setSelectedPlan(null);
-                    setDonation(0);
-                    setCustomDonationInput('');
-                    
-                    // Navigate to unique single-use cryptographic URL!
-                    navigate(`/receipt/${encodeURIComponent(uniqueToken)}`);
-                  }}
-                  onError={(err) => console.error('Ultimate checkout error:', err)}
-                />
-              </div>
-
-              <p className="text-[11px] text-slate-500 text-center pt-1">
-                Instant activation. Includes 180-day Buyer Protection and direct receipt delivery to your email.
-              </p>
-            </div>
-          </div>
-        )}
-
       </div>
     </div>
   );
 };
 
 export default PricingPage;
+

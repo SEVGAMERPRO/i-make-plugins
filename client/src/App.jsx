@@ -40,6 +40,7 @@ import BountiesPage from './pages/BountiesPage';
 import AiConfigPage from './pages/AiConfigPage';
 import StaffReviewPage from './pages/StaffReviewPage';
 import PricingPage from './pages/PricingPage';
+import CheckoutPage from './pages/CheckoutPage';
 import UltimateSuccessPage from './pages/UltimateSuccessPage';
 import YourUltimatePage from './pages/YourUltimatePage';
 import AdsManagerPage from './pages/AdsManagerPage';
@@ -91,12 +92,13 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/ultimate" element={<YourUltimatePage />} />
           <Route path="/your-ultimate" element={<YourUltimatePage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout/ultimate" element={<CheckoutPage />} />
           <Route path="/receipt" element={<UltimateSuccessPage />} />
           <Route path="/receipt/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/checkout/success" element={<UltimateSuccessPage />} />
           <Route path="/checkout/success/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/order-success/:checkoutId" element={<UltimateSuccessPage />} />
-          <Route path="/checkout/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/ultimate/success" element={<UltimateSuccessPage />} />
           <Route path="/order-success" element={<UltimateSuccessPage />} />
           <Route path="/success" element={<UltimateSuccessPage />} />
