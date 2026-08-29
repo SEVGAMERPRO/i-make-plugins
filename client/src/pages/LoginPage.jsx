@@ -73,6 +73,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (!recaptchaToken) {
+      setError('Please verify that you are not a robot using the reCAPTCHA box.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 

@@ -33,6 +33,10 @@ export default function RegisterPage() {
       return setError('Password must be at least 6 characters long');
     }
 
+    if (!recaptchaToken) {
+      return setError('Please verify that you are not a robot using the reCAPTCHA box.');
+    }
+
     setLoading(true);
     
     try {

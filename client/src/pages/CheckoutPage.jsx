@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
+import GoogleRecaptcha from '../components/common/GoogleRecaptcha';
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -31,6 +32,7 @@ export default function CheckoutPage() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoMessage, setPromoMessage] = useState({ type: '', text: '' });
   const [freeCheckoutLoading, setFreeCheckoutLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
 
   // Plan Pricing (Standard: 12.99 / mo)
   const baseMonthlyPrice = 12.99;
@@ -103,6 +105,11 @@ export default function CheckoutPage() {
   const handleFreeCheckout = async () => {
     if (!user) {
       navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+
+    if (!recaptchaToken) {
+      alert('Please check the "I\'m not a robot" reCAPTCHA box to continue.');
       return;
     }
 
@@ -579,6 +586,8 @@ export default function CheckoutPage() {
                       No payment gateway required. Your Ultimate VIP privileges will activate immediately upon confirmation.
                     </p>
                   </div>
+
+                  <GoogleRecaptcha onVerify={(t) => setRecaptchaToken(t)} onExpired={() => setRecaptchaToken('')} />
 
                   <button
                     type="button"
