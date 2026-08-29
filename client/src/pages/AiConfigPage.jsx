@@ -422,21 +422,21 @@ const AiConfigPage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-slate-200">
                   <Star className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <span><strong>0% Sales Commission</strong> (Keep 100% of plugin sales)</span>
+                  <span><strong>Only 5% Sales Commission</strong> (Keep 95% of plugin sales)</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-200">
                   <Rocket className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <span><strong>$5.00 Free Monthly</strong> Sponsored Ad Credits</span>
+                  <span><strong>€5.00 Free Monthly</strong> Sponsored Ad Credits</span>
                 </div>
               </div>
 
               <div className="space-y-2 pt-2">
                 <Link
-                  to="/upgrade"
+                  to="/pricing"
                   className="w-full py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all block"
                 >
                   <Crown className="w-4 h-4" />
-                  <span>Upgrade to Ultimate — $19.99/mo</span>
+                  <span>Unlock Ultimate Access</span>
                 </Link>
                 <button
                   onClick={() => setShowPaywallModal(false)}
