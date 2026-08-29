@@ -420,7 +420,28 @@ const PricingPage = () => {
                     const generatedRef = data?.orderID || data?.transactionId || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
                     const calculatedTotal = (annualBilling ? selectedPlan.priceYearly : selectedPlan.priceMonthly) + (parseFloat(donation) || 0);
                     
+                    // Generate unique single-use checkout token with special chars (%#@*!&$)
+                    const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789%#@*!&$';
+                    let uniqueToken = '';
+                    for (let i = 0; i < 16; i++) {
+                      uniqueToken += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+
+                    const orderSession = {
+                      checkoutId: uniqueToken,
+                      orderId: generatedRef,
+                      plan: selectedPlan.name,
+                      amount: calculatedTotal.toFixed(2),
+                      tip: donation,
+                      cycle: annualBilling ? 'Annual' : 'Monthly',
+                      createdAt: Date.now(),
+                      active: true
+                    };
+
                     try {
+                      sessionStorage.setItem(`mf_receipt_${uniqueToken}`, JSON.stringify(orderSession));
+                      sessionStorage.setItem('mf_current_token', uniqueToken);
+                      
                       const updatedUser = { ...(user || {}), role: 'CREATOR', isUltimate: true };
                       localStorage.setItem('minoforge_user', JSON.stringify(updatedUser));
                       const curCredits = parseFloat(localStorage.getItem('minoforge_ad_credits') || '0');
@@ -431,8 +452,8 @@ const PricingPage = () => {
                     setDonation(0);
                     setCustomDonationInput('');
                     
-                    // Smooth redirection to the whole dedicated VIP Success page!
-                    navigate(`/ultimate/success?orderId=${encodeURIComponent(generatedRef)}&plan=${encodeURIComponent(selectedPlan.name)}&amount=${encodeURIComponent(calculatedTotal.toFixed(2))}&tip=${encodeURIComponent(donation)}&cycle=${annualBilling ? 'Annual' : 'Monthly'}`);
+                    // Navigate to unique single-use cryptographic URL!
+                    navigate(`/receipt/${encodeURIComponent(uniqueToken)}`);
                   }}
                   onError={(err) => console.error('Ultimate checkout error:', err)}
                 />

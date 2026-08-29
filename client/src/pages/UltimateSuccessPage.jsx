@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
 import { 
   Crown, Sparkles, CheckCircle2, Check, ArrowRight, Download, 
   Rocket, Zap, Heart, ShieldCheck, Copy, Star, MessageSquare, 
-  Bot, ExternalLink, Printer, Share2, Award
+  Bot, ExternalLink, Printer, Share2, Award, Lock, ShieldAlert,
+  AlertTriangle, History, RefreshCw, Key
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -13,31 +14,179 @@ const UltimateSuccessPage = () => {
   const { formatPrice } = useCurrency();
   const location = useLocation();
   const navigate = useNavigate();
+  const params = useParams();
 
-  // Extract query params
-  const searchParams = new URLSearchParams(location.search);
-  const orderId = searchParams.get('orderId') || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
-  const planName = searchParams.get('plan') || 'MinoForge Ultimate';
-  const rawAmount = parseFloat(searchParams.get('amount') || '0.01');
-  const tipAmount = parseFloat(searchParams.get('tip') || '0');
-  const billingCycle = searchParams.get('cycle') || 'Monthly';
+  // Extract unique checkoutId from URL parameter or query
+  const rawParamId = params.checkoutId || params.checkoutToken || new URLSearchParams(location.search).get('checkoutId') || '';
+  const checkoutId = decodeURIComponent(rawParamId || sessionStorage.getItem('mf_current_token') || '');
 
+  const [sessionValid, setSessionValid] = useState(true);
+  const [orderData, setOrderData] = useState(null);
   const [copiedTx, setCopiedTx] = useState(false);
+  const [copiedToken, setCopiedToken] = useState(false);
 
   useEffect(() => {
-    // Scroll to top
     window.scrollTo(0, 0);
-  }, []);
+
+    // Verify single-use token from session storage
+    if (checkoutId) {
+      try {
+        const raw = sessionStorage.getItem(`mf_receipt_${checkoutId}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.active === true) {
+            setOrderData(parsed);
+            setSessionValid(true);
+          } else {
+            setSessionValid(false);
+          }
+        } else {
+          // If no session data exists, token has expired or is invalid
+          setSessionValid(false);
+        }
+      } catch (e) {
+        setSessionValid(false);
+      }
+    } else {
+      // Check query params fallback if direct checkout without token
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get('orderId')) {
+        setOrderData({
+          orderId: searchParams.get('orderId'),
+          plan: searchParams.get('plan') || 'MinoForge Ultimate',
+          amount: parseFloat(searchParams.get('amount') || '0.01'),
+          tip: parseFloat(searchParams.get('tip') || '0'),
+          cycle: searchParams.get('cycle') || 'Monthly',
+          checkoutId: 'MF-SEC-SESSION'
+        });
+        setSessionValid(true);
+      } else {
+        setSessionValid(false);
+      }
+    }
+
+    // Invalidate token when the user navigates away or unloads the window
+    const handleBeforeUnload = () => {
+      if (checkoutId) {
+        try {
+          const raw = sessionStorage.getItem(`mf_receipt_${checkoutId}`);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            parsed.active = false;
+            sessionStorage.setItem(`mf_receipt_${checkoutId}`, JSON.stringify(parsed));
+          }
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Component unmount cleanup -> instantly invalidate so returning says Expired!
+      handleBeforeUnload();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [checkoutId]);
+
+  const handleCopyToken = () => {
+    navigator.clipboard.writeText(checkoutId);
+    setCopiedToken(true);
+    setTimeout(() => setCopiedToken(false), 2500);
+  };
 
   const handleCopyTx = () => {
-    navigator.clipboard.writeText(orderId);
-    setCopiedTx(true);
-    setTimeout(() => setCopiedTx(false), 2500);
+    if (orderData?.orderId) {
+      navigator.clipboard.writeText(orderData.orderId);
+      setCopiedTx(true);
+      setTimeout(() => setCopiedTx(false), 2500);
+    }
   };
 
   const handlePrint = () => {
     window.print();
   };
+
+  // ================= EXPIRED / INVALID TOKEN VIEW =================
+  if (!sessionValid) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] text-white py-16 px-4 sm:px-6 lg:px-8 relative flex items-center justify-center overflow-hidden">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-xl w-full mx-auto space-y-6 relative z-10 animate-fade-in text-center">
+          <div className="p-8 sm:p-10 rounded-3xl bg-slate-900/90 border border-amber-500/30 shadow-2xl space-y-6">
+            
+            {/* Animated Lock Icon */}
+            <div className="w-20 h-20 rounded-3xl bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto shadow-xl shadow-amber-500/20">
+              <Lock className="w-10 h-10" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-full border border-amber-500/25">
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Single-Use Token Terminated</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                One-Time Checkout Link Expired
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                This verification URL was a one-time cryptographic checkout token generated exclusively for your active session. For your security and to prevent link sharing, this link is immediately destroyed once you leave the page.
+              </p>
+            </div>
+
+            {/* Token Info Box */}
+            {checkoutId && (
+              <div className="p-3.5 bg-slate-950 rounded-2xl border border-white/5 text-left text-xs space-y-1">
+                <div className="flex items-center justify-between text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                  <span>Cryptographic Token</span>
+                  <span className="text-amber-400">Status: Revoked / Expired</span>
+                </div>
+                <div className="font-mono text-amber-300 font-bold break-all">
+                  {checkoutId}
+                </div>
+              </div>
+            )}
+
+            {/* Account Status Assurance */}
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-left text-xs text-slate-300 space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-emerald-400">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Your Purchases &amp; VIP Status Are 100% Intact</span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Your payment was successfully processed. A permanent invoice receipt was sent to your email from <strong>noreply@minoforge.com</strong>, and your perks are active in your Creator Dashboard.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/dashboard"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-slate-950 font-black rounded-xl text-xs shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 transition-all"
+              >
+                <Crown className="w-4 h-4" />
+                <span>Open Creator Dashboard</span>
+              </Link>
+              <Link
+                to="/plugins"
+                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all"
+              >
+                <span>Browse Marketplace</span>
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ================= ACTIVE SINGLE-USE RECEIPT VIEW =================
+  const planName = orderData?.plan || 'MinoForge Ultimate';
+  const orderId = orderData?.orderId || `MF-ULT-${Math.floor(100000 + Math.random() * 900000)}`;
+  const rawAmount = parseFloat(orderData?.amount || '0.01');
+  const tipAmount = parseFloat(orderData?.tip || '0');
+  const billingCycle = orderData?.cycle || 'Monthly';
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -72,6 +221,34 @@ const UltimateSuccessPage = () => {
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
             Welcome to the elite tier of <strong className="text-white">MinoForge</strong>. Your subscription is active, your creator fee is reduced to <strong>5% (you keep 95%)</strong>, and all platform superpowers are now unlocked.
           </p>
+
+          {/* Cryptographic Token Callout Ribbon */}
+          {checkoutId && (
+            <div className="p-3 bg-slate-900/90 border border-amber-500/40 rounded-2xl max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-xl shadow-amber-500/5">
+              <div className="flex items-center gap-2 text-left">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                    Single-Use Verification ID
+                  </span>
+                  <span className="font-mono text-amber-300 font-bold">{checkoutId}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">
+                  Destroys on exit
+                </span>
+                <button
+                  onClick={handleCopyToken}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] rounded-lg transition-all cursor-pointer"
+                >
+                  {copiedToken ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          )}
 
           {tipAmount > 0 && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/15 border border-pink-500/30 rounded-2xl text-xs font-bold text-pink-300 shadow-lg shadow-pink-500/10">

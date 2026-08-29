@@ -88,6 +88,10 @@ function App() {
           <Route path="/upgrade" element={<PricingPage />} />
           <Route path="/membership" element={<PricingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/receipt/:checkoutId" element={<UltimateSuccessPage />} />
+          <Route path="/checkout/success/:checkoutId" element={<UltimateSuccessPage />} />
+          <Route path="/order-success/:checkoutId" element={<UltimateSuccessPage />} />
+          <Route path="/checkout/:checkoutId" element={<UltimateSuccessPage />} />
           <Route path="/ultimate/success" element={<UltimateSuccessPage />} />
           <Route path="/order-success" element={<UltimateSuccessPage />} />
           <Route path="/success" element={<UltimateSuccessPage />} />
