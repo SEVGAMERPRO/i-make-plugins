@@ -947,10 +947,11 @@ router.get('/2fa/status/:email', (req, res) => {
 });
 
 // @route   GET /api/auth/me
-// @desc    Get current user profile with live Ultimate status
+// @desc    Get current user profile & Ultimate status
+// @access  Private
 router.get('/me', auth, async (req, res, next) => {
   try {
-    let user;
+    let user = null;
     try {
       user = await prisma.user.findUnique({
         where: { id: req.user.id },
@@ -966,34 +967,44 @@ router.get('/me', auth, async (req, res, next) => {
       });
     } catch (err) {}
 
-    if (!user) {
-      user = {
-        id: req.user.id,
-        username: req.user.username || 'SevGamerPro',
-        email: req.user.email || 'severinkaptein8@gmail.com',
-        role: req.user.role || 'ADMIN'
-      };
-    }
-
     const storeUser = store.getUsers().find(u => 
-      u.id === user.id || 
-      (u.email && u.email.toLowerCase() === user.email.toLowerCase()) ||
-      (u.username && u.username.toLowerCase() === user.username.toLowerCase())
+      u.id === req.user.id || 
+      (req.user.email && u.email && u.email.toLowerCase() === req.user.email.toLowerCase()) ||
+      (req.user.username && u.username && u.username.toLowerCase() === req.user.username.toLowerCase())
     );
 
+    if (!user) {
+      if (storeUser) {
+        user = {
+          id: storeUser.id,
+          username: storeUser.username,
+          email: storeUser.email,
+          role: storeUser.role || 'USER',
+          avatarUrl: storeUser.avatarUrl || null,
+          bio: storeUser.bio || ''
+        };
+      } else {
+        user = {
+          id: req.user.id,
+          username: req.user.username || 'User',
+          email: req.user.email || 'user@minoforge.com',
+          role: req.user.role || 'USER'
+        };
+      }
+    }
+
+    const currentRole = storeUser?.role || user.role || 'USER';
     const isUltimate = Boolean(
-      storeUser?.isUltimate || 
-      user.role === 'ADMIN' || 
-      user.role === 'CREATOR' ||
-      user.username?.toLowerCase() === 'sevgamerpro' ||
-      user.email?.toLowerCase() === 'severinkaptein8@gmail.com'
+      storeUser?.isUltimate === true || 
+      (currentRole === 'ADMIN' && storeUser?.isUltimate !== false)
     );
 
     res.json({
       ...user,
+      role: currentRole,
       isUltimate,
-      ultimateDuration: storeUser?.ultimateDuration || (isUltimate ? 'LIFETIME' : null),
-      ultimateExpiresAt: storeUser?.ultimateExpiresAt || (isUltimate ? 'LIFETIME' : null)
+      ultimateDuration: isUltimate ? (storeUser?.ultimateDuration || 'LIFETIME') : null,
+      ultimateExpiresAt: isUltimate ? (storeUser?.ultimateExpiresAt || 'LIFETIME') : null
     });
   } catch (error) {
     next(error);

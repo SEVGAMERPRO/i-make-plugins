@@ -42,7 +42,7 @@ const SAMPLE_PLUGINS_ADMIN = [
   {
     id: 'p-bot-3',
     title: 'Discord Automated Ticket & Transcript Bot',
-    author: 'SevGamerPro',
+    author: 'MinoForge Dev',
     game: 'Discord',
     price: 0.00,
     downloads: 0,
@@ -402,7 +402,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
             id: `u-${Date.now()}`,
             username: target.includes('@') ? target.split('@')[0] : target,
             email: target.includes('@') ? target : `${target}@minoforge.user`,
-            role: 'CREATOR',
+            role: 'USER',
             isUltimate: true,
             ultimateDuration: quickGiftDuration,
             registeredAt: 'Just now',
@@ -1551,7 +1551,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
-                        placeholder="Username or email (e.g. SevGamerPro, admin@colasmp.net)..."
+                        placeholder="Username or email (e.g. CreatorHandle, user@domain.com)..."
                         value={quickGiftInput}
                         onChange={(e) => setQuickGiftInput(e.target.value)}
                         className="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-white/15 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all font-mono"
@@ -2123,7 +2123,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. SevGamerPro"
+                        placeholder="e.g. PartnerCreator"
                         value={newPromoCreator}
                         onChange={(e) => setNewPromoCreator(e.target.value)}
                         className="w-full bg-slate-950 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400"

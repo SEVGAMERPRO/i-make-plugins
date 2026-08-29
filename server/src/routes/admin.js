@@ -199,7 +199,7 @@ router.post('/users/grant-gift', (req, res) => {
     if (isPaid) {
       return res.status(400).json({ 
         success: false, 
-        message: `Protected: ${existingUser.username} is a paying subscriber (PayPal / Stripe). Paid subscriptions can only be cancelled by the user or via PayPal merchant tools!` 
+        message: `Protected: ${existingUser.username} is a paying subscriber (PayPal). Paid subscriptions cannot be manually revoked as gifts!` 
       });
     }
   }
@@ -244,12 +244,18 @@ router.post('/users/grant-gift', (req, res) => {
     }
   }
 
-  const updated = store.updateUserUltimate(cleanTarget, {
+  const userIdentifier = existingUser ? existingUser.id : cleanTarget;
+  const updated = store.updateUserUltimate(userIdentifier, {
     isUltimate: duration !== 'REVOKE',
     duration: duration === 'REVOKE' ? null : duration,
     expiresAt: duration === 'REVOKE' ? null : expiresAt,
-    plan: duration === 'REVOKE' ? null : `ADMIN_GIFT_${duration}`
+    plan: duration === 'REVOKE' ? null : `ADMIN_GIFT_${duration}`,
+    role: existingUser ? existingUser.role : 'USER'
   });
+
+  if (!updated) {
+    return res.status(404).json({ success: false, message: 'User not found in store.' });
+  }
 
   const actionDetails = duration === 'REVOKE' 
     ? `Revoked free gifted MinoForge Ultimate from ${updated.username} (${updated.email})`
@@ -286,10 +292,38 @@ router.put('/users/:id/ultimate', (req, res) => {
   const { id } = req.params;
   const { isUltimate = true, duration = '1_MONTH' } = req.body;
 
+  const existingUser = store.getUsers().find(u => 
+    u.id.toLowerCase() === id.toLowerCase() || 
+    (u.email && u.email.toLowerCase() === id.toLowerCase()) || 
+    (u.username && u.username.toLowerCase() === id.toLowerCase())
+  );
+
+  if (!existingUser) {
+    return res.status(404).json({ success: false, message: 'User not found in registry' });
+  }
+
+  const shouldRevoke = !isUltimate || duration === 'REVOKE';
+
+  if (shouldRevoke) {
+    const isPaid = Boolean(
+      existingUser.isPaidSubscription || 
+      existingUser.paypalSubscriptionId || 
+      existingUser.ultimatePlan === 'PAID_MONTHLY' || 
+      existingUser.ultimatePlan === 'PAID_YEARLY' || 
+      existingUser.paymentMethod === 'PAYPAL'
+    );
+    if (isPaid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Protected: ${existingUser.username} is a paying subscriber via PayPal. Cannot revoke paid subscriptions as gifts!` 
+      });
+    }
+  }
+
   let expiresAt = null;
   let durationLabel = '1 Month';
 
-  if (!isUltimate || duration === 'REVOKE') {
+  if (shouldRevoke) {
     durationLabel = 'Revoked';
   } else {
     const now = Date.now();
@@ -320,34 +354,30 @@ router.put('/users/:id/ultimate', (req, res) => {
         break;
       case 'LIFETIME':
       default:
-        if (duration === 'LIFETIME') {
-          expiresAt = 'LIFETIME';
-          durationLabel = 'Lifetime VIP';
-        } else {
-          expiresAt = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
-          durationLabel = '30 Days (1 Month)';
-        }
+        expiresAt = 'LIFETIME';
+        durationLabel = 'Permanent Lifetime VIP';
         break;
     }
   }
 
-  const updated = store.updateUserUltimate(id, {
-    isUltimate: duration !== 'REVOKE' && Boolean(isUltimate),
-    duration: duration === 'REVOKE' ? null : duration,
-    expiresAt: duration === 'REVOKE' ? null : expiresAt,
-    plan: duration === 'REVOKE' ? null : `ADMIN_GIFT_${duration}`
+  const updated = store.updateUserUltimate(existingUser.id, {
+    isUltimate: !shouldRevoke,
+    duration: shouldRevoke ? null : duration,
+    expiresAt: shouldRevoke ? null : expiresAt,
+    plan: shouldRevoke ? null : `ADMIN_GIFT_${duration}`,
+    role: existingUser.role || 'USER'
   });
 
   if (!updated) {
     return res.status(404).json({ success: false, message: 'User not found' });
   }
 
-  const actionDetails = duration === 'REVOKE' 
+  const actionDetails = shouldRevoke 
     ? `Revoked MinoForge Ultimate from ${updated.username} (${updated.email})`
     : `Gifted ${durationLabel} MinoForge Ultimate access to ${updated.username} (${updated.email})`;
 
   store.addAuditLog({
-    type: duration === 'REVOKE' ? 'ULTIMATE_REVOKE' : 'ULTIMATE_GIFT',
+    type: shouldRevoke ? 'ULTIMATE_REVOKE' : 'ULTIMATE_GIFT',
     actor: 'Master Administrator',
     details: actionDetails,
     ip: req.ip || '127.0.0.1'
@@ -364,9 +394,9 @@ router.put('/users/:id/ultimate', (req, res) => {
 
   res.json({
     success: true,
-    message: duration === 'REVOKE' 
-      ? `Ultimate membership revoked for ${updated.username}` 
-      : `Successfully gifted ${durationLabel} Ultimate to ${updated.username}!`,
+    message: shouldRevoke 
+      ? `Successfully revoked Ultimate from ${updated.username}!` 
+      : `Successfully gifted ${durationLabel} Ultimate access to ${updated.username}!`,
     user: updated
   });
 });

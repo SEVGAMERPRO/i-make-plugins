@@ -235,7 +235,7 @@ module.exports = {
     }
     return null;
   },
-  updateUserUltimate: (idOrName, { isUltimate, duration, expiresAt, plan }) => {
+  updateUserUltimate: (idOrName, { isUltimate, duration, expiresAt, plan, role }) => {
     const clean = (idOrName || '').trim().toLowerCase();
     let idx = users.findIndex(u => 
       u.id.toLowerCase() === clean || 
@@ -246,11 +246,12 @@ module.exports = {
     if (idx === -1 && isUltimate) {
       // If user is not yet in array, create them on the fly!
       const isEmail = clean.includes('@');
+      const targetName = isEmail ? clean.split('@')[0] : idOrName.trim();
       const newUser = {
         id: `u-${Date.now()}`,
-        username: isEmail ? clean.split('@')[0] : idOrName.trim(),
+        username: targetName,
         email: isEmail ? clean : `${clean}@minoforge.user`,
-        role: 'CREATOR',
+        role: role || 'USER', // Always default to USER unless specified
         isUltimate: true,
         ultimateDuration: duration || '1_MONTH',
         ultimateExpiresAt: expiresAt || null,
@@ -270,9 +271,9 @@ module.exports = {
         ...users[idx],
         isUltimate: Boolean(isUltimate),
         ultimateDuration: duration || (isUltimate ? '1_MONTH' : null),
-        ultimateExpiresAt: expiresAt || null,
-        ultimatePlan: plan || (isUltimate ? 'GIFTED_BY_ADMIN' : null),
-        role: isUltimate && users[idx].role === 'USER' ? 'CREATOR' : users[idx].role
+        ultimateExpiresAt: isUltimate ? expiresAt : null,
+        ultimatePlan: isUltimate ? (plan || 'GIFTED_BY_ADMIN') : null,
+        role: role || users[idx].role || 'USER' // NEVER force change to CREATOR
       };
       return users[idx];
     }
