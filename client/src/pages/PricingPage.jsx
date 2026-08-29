@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSign, Clock, HelpCircle, Rocket, Megaphone, Terminal, Heart } from 'lucide-react';
+import { Check, X, Sparkles, Zap, ShieldCheck, Crown, Star, ArrowRight, DollarSign, Clock, HelpCircle, Rocket, Megaphone, Terminal, Heart, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -114,7 +114,12 @@ export default function PricingPage() {
 
   const handleCheckout = (tier) => {
     if (tier.id === 'free') return;
-    navigate(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`);
+    const checkoutUrl = `/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`;
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(checkoutUrl)}`);
+      return;
+    }
+    navigate(checkoutUrl);
   };
 
   return (
@@ -218,14 +223,23 @@ export default function PricingPage() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handleCheckout(tier)}
-                  className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
                     tier.highlighted
                       ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-xl shadow-amber-500/30'
                       : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10'
                   }`}
                 >
-                  <span>{tier.buttonText}</span>
-                  {tier.highlighted && <Crown className="w-4 h-4" />}
+                  {tier.highlighted && !user ? (
+                    <>
+                      <LogIn className="w-4 h-4 text-slate-950" />
+                      <span>Log In to Unlock Ultimate</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{tier.buttonText}</span>
+                      {tier.highlighted && <Crown className="w-4 h-4" />}
+                    </>
+                  )}
                 </button>
               </div>
             );

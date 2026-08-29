@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import GoogleRecaptcha from '../components/common/GoogleRecaptcha';
 import { Sparkles, ArrowRight, Lock, Mail, User, ShieldAlert } from 'lucide-react';
 
-const RegisterPage = () => {
+export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +18,8 @@ const RegisterPage = () => {
   const { register, loginWithGoogle } = useAuth();
   const { config } = useConfig();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ const RegisterPage = () => {
     
     try {
       await register(username, email, password);
-      navigate('/');
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to register. Username or email might be taken.');
     } finally {
@@ -53,7 +55,7 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       await loginWithGoogle(credentialResponse);
-      navigate('/');
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Google registration failed. Please try again.');
     } finally {
@@ -233,6 +235,4 @@ const RegisterPage = () => {
       </div>
     </div>
   );
-};
-
-export default RegisterPage;
+}

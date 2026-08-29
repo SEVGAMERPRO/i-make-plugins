@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import GoogleRecaptcha from '../components/common/GoogleRecaptcha';
 import { Sparkles, ArrowRight, Lock, Mail, KeyRound, Copy, Check, RefreshCw, AlertTriangle, ArrowLeft, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 
-const LoginPage = () => {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [step, setStep] = useState('CREDENTIALS'); // 'CREDENTIALS' | 'VERIFY_CODE'
@@ -20,6 +20,8 @@ const LoginPage = () => {
 
   const { login, loginWithGoogle, verifyLoginCode } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   useEffect(() => {
     let timer;
@@ -109,7 +111,7 @@ const LoginPage = () => {
 
     try {
       await verifyLoginCode(email.trim(), cleanCode);
-      navigate('/');
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid or expired verification code. Please check and try again.');
     } finally {
@@ -122,7 +124,7 @@ const LoginPage = () => {
     setLoading(true);
     try {
       await loginWithGoogle(credentialResponse);
-      navigate('/');
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
     } finally {
@@ -349,6 +351,4 @@ const LoginPage = () => {
       </div>
     </div>
   );
-};
-
-export default LoginPage;
+}

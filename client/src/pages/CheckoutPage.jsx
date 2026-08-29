@@ -117,7 +117,7 @@ export default function CheckoutPage() {
                 <Crown className="w-32 h-32 text-amber-400" />
               </div>
 
-              <div className="flex items-start justify-between gap-4 relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
                 <div className="space-y-1.5">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-wider rounded-full border border-amber-500/30">
                     <Crown className="w-3.5 h-3.5 text-amber-400" />
@@ -130,6 +130,21 @@ export default function CheckoutPage() {
                     Unlock elite creator superpowers, 5% reduced platform fees, and monthly ad credits.
                   </p>
                 </div>
+
+                {user ? (
+                  <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-950/80 border border-emerald-500/30 rounded-2xl text-xs text-emerald-400 flex-shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Subscribing as: <strong className="text-white">{user.username}</strong></span>
+                  </div>
+                ) : (
+                  <Link
+                    to={`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`}
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-2xl text-xs text-amber-300 font-bold flex-shrink-0 transition-colors"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Log in required</span>
+                  </Link>
+                )}
               </div>
 
               {/* Monthly vs Annual Toggle Switch */}
@@ -342,26 +357,58 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Official PayPal Smart Buttons Gateway */}
-              <div className="space-y-3 pt-2">
-                <div className="text-center">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Official Secure Payment Terminal
-                  </span>
-                </div>
+              {/* Payment Section: Login gate if guest, PayPal terminal if logged in */}
+              {!user ? (
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-950/50 via-slate-900 to-slate-950 border-2 border-blue-500/40 text-center space-y-4 shadow-xl">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-400/30 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-black text-white">Log in required for Ultimate</h4>
+                    <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
+                      To connect 5% reduced platform fees, €5/mo free ad credits, and creator badges to your account, you must be logged in.
+                    </p>
+                  </div>
 
-                <PayPalSmartButtons
-                  key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${donation}`}
-                  items={[{
-                    id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
-                    title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan - 15% Off' : 'Monthly Plan'})${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
-                    price: finalTotalAmount
-                  }]}
-                  totalAmount={finalTotalAmount}
-                  onSuccess={handleSuccessfulPayment}
-                  onError={(err) => console.error('Ultimate checkout error:', err)}
-                />
-              </div>
+                  <div className="space-y-2 pt-2">
+                    <Link
+                      to={`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`}
+                      className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95"
+                    >
+                      <span>Log In to Continue Checkout</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+
+                    <Link
+                      to={`/register?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`}
+                      className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all border border-white/10"
+                    >
+                      <span>New to MinoForge? Create Free Account</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-2">
+                  <div className="text-center">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Official Secure Payment Terminal
+                    </span>
+                  </div>
+
+                  <PayPalSmartButtons
+                    key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${donation}`}
+                    items={[{
+                      id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
+                      title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan - 15% Off' : 'Monthly Plan'})${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
+                      price: finalTotalAmount
+                    }]}
+                    totalAmount={finalTotalAmount}
+                    onSuccess={handleSuccessfulPayment}
+                    onError={(err) => console.error('Ultimate checkout error:', err)}
+                  />
+                </div>
+              )}
 
               <div className="pt-2 text-center text-[11px] text-slate-500 space-y-1">
                 <p className="flex items-center justify-center gap-1.5">
