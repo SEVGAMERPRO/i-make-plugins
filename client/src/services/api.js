@@ -46,4 +46,5 @@ export const getPluginById = (id) => api.get(`/plugins/${id}`);
 
 export const getUserProfile = (username) => api.get(`/users/${username}`);
 
+export { api };
 export default api;

@@ -53,6 +53,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await api.login(email, password);
+    if (res.data?.requires2FA) {
+      return res.data;
+    }
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
     localStorage.setItem('minoforge_user', JSON.stringify(userData));
@@ -71,6 +74,9 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async (credential) => {
     const res = await api.googleLogin(credential);
+    if (res.data?.requires2FA) {
+      return res.data;
+    }
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
     localStorage.setItem('minoforge_user', JSON.stringify(userData));
@@ -80,6 +86,21 @@ export const AuthProvider = ({ children }) => {
 
   const verifyLoginCode = async (email, code, username) => {
     const res = await api.verifyCode(email, code, username);
+    if (res.data?.requires2FA) {
+      return res.data;
+    }
+    const { token, user: userData } = res.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('minoforge_user', JSON.stringify(userData));
+    setUser(userData);
+    return userData;
+  };
+
+  const complete2FALogin = async (email, twoFactorToken) => {
+    const res = await api.api.post('/auth/2fa/login-challenge', {
+      email,
+      token: twoFactorToken
+    });
     const { token, user: userData } = res.data;
     localStorage.setItem('token', token);
     localStorage.setItem('minoforge_user', JSON.stringify(userData));
@@ -102,7 +123,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, verifyLoginCode, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, verifyLoginCode, complete2FALogin, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

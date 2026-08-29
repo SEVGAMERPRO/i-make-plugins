@@ -240,6 +240,17 @@ router.post('/verify-code', async (req, res) => {
       };
     }
 
+    // Check if 2FA is enabled on this account
+    const twoFactorSettings = store.get2FASettings(cleanEmail) || user2FASettings.get(cleanEmail);
+    if (twoFactorSettings && twoFactorSettings.enabled) {
+      return res.status(200).json({
+        success: true,
+        requires2FA: true,
+        email: cleanEmail,
+        message: 'Two-Factor Authentication (2FA) is enabled on this account. Please enter your 6-digit Authenticator code.'
+      });
+    }
+
     const token = generateToken(user);
     const userResponse = {
       id: user.id,
@@ -345,6 +356,17 @@ router.post(
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) {
         return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Check if 2FA is enabled on this account
+      const twoFactorSettings = store.get2FASettings(user.email) || user2FASettings.get(user.email.toLowerCase());
+      if (twoFactorSettings && twoFactorSettings.enabled) {
+        return res.status(200).json({
+          success: true,
+          requires2FA: true,
+          email: user.email.toLowerCase(),
+          message: 'Two-Factor Authentication (2FA) is enabled on this account. Please enter your 6-digit Authenticator code.'
+        });
       }
 
       const token = generateToken(user);
@@ -458,6 +480,17 @@ router.post('/google', async (req, res, next) => {
         role: 'USER',
         avatarUrl: picture || null
       };
+    }
+
+    // Check if 2FA is enabled on this account
+    const twoFactorSettings = store.get2FASettings(user.email) || user2FASettings.get(user.email.toLowerCase());
+    if (twoFactorSettings && twoFactorSettings.enabled) {
+      return res.status(200).json({
+        success: true,
+        requires2FA: true,
+        email: user.email.toLowerCase(),
+        message: 'Two-Factor Authentication (2FA) is enabled on this account. Please enter your 6-digit Authenticator code.'
+      });
     }
 
     const token = generateToken(user);
@@ -809,13 +842,15 @@ router.post('/2fa/verify-and-activate', async (req, res) => {
       });
     }
 
-    // Save to user2FASettings
-    user2FASettings.set(cleanEmail, {
+    // Save to user2FASettings and store
+    const twoFactorPayload = {
       enabled: true,
       secret: secret.trim(),
       backupCodes: Array.isArray(backupCodes) ? backupCodes : generateBackupCodes(),
       enabledAt: new Date().toISOString()
-    });
+    };
+    user2FASettings.set(cleanEmail, twoFactorPayload);
+    store.set2FASettings(cleanEmail, twoFactorPayload);
 
     store.trackActivity({
       type: 'SECURITY_2FA_ENABLED',
@@ -834,6 +869,95 @@ router.post('/2fa/verify-and-activate', async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/2fa/login-challenge
+// @desc    Verify 2FA TOTP code or backup code and issue JWT login token
+router.post('/2fa/login-challenge', async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    if (!email || !token) {
+      return res.status(400).json({ success: false, message: 'Email and 2FA code are required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanToken = token.toString().replace(/[\s-]/g, '').trim();
+    const settings = store.get2FASettings(cleanEmail) || user2FASettings.get(cleanEmail);
+
+    if (!settings || !settings.enabled) {
+      return res.status(400).json({ success: false, message: '2FA is not enabled on this account.' });
+    }
+
+    // 1. Verify TOTP code with Speakeasy
+    let isValid = speakeasy.totp.verify({
+      secret: settings.secret,
+      encoding: 'base32',
+      token: cleanToken,
+      window: 2
+    });
+
+    let usedBackupCode = false;
+
+    // 2. Check if single-use emergency recovery backup code
+    if (!isValid && Array.isArray(settings.backupCodes)) {
+      const backupIndex = settings.backupCodes.findIndex(
+        c => c.replace(/[\s-]/g, '') === cleanToken || c === token.trim()
+      );
+      if (backupIndex !== -1) {
+        settings.backupCodes.splice(backupIndex, 1);
+        user2FASettings.set(cleanEmail, settings);
+        store.set2FASettings(cleanEmail, settings);
+        isValid = true;
+        usedBackupCode = true;
+      }
+    }
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid 6-digit Authenticator code or backup recovery code. Please try again.'
+      });
+    }
+
+    // Lookup user in DB or store
+    let user;
+    try {
+      user = await prisma.user.findUnique({ where: { email: cleanEmail } });
+    } catch (e) {}
+
+    const storeUser = store.getUsers().find(u => u.email && u.email.toLowerCase() === cleanEmail);
+
+    const userResponse = {
+      id: user?.id || storeUser?.id || `u-${Date.now()}`,
+      username: user?.username || storeUser?.username || cleanEmail.split('@')[0],
+      email: cleanEmail,
+      role: user?.role || storeUser?.role || (cleanEmail === 'severinkaptein8@gmail.com' ? 'ADMIN' : 'USER'),
+      avatarUrl: user?.avatarUrl || storeUser?.avatarUrl || null,
+      isUltimate: Boolean(storeUser?.isUltimate)
+    };
+
+    const jwtToken = generateToken(userResponse);
+    store.addUser(userResponse, req.ip);
+
+    store.trackActivity({
+      type: '2FA_LOGIN_SUCCESS',
+      username: userResponse.username,
+      email: cleanEmail,
+      ip: req.ip || '127.0.0.1',
+      path: '/login',
+      details: usedBackupCode ? 'Authenticated via 2FA Backup Code' : 'Authenticated via Google Authenticator 2FA'
+    });
+
+    return res.status(200).json({
+      success: true,
+      token: jwtToken,
+      user: userResponse,
+      message: 'Two-factor authentication successful.'
+    });
+  } catch (error) {
+    console.error('[2FA Login Challenge Error]:', error);
+    return res.status(500).json({ success: false, message: 'Failed to verify 2FA login challenge.' });
+  }
+});
+
 // @route   POST /api/auth/2fa/validate
 // @desc    Validate 6-digit TOTP token OR backup recovery code during login / admin access
 router.post('/2fa/validate', async (req, res) => {
@@ -845,7 +969,7 @@ router.post('/2fa/validate', async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanToken = token.toString().replace(/[\s-]/g, '').trim();
-    const settings = user2FASettings.get(cleanEmail);
+    const settings = store.get2FASettings(cleanEmail) || user2FASettings.get(cleanEmail);
 
     // If user hasn't explicitly set up 2FA yet, allow pass or require setup
     if (!settings || !settings.enabled) {
@@ -884,6 +1008,7 @@ router.post('/2fa/validate', async (req, res) => {
       // Consume the single-use backup code
       settings.backupCodes.splice(backupIndex, 1);
       user2FASettings.set(cleanEmail, settings);
+      store.set2FASettings(cleanEmail, settings);
 
       store.trackActivity({
         type: 'SECURITY_BACKUP_CODE_USED',
@@ -923,6 +1048,7 @@ router.post('/2fa/disable', async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
     user2FASettings.delete(cleanEmail);
+    store.disable2FA(cleanEmail);
 
     store.trackActivity({
       type: 'SECURITY_2FA_DISABLED',
@@ -944,9 +1070,9 @@ router.post('/2fa/disable', async (req, res) => {
 // @desc    Get 2FA status for user
 router.get('/2fa/status/:email', (req, res) => {
   const cleanEmail = req.params.email.trim().toLowerCase();
-  const settings = user2FASettings.get(cleanEmail);
+  const settings = store.get2FASettings(cleanEmail) || user2FASettings.get(cleanEmail);
   res.json({
-    enabled: !!(settings && settings.enabled),
+    enabled: Boolean(settings && settings.enabled),
     enabledAt: settings?.enabledAt || null,
     remainingBackupCodes: settings?.backupCodes?.length || 0
   });

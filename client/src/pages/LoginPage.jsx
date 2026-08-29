@@ -18,7 +18,10 @@ export default function LoginPage() {
   const [copied, setCopied] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const { login, loginWithGoogle, verifyLoginCode } = useAuth();
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [useBackupCode, setUseBackupCode] = useState(false);
+
+  const { login, loginWithGoogle, verifyLoginCode, complete2FALogin } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
@@ -101,7 +104,7 @@ export default function LoginPage() {
     }
   };
 
-  // Step 2: Verify 9-digit code and log in
+  // Step 2: Verify 9-digit code and check for 2FA
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     const cleanCode = verificationCode.replace(/-/g, '').trim();
@@ -115,10 +118,37 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await verifyLoginCode(email.trim(), cleanCode);
+      const res = await verifyLoginCode(email.trim(), cleanCode);
+      if (res && res.requires2FA) {
+        setStep('2FA_CHALLENGE');
+        setSuccessMsg('Two-Factor Authentication required. Enter your 6-digit Authenticator code.');
+        return;
+      }
       navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid or expired verification code. Please check and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3: Verify 2FA TOTP or Backup code
+  const handle2FASubmit = async (e) => {
+    e.preventDefault();
+    const clean = twoFactorCode.replace(/[\s-]/g, '').trim();
+    if (!clean) {
+      setError('Please enter your 6-digit Google Authenticator code or emergency backup code.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      await complete2FALogin(email.trim(), clean);
+      navigate(redirectTo);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid 2FA code. Please check your Authenticator app and try again.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +158,13 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await loginWithGoogle(credentialResponse);
+      const res = await loginWithGoogle(credentialResponse);
+      if (res && res.requires2FA) {
+        setEmail(res.email || '');
+        setStep('2FA_CHALLENGE');
+        setSuccessMsg('Two-Factor Authentication required. Enter your 6-digit Authenticator code.');
+        return;
+      }
       navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
@@ -156,12 +192,14 @@ export default function LoginPage() {
             </div>
           </Link>
           <h2 className="text-3xl font-black text-white tracking-tight">
-            {step === 'CREDENTIALS' ? 'Sign In to MinoForge' : 'Security Verification'}
+            {step === 'CREDENTIALS' && 'Sign In to MinoForge'}
+            {step === 'VERIFY_CODE' && 'Email Verification'}
+            {step === '2FA_CHALLENGE' && 'Two-Factor Authentication'}
           </h2>
           <p className="mt-2 text-sm text-slate-400">
-            {step === 'CREDENTIALS'
-              ? 'Access your plugins, purchases, and creator hub'
-              : `Enter the 9-digit security code sent to your email`}
+            {step === 'CREDENTIALS' && 'Access your plugins, purchases, and creator hub'}
+            {step === 'VERIFY_CODE' && 'Enter the 9-digit security code sent to your email'}
+            {step === '2FA_CHALLENGE' && 'Enter the code from Google Authenticator to confirm your identity'}
           </p>
         </div>
         
@@ -344,12 +382,90 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setStep('CREDENTIALS')}
-                className="text-xs text-slate-400 hover:text-white inline-flex items-center gap-1 transition-colors"
+                className="text-xs text-slate-400 hover:text-white inline-flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
               </button>
             </div>
 
+          </form>
+        )}
+
+        {/* STEP 3: TWO-FACTOR AUTHENTICATION (2FA) CHALLENGE */}
+        {step === '2FA_CHALLENGE' && (
+          <form onSubmit={handle2FASubmit} className="space-y-6 animate-fade-in">
+            {/* Account Info Pill */}
+            <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 truncate">
+                <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span className="text-amber-200 font-semibold truncate">{email}</span>
+              </div>
+              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-bold rounded-full">
+                2FA Active
+              </span>
+            </div>
+
+            {/* 2FA Input Box */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+                  {useBackupCode ? 'Emergency Backup Recovery Code' : 'Google Authenticator 6-Digit Code'}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseBackupCode(!useBackupCode);
+                    setTwoFactorCode('');
+                    setError('');
+                  }}
+                  className="text-xs text-amber-400 hover:text-amber-300 font-bold transition-colors cursor-pointer"
+                >
+                  {useBackupCode ? 'Use 6-digit code' : 'Use backup code'}
+                </button>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  autoFocus
+                  required
+                  placeholder={useBackupCode ? 'XXXX-XXXX' : '000000'}
+                  value={twoFactorCode}
+                  onChange={(e) => setTwoFactorCode(e.target.value.toUpperCase())}
+                  maxLength={useBackupCode ? 12 : 8}
+                  className="w-full bg-slate-950/90 border-2 border-amber-500/40 focus:border-amber-400 rounded-2xl py-4 px-4 text-center text-2xl font-mono font-black tracking-widest text-amber-300 placeholder-slate-600 focus:outline-none focus:ring-4 focus:ring-amber-500/20 transition-all uppercase select-all"
+                />
+              </div>
+              <span className="text-[11px] text-slate-400 mt-1.5 block text-center">
+                {useBackupCode
+                  ? 'Enter one of your 8-digit emergency backup recovery codes.'
+                  : 'Open your Authenticator app (Google Authenticator, Authy, etc.) and enter the current code.'}
+              </span>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !twoFactorCode.trim()}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-sm rounded-xl shadow-xl shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>{loading ? 'Verifying 2FA Code...' : 'Verify & Complete Sign In'}</span>
+            </button>
+
+            {/* Back Button */}
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('CREDENTIALS');
+                  setError('');
+                }}
+                className="text-xs text-slate-400 hover:text-white inline-flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
+              </button>
+            </div>
           </form>
         )}
 

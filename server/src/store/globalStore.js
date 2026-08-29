@@ -826,5 +826,49 @@ module.exports = {
     };
     purchases.unshift(newPurchase);
     return newPurchase;
+  },
+
+  // ==========================================
+  // 🔐 2FA SECURITY CREDENTIALS ENGINE
+  // ==========================================
+  set2FASettings: (email, settings) => {
+    const clean = (email || '').trim().toLowerCase();
+    const idx = users.findIndex(u => (u.email && u.email.toLowerCase() === clean) || u.username.toLowerCase() === clean);
+    if (idx !== -1) {
+      users[idx].twoFactorEnabled = Boolean(settings.enabled);
+      users[idx].twoFactorSecret = settings.secret || users[idx].twoFactorSecret;
+      users[idx].twoFactorBackupCodes = settings.backupCodes || users[idx].twoFactorBackupCodes || [];
+      users[idx].twoFactorEnabledAt = settings.enabledAt || new Date().toISOString();
+    }
+  },
+
+  get2FASettings: (email) => {
+    const clean = (email || '').trim().toLowerCase();
+    const u = users.find(u => (u.email && u.email.toLowerCase() === clean) || u.username.toLowerCase() === clean);
+    if (u && u.twoFactorEnabled) {
+      return {
+        enabled: true,
+        secret: u.twoFactorSecret,
+        backupCodes: u.twoFactorBackupCodes || [],
+        enabledAt: u.twoFactorEnabledAt
+      };
+    }
+    return null;
+  },
+
+  is2FAEnabled: (email) => {
+    const clean = (email || '').trim().toLowerCase();
+    const u = users.find(u => (u.email && u.email.toLowerCase() === clean) || u.username.toLowerCase() === clean);
+    return Boolean(u && u.twoFactorEnabled);
+  },
+
+  disable2FA: (email) => {
+    const clean = (email || '').trim().toLowerCase();
+    const idx = users.findIndex(u => (u.email && u.email.toLowerCase() === clean) || u.username.toLowerCase() === clean);
+    if (idx !== -1) {
+      users[idx].twoFactorEnabled = false;
+      users[idx].twoFactorSecret = null;
+      users[idx].twoFactorBackupCodes = [];
+    }
   }
 };
