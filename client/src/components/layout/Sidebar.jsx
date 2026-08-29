@@ -11,12 +11,17 @@ const Sidebar = ({ isOpen, onClose }) => {
     return location.pathname === path ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white';
   };
 
-  const isUltimate = Boolean(
-    user?.isUltimate || 
-    user?.role === 'CREATOR' || 
-    localStorage.getItem('minoforge_ultimate_active') === 'true' ||
-    (localStorage.getItem('minoforge_user') && localStorage.getItem('minoforge_user').includes('"isUltimate":true'))
-  );
+  const isUltimate = (() => {
+    try {
+      if (user?.isUltimate || user?.role === 'CREATOR') return true;
+      if (typeof window !== 'undefined' && window.localStorage) {
+        if (localStorage.getItem('minoforge_ultimate_active') === 'true') return true;
+        const raw = localStorage.getItem('minoforge_user');
+        if (raw && typeof raw === 'string' && raw.includes('"isUltimate":true')) return true;
+      }
+    } catch (e) {}
+    return false;
+  })();
 
   return (
     <>
