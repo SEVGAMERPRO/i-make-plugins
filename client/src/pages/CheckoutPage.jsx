@@ -9,7 +9,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
 
-const CheckoutPage = () => {
+function CheckoutPage() {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();

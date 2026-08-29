@@ -106,7 +106,7 @@ const SECTIONS = [
   }
 ];
 
-const PricingPage = () => {
+function PricingPage() {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
