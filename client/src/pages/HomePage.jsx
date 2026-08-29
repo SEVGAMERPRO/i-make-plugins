@@ -23,7 +23,7 @@ const HERO_IMAGES = [
   '/images/categories/websites.png',
 ];
 
-const HomePage = () => {
+export default function HomePage() {
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const [bgIndex, setBgIndex] = useState(0);
@@ -368,6 +368,4 @@ const HomePage = () => {
       />
     </div>
   );
-};
-
-export default HomePage;
+}
