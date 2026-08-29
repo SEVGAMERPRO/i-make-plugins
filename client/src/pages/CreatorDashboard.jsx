@@ -23,7 +23,6 @@ const CreatorDashboard = () => {
   // Modals State
   const [showCreateAdModal, setShowCreateAdModal] = useState(false);
   const [showCreateBundleModal, setShowCreateBundleModal] = useState(false);
-  const [showCreateCouponModal, setShowCreateCouponModal] = useState(false);
   const [showScheduleSaleModal, setShowScheduleSaleModal] = useState(false);
   const [showIssueLicenseModal, setShowIssueLicenseModal] = useState(false);
 
@@ -31,8 +30,6 @@ const CreatorDashboard = () => {
   const [featuredRate, setFeaturedRate] = useState('10');
   const [bundleTitle, setBundleTitle] = useState('');
   const [bundleDiscount, setBundleDiscount] = useState('20');
-  const [couponCode, setCouponCode] = useState('');
-  const [couponDiscount, setCouponDiscount] = useState('25');
   const [saleEventName, setSaleEventName] = useState('');
   const [saleDiscount, setSaleDiscount] = useState('20');
   const [licenseBuyer, setLicenseBuyer] = useState('');
@@ -51,14 +48,6 @@ const CreatorDashboard = () => {
   const [bundles, setBundles] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('minoforge_bundles') || '[]');
-    } catch {
-      return [];
-    }
-  });
-
-  const [coupons, setCoupons] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('minoforge_coupons') || '[]');
     } catch {
       return [];
     }
@@ -146,25 +135,6 @@ const CreatorDashboard = () => {
     localStorage.setItem('minoforge_bundles', JSON.stringify(updated));
     setShowCreateBundleModal(false);
     setBundleTitle('');
-  };
-
-  const handleCreateCoupon = (e) => {
-    e.preventDefault();
-    if (!couponCode.trim()) return;
-    const newCoupon = {
-      id: `cpn-${Date.now()}`,
-      code: couponCode.trim().toUpperCase(),
-      discount: parseInt(couponDiscount) || 25,
-      uses: 0,
-      maxUses: 100,
-      status: 'ACTIVE',
-      createdAt: new Date().toLocaleDateString()
-    };
-    const updated = [newCoupon, ...coupons];
-    setCoupons(updated);
-    localStorage.setItem('minoforge_coupons', JSON.stringify(updated));
-    setShowCreateCouponModal(false);
-    setCouponCode('');
   };
 
   const handleScheduleSale = (e) => {
@@ -328,13 +298,6 @@ const CreatorDashboard = () => {
                   className={`w-full text-left px-3 py-2 rounded-xl transition-all cursor-pointer ${currentSection === 'invite-a-creator' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   Invite a creator
-                </button>
-                <button
-                  onClick={() => setCurrentSection('coupon-codes')}
-                  className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between cursor-pointer ${currentSection === 'coupon-codes' ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <span>Coupon codes</span>
-                  <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{coupons.length}</span>
                 </button>
                 <button
                   onClick={() => setCurrentSection('stores')}
@@ -936,54 +899,6 @@ const CreatorDashboard = () => {
               </div>
             )}
 
-            {/* SECTION 11: COUPON CODES */}
-            {currentSection === 'coupon-codes' && (
-              <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <div>
-                    <h2 className="text-2xl font-black text-white">Coupon &amp; Promo Codes ({coupons.length})</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Create discount codes for your customers or Discord community giveaways</p>
-                  </div>
-                  <button
-                    onClick={() => setShowCreateCouponModal(true)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Create Coupon</span>
-                  </button>
-                </div>
-
-                {coupons.length === 0 ? (
-                  <div className="text-center py-12 space-y-3">
-                    <Tag className="w-12 h-12 text-slate-600 mx-auto" />
-                    <h4 className="text-base font-bold text-white">No Coupon Codes Created</h4>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                      Create promotional codes (e.g. <code>LAUNCH50</code>) to give customers instant discounts at checkout.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {coupons.map((c, idx) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-black text-cyan-300 text-sm bg-slate-900 px-3 py-1.5 rounded-lg border border-cyan-500/30">
-                            {c.code}
-                          </span>
-                          <div>
-                            <span className="text-xs font-bold text-white block">{c.discount}% Discount</span>
-                            <span className="text-[10px] text-slate-400">{c.uses} of {c.maxUses} uses</span>
-                          </div>
-                        </div>
-                        <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full">
-                          Active
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* SECTION 12: STORES */}
             {currentSection === 'stores' && (
               <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
@@ -1523,46 +1438,6 @@ const CreatorDashboard = () => {
                 <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
                   <button type="button" onClick={() => setShowCreateBundleModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
                   <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Create Bundle</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL: CREATE COUPON */}
-        {showCreateCouponModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-white space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-lg font-bold text-white">Create Promo Coupon Code</h3>
-                <button onClick={() => setShowCreateCouponModal(false)} className="text-slate-400 hover:text-white">✕</button>
-              </div>
-              <form onSubmit={handleCreateCoupon} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Coupon Code</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. SUMMER25"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white uppercase font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Discount %</label>
-                  <input
-                    type="number"
-                    min="5"
-                    max="90"
-                    value={couponDiscount}
-                    onChange={(e) => setCouponDiscount(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
-                  <button type="button" onClick={() => setShowCreateCouponModal(false)} className="px-4 py-2 bg-slate-800 rounded-xl text-xs">Cancel</button>
-                  <button type="submit" className="px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold">Create Coupon</button>
                 </div>
               </form>
             </div>

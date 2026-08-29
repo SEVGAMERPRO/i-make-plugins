@@ -170,7 +170,7 @@ router.post('/users/:id/resolve-ip', (req, res) => {
 });
 
 // @route   POST /api/admin/users/grant-gift
-// @desc    Instantly gift Ultimate to any username or email directly
+// @desc    Instantly gift Ultimate to any username or email directly (or revoke free gifts)
 router.post('/users/grant-gift', (req, res) => {
   const { target, duration = '1_MONTH' } = req.body;
   if (!target || !target.trim()) {
@@ -178,6 +178,32 @@ router.post('/users/grant-gift', (req, res) => {
   }
 
   const cleanTarget = target.trim();
+  const existingUser = store.getUsers().find(u => 
+    u.id.toLowerCase() === cleanTarget.toLowerCase() || 
+    (u.email && u.email.toLowerCase() === cleanTarget.toLowerCase()) || 
+    (u.username && u.username.toLowerCase() === cleanTarget.toLowerCase())
+  );
+
+  // If attempting to revoke, ensure the user exists and is NOT a paid subscriber
+  if (duration === 'REVOKE') {
+    if (!existingUser) {
+      return res.status(404).json({ success: false, message: 'User not found in registry.' });
+    }
+    const isPaid = Boolean(
+      existingUser.isPaidSubscription || 
+      existingUser.paypalSubscriptionId || 
+      existingUser.ultimatePlan === 'PAID_MONTHLY' || 
+      existingUser.ultimatePlan === 'PAID_YEARLY' || 
+      existingUser.paymentMethod === 'PAYPAL'
+    );
+    if (isPaid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Protected: ${existingUser.username} is a paying subscriber (PayPal / Stripe). Paid subscriptions can only be cancelled by the user or via PayPal merchant tools!` 
+      });
+    }
+  }
+
   let expiresAt = null;
   let durationLabel = '1 Month';
 
@@ -226,7 +252,7 @@ router.post('/users/grant-gift', (req, res) => {
   });
 
   const actionDetails = duration === 'REVOKE' 
-    ? `Revoked MinoForge Ultimate from ${updated.username} (${updated.email})`
+    ? `Revoked free gifted MinoForge Ultimate from ${updated.username} (${updated.email})`
     : `Gifted ${durationLabel} MinoForge Ultimate access to ${updated.username} (${updated.email})`;
 
   store.addAuditLog({
@@ -236,10 +262,19 @@ router.post('/users/grant-gift', (req, res) => {
     ip: req.ip || '127.0.0.1'
   });
 
+  store.trackActivity({
+    type: 'ADMIN_ACTION',
+    username: updated.username,
+    email: updated.email,
+    ip: req.ip || '127.0.0.1',
+    path: '/nimda',
+    details: actionDetails
+  });
+
   res.json({
     success: true,
     message: duration === 'REVOKE'
-      ? `Revoked Ultimate from ${updated.username}`
+      ? `Successfully revoked free gifted Ultimate from ${updated.username}!`
       : `Successfully gifted ${durationLabel} Ultimate access to ${updated.username}!`,
     user: updated
   });

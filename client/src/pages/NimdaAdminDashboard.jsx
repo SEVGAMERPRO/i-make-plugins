@@ -6,7 +6,7 @@ import {
   Download, Trash2, Eye, Check, X, Search, ChevronRight, Terminal, Cpu, Wrench,
   BarChart3, TrendingUp, ShoppingCart, CreditCard, ArrowUpRight, UserPlus, LogIn,
   MousePointerClick, Calendar, ArrowDownRight, Layers, Crown, Gift, Clock, Zap, Award,
-  Tag, Percent, Copy, Plus, Flame
+  Tag, Percent, Copy, Plus, Flame, UserMinus
 } from 'lucide-react';
 import axios from 'axios';
 import { useCurrency } from '../context/CurrencyContext';
@@ -309,6 +309,55 @@ const NimdaAdminDashboard = ({ onLogout }) => {
     } finally {
       setGiftLoading(false);
       setTimeout(() => setNotification(''), 4000);
+    }
+  };
+
+  const handleRevokeFreeGift = async (targetUser) => {
+    const isPaid = Boolean(
+      targetUser.isPaidSubscription || 
+      targetUser.paypalSubscriptionId || 
+      targetUser.ultimatePlan === 'PAID_MONTHLY' || 
+      targetUser.ultimatePlan === 'PAID_YEARLY' || 
+      targetUser.paymentMethod === 'PAYPAL'
+    );
+
+    if (isPaid) {
+      alert(`⚠️ Protected: ${targetUser.username} has an active paying subscription via PayPal. Paid subscriptions cannot be manually revoked.`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to take Ultimate back from "${targetUser.username}"? Their free VIP access will be removed immediately.`)) {
+      return;
+    }
+
+    setGiftLoading(true);
+    try {
+      const res = await axios.post('/api/admin/users/grant-gift', {
+        target: targetUser.username || targetUser.email || targetUser.id,
+        duration: 'REVOKE'
+      });
+
+      if (res.data?.success) {
+        setNotification(`🚫 Successfully took Ultimate back from ${targetUser.username}!`);
+        if (res.data.user) {
+          setUsers(prev => prev.map(u => u.id === res.data.user.id ? res.data.user : u));
+        } else {
+          setUsers(prev => prev.map(u => u.id === targetUser.id ? { 
+            ...u, 
+            isUltimate: false, 
+            ultimateDuration: null, 
+            ultimateExpiresAt: null, 
+            role: u.role === 'ADMIN' ? 'ADMIN' : 'USER' 
+          } : u));
+        }
+      } else {
+        alert(res.data?.message || 'Failed to revoke Ultimate.');
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to revoke Ultimate.');
+    } finally {
+      setGiftLoading(false);
+      setTimeout(() => setNotification(''), 5000);
     }
   };
 
@@ -1522,7 +1571,9 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       <select
                         value={quickGiftDuration}
                         onChange={(e) => setQuickGiftDuration(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-white/15 rounded-2xl text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all cursor-pointer"
+                        className={`w-full pl-10 pr-4 py-3 bg-slate-950/90 border rounded-2xl text-xs font-bold focus:outline-none transition-all cursor-pointer ${
+                          quickGiftDuration === 'REVOKE' ? 'border-red-500/50 text-red-300' : 'border-white/15 text-amber-300'
+                        }`}
                       >
                         <option value="1_DAY">⚡ 1 Day (24 Hours Pass)</option>
                         <option value="7_DAYS">📅 7 Days (1 Week Trial)</option>
@@ -1531,6 +1582,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                         <option value="6_MONTHS">💎 6 Months (Half-Year Access)</option>
                         <option value="1_YEAR">👑 1 Year (Annual VIP Pass)</option>
                         <option value="LIFETIME">♾️ Permanent Lifetime Access</option>
+                        <option value="REVOKE" className="text-red-400 font-bold">🚫 Revoke / Take Back (Free Users Only)</option>
                       </select>
                     </div>
 
@@ -1538,10 +1590,26 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                       <button
                         type="submit"
                         disabled={giftLoading}
-                        className="btn-glow-blue btn-shimmer btn-animated w-full py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 text-slate-950 font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                        className={`btn-animated w-full py-3 font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-xl cursor-pointer disabled:opacity-50 transition-all ${
+                          quickGiftDuration === 'REVOKE'
+                            ? 'bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white shadow-red-500/20'
+                            : 'btn-glow-blue btn-shimmer bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-500 text-slate-950 shadow-amber-500/20'
+                        }`}
                       >
-                        {giftLoading ? <RefreshCw className="w-4 h-4 animate-spin text-slate-950" /> : <Crown className="w-4 h-4 text-slate-950 fill-current" />}
-                        <span>{giftLoading ? 'Granting...' : 'Grant Ultimate'}</span>
+                        {giftLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : quickGiftDuration === 'REVOKE' ? (
+                          <UserMinus className="w-4 h-4 text-white" />
+                        ) : (
+                          <Crown className="w-4 h-4 text-slate-950 fill-current" />
+                        )}
+                        <span>
+                          {giftLoading 
+                            ? 'Processing...' 
+                            : quickGiftDuration === 'REVOKE' 
+                              ? 'Take Ultimate Back' 
+                              : 'Grant Ultimate'}
+                        </span>
                       </button>
                     </div>
                   </form>
@@ -1711,29 +1779,46 @@ const NimdaAdminDashboard = ({ onLogout }) => {
 
                               {/* Membership & Expiration */}
                               <td className="p-4">
-                                {user.isUltimate ? (
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10">
-                                        <Crown className="w-3 h-3 text-amber-400" />
-                                        <span>ACTIVE ULTIMATE</span>
+                                {user.isUltimate ? (() => {
+                                  const isPaidUser = Boolean(
+                                    user.isPaidSubscription || 
+                                    user.paypalSubscriptionId || 
+                                    user.ultimatePlan === 'PAID_MONTHLY' || 
+                                    user.ultimatePlan === 'PAID_YEARLY' || 
+                                    user.paymentMethod === 'PAYPAL'
+                                  );
+
+                                  return (
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-1.5">
+                                        {isPaidUser ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/10">
+                                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                            <span>PAID SUBSCRIBER (PAYPAL)</span>
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10">
+                                            <Gift className="w-3 h-3 text-amber-400" />
+                                            <span>FREE GIFT VIP</span>
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
+                                        <Clock className="w-3 h-3 text-cyan-400" />
+                                        <span>
+                                          {isLifetime 
+                                            ? 'Permanent Lifetime VIP' 
+                                            : remainingDays !== null && remainingDays > 0 
+                                              ? `${remainingDays} days remaining (${new Date(user.ultimateExpiresAt).toLocaleDateString()})` 
+                                              : 'Expired'}
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-emerald-400 font-semibold block">
+                                        ✓ 5% Platform Fee • €5 Ads • Verified Badge
                                       </span>
                                     </div>
-                                    <div className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
-                                      <Clock className="w-3 h-3 text-cyan-400" />
-                                      <span>
-                                        {isLifetime 
-                                          ? 'Permanent Lifetime VIP' 
-                                          : remainingDays !== null && remainingDays > 0 
-                                            ? `${remainingDays} days remaining (${new Date(user.ultimateExpiresAt).toLocaleDateString()})` 
-                                            : 'Expired'}
-                                      </span>
-                                    </div>
-                                    <span className="text-[10px] text-emerald-400 font-semibold block">
-                                      ✓ 5% Platform Fee • €5 Ads • Verified Badge
-                                    </span>
-                                  </div>
-                                ) : (
+                                  );
+                                })() : (
                                   <div className="space-y-1">
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-white/10">
                                       Standard Account (10% Fee)
@@ -1789,36 +1874,74 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                                 )}
                               </td>
 
-                              {/* Actions / Gift Buttons */}
+                              {/* Actions / Gift & Revoke Buttons */}
                               <td className="p-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedUserForGift(user);
-                                      setGiftDuration(user.isUltimate && user.ultimateDuration ? user.ultimateDuration : '1_MONTH');
-                                    }}
-                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all ${
-                                      user.isUltimate
-                                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
-                                        : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black'
-                                    }`}
-                                  >
-                                    <Gift className="w-3.5 h-3.5" />
-                                    <span>{user.isUltimate ? 'Extend / Edit' : 'Gift Ultimate'}</span>
-                                  </button>
+                                {(() => {
+                                  const isPaidUser = Boolean(
+                                    user.isPaidSubscription || 
+                                    user.paypalSubscriptionId || 
+                                    user.ultimatePlan === 'PAID_MONTHLY' || 
+                                    user.ultimatePlan === 'PAID_YEARLY' || 
+                                    user.paymentMethod === 'PAYPAL'
+                                  );
 
-                                  {user.isUltimate && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleGiftUltimate(user.id, 'REVOKE')}
-                                      className="px-2.5 py-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                                      title="Revoke Ultimate membership"
-                                    >
-                                      Revoke
-                                    </button>
-                                  )}
-                                </div>
+                                  if (user.isUltimate) {
+                                    if (isPaidUser) {
+                                      return (
+                                        <div className="flex items-center justify-end gap-2">
+                                          <span className="px-3 py-1.5 bg-slate-950/80 text-slate-400 border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-1.5" title="Protected: Paid subscription via PayPal">
+                                            <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                                            <span>Paid Plan (Active)</span>
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+
+                                    // Free Gifted User -> Can edit or take back
+                                    return (
+                                      <div className="flex items-center justify-end gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedUserForGift(user);
+                                            setGiftDuration(user.ultimateDuration || '1_MONTH');
+                                          }}
+                                          className="px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-sm cursor-pointer transition-all"
+                                        >
+                                          <Gift className="w-3.5 h-3.5" />
+                                          <span>Edit</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRevokeFreeGift(user)}
+                                          className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-red-500/10 hover:shadow-red-500/20"
+                                          title="Take back free gifted Ultimate"
+                                        >
+                                          <UserMinus className="w-3.5 h-3.5" />
+                                          <span>Take Ultimate Back</span>
+                                        </button>
+                                      </div>
+                                    );
+                                  }
+
+                                  // Standard Non-Ultimate User -> Can Gift
+                                  return (
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedUserForGift(user);
+                                          setGiftDuration('1_MONTH');
+                                        }}
+                                        className="btn-glow-blue btn-shimmer btn-animated px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md cursor-pointer transition-all"
+                                      >
+                                        <Gift className="w-3.5 h-3.5 fill-current" />
+                                        <span>Gift Ultimate</span>
+                                      </button>
+                                    </div>
+                                  );
+                                })()}
                               </td>
 
                             </tr>
