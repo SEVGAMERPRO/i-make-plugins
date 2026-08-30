@@ -398,50 +398,73 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Reviews Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {platformReviews.map((rev) => (
-              <div 
-                key={rev.id} 
-                className="p-6 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between shadow-xl"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <StarRating rating={rev.rating} size="sm" showValue={true} />
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      {new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                  </div>
-
-                  <h3 className="font-bold text-white text-sm mb-2 leading-snug">
-                    "{rev.title}"
-                  </h3>
-
-                  <p className="text-slate-300 text-xs leading-relaxed italic">
-                    "{rev.comment}"
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 pt-5 mt-5 border-t border-white/5">
-                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-xs text-amber-300">
-                    {rev.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-xs text-white truncate">{rev.username}</span>
-                      {rev.isUltimate && (
-                        <span className="text-[10px] text-amber-400 font-black" title="Ultimate VIP">👑</span>
-                      )}
-                    </div>
-                    <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
-                      <CheckCircle className="w-2.5 h-2.5" />
-                      <span>Verified Experience</span>
-                    </span>
-                  </div>
-                </div>
+          {/* Reviews Grid / Empty State */}
+          {platformReviews.length === 0 ? (
+            <div className="p-12 text-center bg-slate-900/40 rounded-3xl border border-white/5 space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold mx-auto text-xl shadow-lg">
+                ⭐
               </div>
-            ))}
-          </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-white text-base">No Platform Reviews Yet</h3>
+                <p className="text-slate-400 text-xs max-w-md mx-auto leading-relaxed">
+                  Be the first community member to share feedback on MinoForge speed, features, and creators!
+                </p>
+              </div>
+              <div className="pt-2">
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Write the First Review</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {platformReviews.map((rev) => (
+                <div 
+                  key={rev.id} 
+                  className="p-6 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between shadow-xl"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <StarRating rating={rev.rating} size="sm" showValue={true} />
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-white text-sm mb-2 leading-snug">
+                      "{rev.title}"
+                    </h3>
+
+                    <p className="text-slate-300 text-xs leading-relaxed italic">
+                      "{rev.comment}"
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-5 mt-5 border-t border-white/5">
+                    <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-xs text-amber-300">
+                      {rev.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-xs text-white truncate">{rev.username}</span>
+                        {rev.isUltimate && (
+                          <span className="text-[10px] text-amber-400 font-black" title="Ultimate VIP">👑</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                        <CheckCircle className="w-2.5 h-2.5" />
+                        <span>Verified Experience</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
         </div>
       </section>

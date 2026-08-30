@@ -135,62 +135,11 @@ let promoCodes = [
 // Real Purchases Record
 let purchases = [];
 
-// Platform Experience Reviews (Website itself)
-let websiteReviews = [
-  {
-    id: 'rev-site-1',
-    userId: 'u-rev-1',
-    username: 'LunarHosting',
-    avatarUrl: '/images/avatars/default.png',
-    rating: 4.9,
-    title: 'The cleanest mod & plugin marketplace on the web',
-    comment: 'Super fast instant downloads, zero sketchy redirect links, and the automated bytecode verification gives total peace of mind for our dedicated servers.',
-    isUltimate: true,
-    isVerifiedUser: true,
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
-  },
-  {
-    id: 'rev-site-2',
-    userId: 'u-rev-2',
-    username: 'RedstoneDev',
-    avatarUrl: '/images/avatars/default.png',
-    rating: 5.0,
-    title: '0% fees for Ultimate creators is genuinely unmatched',
-    comment: 'Switched all our network resources over to MinoForge. Direct instant payouts and the creator toolkit is leagues ahead of older legacy forums.',
-    isUltimate: true,
-    isVerifiedUser: true,
-    createdAt: new Date(Date.now() - 4 * 86400000).toISOString()
-  },
-  {
-    id: 'rev-site-3',
-    userId: 'u-rev-3',
-    username: 'VelocityRP',
-    avatarUrl: '/images/avatars/default.png',
-    rating: 4.8,
-    title: 'Amazing FiveM & Minecraft ecosystem',
-    comment: 'Bought 3 custom resource packs and scripts here. Everything installed with zero compatibility conflicts.',
-    isUltimate: false,
-    isVerifiedUser: true,
-    createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
-  }
-];
+// Platform Experience Reviews (Website itself) - Real user reviews only
+let websiteReviews = [];
 
-// Individual Plugin & Seller Reviews (Verified Buyers Only)
-let pluginReviews = [
-  {
-    id: 'rev-plug-1',
-    pluginId: 'p-bot-3',
-    userId: 'u-buyer-1',
-    username: 'CraftMaster',
-    avatarUrl: '/images/avatars/default.png',
-    rating: 4.9,
-    title: 'Flawless Discord Ticket transcript engine',
-    comment: 'Installed in under 2 minutes. The HTML transcript generation is clean, searchable, and saves our support staff hours every week.',
-    isUltimate: false,
-    isVerifiedBuyer: true,
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
-  }
-];
+// Individual Plugin & Seller Reviews (Verified Buyers Only) - Real verified purchases only
+let pluginReviews = [];
 
 // Developer API Keys, Webhooks & Real-time Events
 let apiKeys = [];
