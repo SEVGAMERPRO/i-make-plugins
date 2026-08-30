@@ -82,18 +82,7 @@ const CreatorDashboard = () => {
   const [payoutHistory, setPayoutHistory] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('minoforge_payout_history') || '[]');
-      if (saved.length > 0) return saved;
-      return [
-        {
-          ref: 'PAY-2026-0801',
-          date: 'Aug 28, 2026',
-          destination: 'PayPal (severinkaptein8@gmail.com)',
-          gross: 50.00,
-          fee: 4.00,
-          amount: 46.00,
-          status: 'Completed'
-        }
-      ];
+      return saved.filter(p => p.id !== 'pay-tx-sample' && p.ref !== 'PAY-2026-0801');
     } catch {
       return [];
     }
@@ -105,7 +94,12 @@ const CreatorDashboard = () => {
   const [withdrawSuccessMsg, setWithdrawSuccessMsg] = useState('');
   const [withdrawError, setWithdrawError] = useState('');
   const [customWithdrawBalance, setCustomWithdrawBalance] = useState(() => {
-    return parseFloat(localStorage.getItem('minoforge_creator_wallet_balance') || '65.00');
+    const raw = localStorage.getItem('minoforge_creator_wallet_balance');
+    if (!raw || raw === '65.00' || raw === '65') {
+      localStorage.setItem('minoforge_creator_wallet_balance', '0.00');
+      return 0.00;
+    }
+    return parseFloat(raw) || 0.00;
   });
 
   // Calculated Real Lifetime Metrics (Starting strictly at 0)
@@ -929,7 +923,8 @@ const CreatorDashboard = () => {
 
             {/* SECTION 13: PAYOUT GATEWAYS & WALLET */}
             {currentSection === 'tebex-stripe-wallet' && (() => {
-              const currentTotalBalance = (totalRevenue * (user?.isUltimate ? 0.95 : 0.90)) + customWithdrawBalance;
+              const commissionRate = user?.isUltimate ? 1.00 : 0.90;
+              const currentTotalBalance = totalRevenue > 0 ? (totalRevenue * commissionRate) + customWithdrawBalance : customWithdrawBalance;
               const grossWithdrawNum = parseFloat(withdrawAmount) || 0;
               const fee8Percent = parseFloat((grossWithdrawNum * 0.08).toFixed(2));
               const netWithdrawNum = Math.max(0, parseFloat((grossWithdrawNum - fee8Percent).toFixed(2)));
@@ -1024,8 +1019,8 @@ const CreatorDashboard = () => {
                     </div>
                     <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Platform Rate</span>
-                      <span className="text-3xl font-black text-amber-400 font-mono">{user?.isUltimate ? '95%' : '90%'}</span>
-                      <span className="text-[10px] text-slate-500 block">{user?.isUltimate ? '5% Ultimate commission' : '10% Standard commission'}</span>
+                      <span className="text-3xl font-black text-amber-400 font-mono">{user?.isUltimate ? '100%' : '90%'}</span>
+                      <span className="text-[10px] text-slate-500 block">{user?.isUltimate ? '0% Ultimate fee (Keep 100%)' : '10% Standard commission'}</span>
                     </div>
                     <div className="p-5 rounded-2xl bg-slate-950 border border-white/10 space-y-1">
                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Lifetime Paid Out</span>

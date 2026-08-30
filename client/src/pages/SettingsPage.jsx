@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Settings, ShieldCheck, Lock, Smartphone, User, Sparkles, Bell, 
   Key, Copy, Check, Download, AlertTriangle, ChevronRight, CheckCircle2, 
   ExternalLink, Bot, Zap, Globe, Mail, Eye, EyeOff, Save, Search, RefreshCw,
-  Code, Terminal, Webhook, Plus, Trash2, Send, Activity, FileCode, Play, Radio
+  Code, Terminal, Webhook, Plus, Trash2, Send, Activity, FileCode, Play, Radio,
+  Crown, Sliders, Flame
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -13,18 +14,63 @@ import axios from 'axios';
 
 const SettingsPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { currency, setCurrency } = useCurrency();
   const { language, setLanguage, t, languages = [], currentLanguageObj } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [langSuccess, setLangSuccess] = useState('');
   const [langSearchQuery, setLangSearchQuery] = useState('');
   
-  // Active Tab: 'security' | 'profile' | 'language' | 'developer' | 'integrations' | 'notifications'
+  // Active Tab: 'security' | 'ultimate' | 'profile' | 'language' | 'developer' | 'integrations' | 'notifications'
   const initialTab = searchParams.get('tab') || 'security';
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const email = user?.email || 'user@example.com';
   const username = user?.username || 'MinoUser';
+
+  const isUltimate = (() => {
+    try {
+      if (user?.isUltimate || user?.role === 'CREATOR') return true;
+      if (typeof window !== 'undefined' && window.localStorage) {
+        if (localStorage.getItem('minoforge_ultimate_active') === 'true') return true;
+        const raw = localStorage.getItem('minoforge_user');
+        if (raw && typeof raw === 'string' && raw.includes('"isUltimate":true')) return true;
+      }
+    } catch (e) {}
+    return false;
+  })();
+
+  // ================= ULTIMATE SETTINGS STATE =================
+  const [ultimateSettings, setUltimateSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`minoforge_ultimate_settings_${email}`);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      goldenCrownRing: true,
+      zeroFeeMode: true,
+      autoSpotlight: true,
+      minoshieldPriorityScan: true,
+      unlimitedAiDiagnostics: true,
+      discordVipRole: true,
+      customProfileBanner: 'galaxy',
+      customProfileFlair: 'Verified Ultimate Creator 👑',
+      publicUltimateBadge: true,
+      instantPayoutPriority: true
+    };
+  });
+  const [ultimateSavedMsg, setUltimateSavedMsg] = useState('');
+
+  const handleSaveUltimateSettings = (e) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem(`minoforge_ultimate_settings_${email}`, JSON.stringify(ultimateSettings));
+      setUltimateSavedMsg('👑 Ultimate VIP preferences saved and synchronized!');
+      setTimeout(() => setUltimateSavedMsg(''), 4000);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // ================= 2FA STATE =================
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -366,6 +412,7 @@ MinoForge Security Engine • https://minoforge.com
         <div className="flex overflow-x-auto sm:flex-wrap gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-white/10 hide-scrollbar">
           {[
             { id: 'security', label: '🔒 Security & 2FA', fullLabel: '🔒 Security & 2FA (Google Authenticator)', icon: ShieldCheck },
+            { id: 'ultimate', label: '👑 Ultimate Perks', fullLabel: isUltimate ? '👑 Ultimate VIP Perks' : '👑 Unlock Ultimate', icon: Crown, isSpecial: true },
             { id: 'profile', label: '👤 Profile & Bio', fullLabel: '👤 Profile & Bio', icon: User },
             { id: 'language', label: '🌍 Language / Taal', fullLabel: '🌍 Language / Taal (Google Cloud Translate)', icon: Globe },
             { id: 'developer', label: '🔑 Developer API', fullLabel: '🔑 Developer API & Discord Bot', icon: Code },
@@ -380,11 +427,15 @@ MinoForge Security Engine • https://minoforge.com
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
                   isCurrent
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? tab.isSpecial 
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-lg shadow-amber-500/30'
+                      : 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                    : tab.isSpecial
+                      ? 'text-amber-400 border border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-300'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${tab.isSpecial && !isCurrent ? 'text-amber-400' : ''}`} />
                 <span className="hidden md:inline">{tab.fullLabel}</span>
                 <span className="md:hidden">{tab.label}</span>
               </button>
@@ -639,6 +690,318 @@ MinoForge Security Engine • https://minoforge.com
               )}
             </div>
 
+          </div>
+        )}
+
+        {/* TAB: ULTIMATE MEMBERSHIP & PERKS */}
+        {activeTab === 'ultimate' && (
+          <div className="space-y-6 animate-fade-in">
+            {!isUltimate ? (
+              /* LOCKED PREVIEW / REDIRECT TO UPGRADE FOR NON-ULTIMATE */
+              <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-amber-950/30 via-slate-900 to-slate-950 border-2 border-amber-500/40 text-center space-y-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute -right-20 -top-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10 space-y-4">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500/20 to-yellow-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto text-amber-400 text-4xl shadow-xl shadow-amber-500/20 animate-pulse">
+                    👑
+                  </div>
+                  
+                  <div className="space-y-2 max-w-xl mx-auto">
+                    <span className="px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-wider">
+                      Ultimate VIP Membership Required
+                    </span>
+                    <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                      Customize Your Ultimate Perks
+                    </h2>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      You are currently on a Standard Member account. Upgrade to MinoForge Ultimate to unlock 0% creator commissions, golden avatar badges, auto-spotlight weekly boosts, priority security scanning, and full customization controls.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Ultimate Features Grid */}
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
+                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/10 space-y-1.5">
+                    <div className="text-amber-400 font-bold text-sm flex items-center gap-1.5">
+                      <Zap className="w-4 h-4" /> 0% Platform Fee
+                    </div>
+                    <p className="text-[11px] text-slate-400">Keep 100% of all resource revenue with zero platform commission deductions.</p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/10 space-y-1.5">
+                    <div className="text-amber-400 font-bold text-sm flex items-center gap-1.5">
+                      <Crown className="w-4 h-4" /> Golden VIP Crown
+                    </div>
+                    <p className="text-[11px] text-slate-400">Stand out everywhere with a glowing golden crown badge and verified avatar ring.</p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/10 space-y-1.5">
+                    <div className="text-amber-400 font-bold text-sm flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4" /> Auto-Spotlight Boost
+                    </div>
+                    <p className="text-[11px] text-slate-400">Automated homepage carousel placement whenever you release or update plugins.</p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/10 space-y-1.5">
+                    <div className="text-amber-400 font-bold text-sm flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4" /> MinoShield™ Priority
+                    </div>
+                    <p className="text-[11px] text-slate-400">Instant bytecode decompilation and express security review bypassing queues.</p>
+                  </div>
+                </div>
+
+                {/* Redirect / Go Ultimate CTA */}
+                <div className="relative z-10 pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    onClick={() => navigate('/upgrade')}
+                    className="btn-glow-blue btn-shimmer btn-animated w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-base rounded-2xl shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Go Ultimate — Unlock All Perks</span>
+                    <Sparkles className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/pricing')}
+                    className="w-full sm:w-auto px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm rounded-2xl border border-white/10 transition-all cursor-pointer"
+                  >
+                    View All Plan Features
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* FULL INTERACTIVE ULTIMATE CONTROL CENTER FOR ULTIMATE MEMBERS */
+              <form onSubmit={handleSaveUltimateSettings} className="space-y-6">
+                
+                {/* Header VIP Card */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-950 border-2 border-amber-500/40 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-yellow-500/20 border-2 border-amber-400/60 flex items-center justify-center text-3xl shadow-lg shadow-amber-500/30">
+                      👑
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h2 className="text-xl font-black text-white">Ultimate VIP Creator Studio</h2>
+                        <span className="px-2.5 py-0.5 bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-black rounded-full">
+                          ACTIVE &amp; UNLOCKED
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                        Customize your Ultimate perks, verified badge appearance, zero-commission payout routing, and automated marketplace boost settings.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-animated px-6 py-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save Ultimate Settings</span>
+                  </button>
+                </div>
+
+                {ultimateSavedMsg && (
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-xs font-bold text-emerald-300 flex items-center gap-2 animate-fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>{ultimateSavedMsg}</span>
+                  </div>
+                )}
+
+                {/* Ultimate Settings Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Perk 1: Golden Crown Badge & Avatar Glow */}
+                  <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 space-y-4 shadow-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black text-white flex items-center gap-2">
+                          <Crown className="w-4 h-4 text-amber-400" />
+                          <span>Golden Crown Avatar &amp; Profile Ring</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Display a 3D animated golden crown and luminous avatar ring on your profile, comments, reviews, and plugin seller cards.
+                        </p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={ultimateSettings.goldenCrownRing}
+                        onChange={(e) => setUltimateSettings({ ...ultimateSettings, goldenCrownRing: e.target.checked })}
+                        className="w-5 h-5 accent-amber-500 rounded cursor-pointer mt-1"
+                      />
+                    </div>
+
+                    {/* Live Preview */}
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 flex items-center gap-3">
+                      <div className="relative">
+                        <div className={`w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center font-black text-sm text-white overflow-hidden border-2 ${
+                          ultimateSettings.goldenCrownRing ? 'border-amber-400 shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/30' : 'border-white/10'
+                        }`}>
+                          {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{username.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                        {ultimateSettings.goldenCrownRing && (
+                          <div className="absolute -top-3 -left-2 text-base filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.9)] animate-bounce">
+                            👑
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                          <span>{displayName || username}</span>
+                          {ultimateSettings.goldenCrownRing && <span className="text-amber-400 text-xs">👑</span>}
+                        </div>
+                        <span className="text-[11px] text-amber-400 font-semibold">{ultimateSettings.customProfileFlair}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Perk 2: 0% Platform Commission Status */}
+                  <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 space-y-4 shadow-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black text-white flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-emerald-400" />
+                          <span>0% Creator Platform Fee (Keep 100%)</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Your account automatically receives 100% of all gross plugin sales directly without any standard 10% platform commission fee deduction.
+                        </p>
+                      </div>
+                      <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 font-black text-xs flex-shrink-0">
+                        100% Payout
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-emerald-500/20 space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">Standard Platform Fee:</span>
+                        <span className="line-through text-slate-500 font-mono">10%</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-bold text-emerald-400">
+                        <span>Your Ultimate Creator Fee:</span>
+                        <span className="font-mono">0.0% (Waived for Life)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Perk 3: Auto-Spotlight Weekly Boost */}
+                  <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 space-y-4 shadow-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black text-white flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-cyan-400" />
+                          <span>Automated Marketplace Homepage Spotlight</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Automatically boost your newly submitted or updated plugins to the "Featured &amp; Trending" hero showcase on MinoForge homepage.
+                        </p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={ultimateSettings.autoSpotlight}
+                        onChange={(e) => setUltimateSettings({ ...ultimateSettings, autoSpotlight: e.target.checked })}
+                        className="w-5 h-5 accent-cyan-500 rounded cursor-pointer mt-1"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-between text-xs text-slate-300">
+                      <span>Status:</span>
+                      <span className="font-bold text-cyan-400">{ultimateSettings.autoSpotlight ? '✓ Enabled (Auto-Boost on Publish)' : 'Disabled'}</span>
+                    </div>
+                  </div>
+
+                  {/* Perk 4: MinoShield™ Priority Scan */}
+                  <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 space-y-4 shadow-xl">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black text-white flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4 text-purple-400" />
+                          <span>MinoShield™ Priority Sandbox Security Review</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Bypass manual approval backlogs with automated instant bytecode decompilation, AST exploit scanning, and priority staff verification.
+                        </p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={ultimateSettings.minoshieldPriorityScan}
+                        onChange={(e) => setUltimateSettings({ ...ultimateSettings, minoshieldPriorityScan: e.target.checked })}
+                        className="w-5 h-5 accent-purple-500 rounded cursor-pointer mt-1"
+                      />
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-between text-xs text-slate-300">
+                      <span>Review Queue:</span>
+                      <span className="font-bold text-purple-400">⚡ VIP Fast-Track (&lt; 5 Minutes)</span>
+                    </div>
+                  </div>
+
+                  {/* Perk 5: Custom Profile Flair */}
+                  <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 space-y-4 shadow-xl md:col-span-2">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black text-white flex items-center gap-2">
+                        <Sliders className="w-4 h-4 text-amber-400" />
+                        <span>Custom Profile Flair &amp; VIP Tagline</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        Customize the custom badge text that displays next to your username on your public creator page and plugin pages.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {['Verified Ultimate Creator 👑', 'VIP Studio Master 🚀', 'MinoForge Elite ⭐'].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setUltimateSettings({ ...ultimateSettings, customProfileFlair: preset })}
+                          className={`p-3 rounded-2xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                            ultimateSettings.customProfileFlair === preset
+                              ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-md shadow-amber-500/10'
+                              : 'bg-slate-950 border-white/10 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-1 pt-1">
+                      <label className="text-xs font-bold text-slate-300">Or type custom flair:</label>
+                      <input
+                        type="text"
+                        value={ultimateSettings.customProfileFlair}
+                        onChange={(e) => setUltimateSettings({ ...ultimateSettings, customProfileFlair: e.target.value })}
+                        maxLength={40}
+                        className="w-full px-4 py-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-amber-300 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        placeholder="e.g. Master Plugin Developer 👑"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Bottom Save Bar */}
+                <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>All changes take effect immediately across all MinoForge services.</span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-glow-blue btn-shimmer btn-animated px-8 py-3.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save All Ultimate Preferences</span>
+                  </button>
+                </div>
+
+              </form>
+            )}
           </div>
         )}
 
