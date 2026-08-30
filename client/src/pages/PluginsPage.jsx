@@ -240,10 +240,10 @@ const PluginsPage = () => {
                   </p>
                   <div className="flex flex-wrap gap-3 justify-center">
                     <Link
-                      to="/upload"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 hover:from-blue-500 hover:to-blue-400 transition-all"
+                      to="/become-creator"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all"
                     >
-                      <Upload className="w-4 h-4" /> Upload a Plugin
+                      <Sparkles className="w-4 h-4" /> Become a Creator — Publish a Resource
                     </Link>
                   </div>
                 </div>

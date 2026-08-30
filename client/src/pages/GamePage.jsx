@@ -97,10 +97,10 @@ const GamePage = () => {
               There are currently no active plugins for {gameInfo.name}. Are you a developer? Be the first to upload and start earning!
             </p>
             <Link
-              to="/register"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/30 transition-all"
+              to="/become-creator"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/30 transition-all"
             >
-              <Upload className="w-4 h-4" /> Start Selling for {gameInfo.name}
+              <Upload className="w-4 h-4" /> Start Selling for {gameInfo.name} — Become a Creator
             </Link>
           </div>
         )}

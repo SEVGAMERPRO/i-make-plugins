@@ -300,8 +300,14 @@ export default function HomePage() {
 
           <div className="z-10 flex-shrink-0">
             <button
-              onClick={() => setIsCustomRequestOpen(true)}
-              className="btn-glow-blue btn-shimmer btn-animated py-4 px-8 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base sm:text-lg rounded-2xl flex items-center gap-3 group"
+              onClick={() => {
+                if (!user) {
+                  navigate('/login?redirect=/custom-plugin');
+                  return;
+                }
+                setIsCustomRequestOpen(true);
+              }}
+              className="btn-glow-blue btn-shimmer btn-animated py-4 px-8 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-base sm:text-lg rounded-2xl flex items-center gap-3 group cursor-pointer"
             >
               <span>Order Custom Plugin</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
@@ -389,7 +395,13 @@ export default function HomePage() {
               </div>
 
               <button
-                onClick={() => setIsReviewModalOpen(true)}
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login?redirect=/');
+                    return;
+                  }
+                  setIsReviewModalOpen(true);
+                }}
                 className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
@@ -412,7 +424,13 @@ export default function HomePage() {
               </div>
               <div className="pt-2">
                 <button
-                  onClick={() => setIsReviewModalOpen(true)}
+                  onClick={() => {
+                    if (!user) {
+                      navigate('/login?redirect=/');
+                      return;
+                    }
+                    setIsReviewModalOpen(true);
+                  }}
                   className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20 inline-flex items-center gap-2 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
@@ -484,7 +502,7 @@ export default function HomePage() {
               <button
                 key={game.slug}
                 onClick={() => navigate(`/games/${game.slug}`)}
-                className="inline-flex items-center gap-2.5 px-5 py-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl text-sm font-bold text-white hover:text-blue-300 transition-all border border-white/10 hover:border-blue-400/40 shadow-md"
+                className="inline-flex items-center gap-2.5 px-5 py-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl text-sm font-bold text-white hover:text-blue-300 transition-all border border-white/10 hover:border-blue-400/40 shadow-md cursor-pointer"
               >
                 <div className="w-5 h-5 rounded-md overflow-hidden flex-shrink-0">
                   <img src={game.image} alt={game.name} className="w-full h-full object-cover" />
@@ -510,15 +528,15 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => navigate('/register')}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-bold text-lg hover:from-blue-500 hover:to-blue-400 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2"
+              onClick={() => navigate('/become-creator')}
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-bold text-lg hover:from-blue-500 hover:to-blue-400 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Start Selling on MinoForge</span>
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
               onClick={() => navigate('/plugins')}
-              className="px-8 py-4 bg-slate-800/80 hover:bg-slate-700/80 text-white rounded-xl font-bold text-lg transition-all border border-white/10 hover:border-white/20"
+              className="px-8 py-4 bg-slate-800/80 hover:bg-slate-700/80 text-white rounded-xl font-bold text-lg transition-all border border-white/10 hover:border-white/20 cursor-pointer"
             >
               Browse Marketplace
             </button>

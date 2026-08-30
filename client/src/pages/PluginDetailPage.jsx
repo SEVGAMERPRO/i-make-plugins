@@ -203,6 +203,10 @@ const PluginDetailPage = () => {
   }, [id, plugin]);
 
   const handleDownload = () => {
+    if (!user) {
+      navigate(`/login?redirect=/plugins/${id}`);
+      return;
+    }
     const url = plugin?.downloadUrl || '/downloads/UltimateEconomy-v2.4.0.zip';
     const link = document.createElement('a');
     link.href = url;
@@ -213,6 +217,14 @@ const PluginDetailPage = () => {
 
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3000);
+  };
+
+  const handlePurchaseOrAddToCart = (openCheckout = false) => {
+    if (!user) {
+      navigate(`/login?redirect=/plugins/${id}`);
+      return;
+    }
+    addToCart(plugin, openCheckout);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -977,6 +989,10 @@ const PluginDetailPage = () => {
                 <div className="space-y-2.5">
                   <button 
                     onClick={() => {
+                      if (!user) {
+                        navigate(`/login?redirect=/plugins/${id}`);
+                        return;
+                      }
                       addToCart(plugin, false);
                       setIsCheckoutOpen(true);
                     }}
@@ -988,6 +1004,10 @@ const PluginDetailPage = () => {
 
                   <button 
                     onClick={() => {
+                      if (!user) {
+                        navigate(`/login?redirect=/plugins/${id}`);
+                        return;
+                      }
                       addToCart(plugin, false);
                       setIsCheckoutOpen(true);
                     }}
@@ -1000,7 +1020,7 @@ const PluginDetailPage = () => {
                   </button>
 
                   <button 
-                    onClick={() => addToCart(plugin, true)}
+                    onClick={() => handlePurchaseOrAddToCart(true)}
                     className="btn-animated w-full py-2.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
                   >
                     <ShoppingCart className="w-4 h-4 text-cyan-400" />
@@ -1018,7 +1038,7 @@ const PluginDetailPage = () => {
                   </button>
 
                   <button 
-                    onClick={() => addToCart(plugin, true)}
+                    onClick={() => handlePurchaseOrAddToCart(true)}
                     className="btn-animated w-full py-2.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
                   >
                     <ShoppingCart className="w-4 h-4 text-emerald-400" />

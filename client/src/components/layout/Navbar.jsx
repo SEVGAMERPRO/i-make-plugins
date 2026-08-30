@@ -155,6 +155,16 @@ const Navbar = ({ onMenuClick }) => {
         {/* Right User Actions & Popover Menu */}
         <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
           
+          {/* ✨ Become a Creator Button (Exact location circled in user screenshot) */}
+          <Link
+            to="/become-creator"
+            className="btn-animated hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-cyan-600/20 via-blue-600/20 to-purple-600/20 hover:from-cyan-500/30 hover:via-blue-500/30 hover:to-purple-500/30 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-300 rounded-xl text-xs font-black shadow-lg shadow-cyan-500/10 transition-all cursor-pointer mr-1"
+            title="Join our verified creators and monetize your plugins"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+            <span>Become a Creator</span>
+          </Link>
+
           {/* Currency Switcher (Desktop only; mobile uses drawer & footer) */}
           <div className="hidden sm:block">
             <CurrencySwitcher />
