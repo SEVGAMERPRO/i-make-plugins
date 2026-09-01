@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Star, Download, Clock, Tag, ShieldCheck, ChevronRight, Sparkles, Terminal, FileCode, CheckCircle2, User, Share2, Check, CreditCard, ShoppingCart, MessageSquare, ExternalLink, Cpu, Layers, AlertCircle, History, FileText, Key, Award, Flame, Zap, CheckCircle, Bell, BellOff, Users, GitFork, PackageCheck, AlertTriangle, FileArchive, Lock, ThumbsUp } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -7,6 +7,7 @@ import StarRating from '../components/ui/StarRating';
 import MinoShieldBadge from '../components/security/MinoShieldBadge';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { useAuth } from '../context/AuthContext';
 import { getPluginById } from '../services/api';
 
 const SAMPLE_PLUGINS_DATABASE = {
@@ -123,10 +124,36 @@ const SAMPLE_PLUGINS_DATABASE = {
 
 const PluginDetailPage = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { addToCart, isInCart, setIsCheckoutOpen, openCheckoutWithMethod } = useCart();
   const { formatPrice } = useCurrency();
+  const [plugin, setPlugin] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [userLicense, setUserLicense] = useState(null);
   const [copiedLic, setCopiedLic] = useState(false);
+
+  useEffect(() => {
+    const fetchPlugin = async () => {
+      setLoading(true);
+      try {
+        const data = await getPluginById(id);
+        if (data) {
+          setPlugin(data);
+        } else if (SAMPLE_PLUGINS_DATABASE[id]) {
+          setPlugin(SAMPLE_PLUGINS_DATABASE[id]);
+        }
+      } catch (err) {
+        if (SAMPLE_PLUGINS_DATABASE[id]) {
+          setPlugin(SAMPLE_PLUGINS_DATABASE[id]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlugin();
+  }, [id]);
 
   // Review states
   const [pluginReviews, setPluginReviews] = useState([]);
