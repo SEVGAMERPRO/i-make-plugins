@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { X, Trash2, ShoppingCart, ArrowRight, ShieldCheck, Sparkles, Download, CheckCircle2, Tag, Check } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, Trash2, ShoppingCart, ArrowRight, ShieldCheck, Sparkles, Download, CheckCircle2, Tag, Check, CreditCard } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useAuth } from '../../context/AuthContext';
 
 const CartDrawer = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { 
     cartItems, 
     isCartOpen, 
@@ -18,16 +21,21 @@ const CartDrawer = () => {
     couponError, 
     applyCoupon, 
     removeCoupon, 
-    setIsCheckoutOpen 
+    setIsCheckoutOpen,
+    openCheckoutWithMethod 
   } = useCart();
   const { formatPrice, activeCurrency } = useCurrency();
   const [couponInput, setCouponInput] = useState('');
 
   if (!isCartOpen) return null;
 
-  const handleProceedToCheckout = () => {
+  const handleProceedToCheckout = (method = 'applepay') => {
     setIsCartOpen(false);
-    setIsCheckoutOpen(true);
+    if (!user) {
+      navigate('/login?redirect=/plugins');
+      return;
+    }
+    openCheckoutWithMethod(method);
   };
 
   const handleApplyCoupon = (e) => {
@@ -211,44 +219,73 @@ const CartDrawer = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <button
-                  onClick={handleProceedToCheckout}
+                  onClick={() => handleProceedToCheckout('applepay')}
                   className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
                 >
                   <span>Checkout All Items ({formatPrice(total, true)})</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
+                {/* 4 Express 1-Click Payment Gateways */}
                 <div className="grid grid-cols-2 gap-2">
+                  {/* Apple Pay Button */}
                   <button
-                    onClick={handleProceedToCheckout}
-                    className="py-3 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-xs rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
+                    onClick={() => handleProceedToCheckout('applepay')}
+                    className="py-2.5 bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer"
                   >
                     <span>Pay with</span>
-                    <span className="font-black text-sm tracking-tight italic">
+                    <span className="font-bold text-sm tracking-tight flex items-center">
+                      <span></span><span>Pay</span>
+                    </span>
+                  </button>
+
+                  {/* Google Pay Button */}
+                  <button
+                    onClick={() => handleProceedToCheckout('googlepay')}
+                    className="py-2.5 bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md border border-white/15 transition-all cursor-pointer"
+                  >
+                    <span>Pay with</span>
+                    <span className="font-bold text-xs tracking-tight flex items-center">
+                      <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span>
+                    </span>
+                  </button>
+
+                  {/* PayPal Button */}
+                  <button
+                    onClick={() => handleProceedToCheckout('paypal')}
+                    className="py-2.5 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black text-xs rounded-xl flex items-center justify-center gap-1 shadow-md transition-all cursor-pointer"
+                  >
+                    <span>Pay with</span>
+                    <span className="font-black text-xs tracking-tight italic">
                       <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
                     </span>
                   </button>
 
+                  {/* iDEAL Button */}
                   <button
-                    onClick={handleProceedToCheckout}
-                    className="py-3 bg-[#cc0066] hover:bg-[#b30059] active:scale-[0.99] text-white font-black text-xs rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-pink-500/10 transition-all cursor-pointer"
+                    onClick={() => handleProceedToCheckout('ideal')}
+                    className="py-2.5 bg-[#cc0066] hover:bg-[#b30059] active:scale-[0.99] text-white font-black text-xs rounded-xl flex items-center justify-center gap-1 shadow-md transition-all cursor-pointer"
                   >
                     <span>Pay with</span>
-                    <span className="font-black text-xs tracking-tight uppercase bg-white text-[#cc0066] px-1.5 py-0.5 rounded font-mono">
+                    <span className="font-black text-[11px] tracking-tight uppercase bg-white text-[#cc0066] px-1 py-0.2 rounded font-mono">
                       iDEAL
                     </span>
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] text-slate-500 pt-1">
                 <span>🔒 256-Bit SSL</span>
                 <span>•</span>
-                <span>🏦 iDEAL &amp; PayPal</span>
+                <span>🍎 Apple Pay</span>
                 <span>•</span>
-                <span>⚡ Instant DRM Key</span>
+                <span>🌐 Google Pay</span>
+                <span>•</span>
+                <span>🅿️ PayPal</span>
+                <span>•</span>
+                <span>🏦 iDEAL</span>
               </div>
             </div>
           )}

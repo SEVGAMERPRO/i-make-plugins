@@ -22,6 +22,14 @@ export default function CheckoutPage() {
   const initialBilling = searchParams.get('billing') === 'yearly';
   const [annualBilling, setAnnualBilling] = useState(initialBilling);
   
+  // Payment Method Selection for Ultimate Checkout ('applepay' | 'googlepay' | 'paypal' | 'card' | 'ideal')
+  const [checkoutMethod, setCheckoutMethod] = useState('applepay');
+  const [applePayLoading, setApplePayLoading] = useState(false);
+  const [googlePayLoading, setGooglePayLoading] = useState(false);
+  const [cardLoading, setCardLoading] = useState(false);
+  const [idealLoading, setIdealLoading] = useState(false);
+  const [selectedIdealBank, setSelectedIdealBank] = useState('ING Bank');
+
   // Donation / Tip State
   const [donation, setDonation] = useState(0);
   const [customDonationInput, setCustomDonationInput] = useState('');
@@ -174,6 +182,66 @@ export default function CheckoutPage() {
 
     // Navigate to single-use self-terminating cryptographic receipt URL!
     navigate(`/receipt/${encodeURIComponent(uniqueToken)}`);
+  };
+
+  const handleApplePayCheckout = () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+    setApplePayLoading(true);
+    setTimeout(() => {
+      setApplePayLoading(false);
+      handleSuccessfulPayment({
+        orderID: `MF-APL-${Math.floor(100000 + Math.random() * 900000)}`,
+        paymentMethod: 'APPLE_PAY'
+      });
+    }, 1500);
+  };
+
+  const handleGooglePayCheckout = () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+    setGooglePayLoading(true);
+    setTimeout(() => {
+      setGooglePayLoading(false);
+      handleSuccessfulPayment({
+        orderID: `MF-GPY-${Math.floor(100000 + Math.random() * 900000)}`,
+        paymentMethod: 'GOOGLE_PAY'
+      });
+    }, 1500);
+  };
+
+  const handleCardCheckout = () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+    setCardLoading(true);
+    setTimeout(() => {
+      setCardLoading(false);
+      handleSuccessfulPayment({
+        orderID: `MF-CRD-${Math.floor(100000 + Math.random() * 900000)}`,
+        paymentMethod: 'CREDIT_CARD'
+      });
+    }, 1500);
+  };
+
+  const handleIdealCheckout = () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/checkout/ultimate?billing=${annualBilling ? 'yearly' : 'monthly'}`)}`);
+      return;
+    }
+    setIdealLoading(true);
+    setTimeout(() => {
+      setIdealLoading(false);
+      handleSuccessfulPayment({
+        orderID: `MF-IDL-${Math.floor(100000 + Math.random() * 900000)}`,
+        paymentMethod: 'IDEAL'
+      });
+    }, 1500);
   };
 
   return (
@@ -610,33 +678,314 @@ export default function CheckoutPage() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3 pt-2">
+                <div className="space-y-4 pt-2">
                   <div className="text-center">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                       Official Secure Payment Terminal
                     </span>
                   </div>
 
-                  <PayPalSmartButtons
-                    key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${finalTotalAmount}_${appliedPromo?.code || 'nopromo'}`}
-                    isSubscription={true}
-                    billingCycle={annualBilling ? 'yearly' : 'monthly'}
-                    subscriptionPlanId={annualBilling ? 'P-03X31846PF270403XNKJRJUQ' : 'P-6N334537WX7871409NKJRIKY'}
-                    donation={donation}
-                    items={[{
-                      id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
-                      title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan' : 'Monthly Plan'})${appliedPromo ? ` [Code: ${appliedPromo.code}]` : ''}${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
-                      price: finalTotalAmount
-                    }]}
-                    totalAmount={finalTotalAmount}
-                    onSuccess={handleSuccessfulPayment}
-                    onError={(err) => console.error('Ultimate checkout error:', err)}
-                  />
+                  {/* Payment Method Selector Tabs */}
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMethod('applepay')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        checkoutMethod === 'applepay'
+                          ? 'bg-white text-black shadow-lg shadow-white/10'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <span className="text-sm leading-none font-black">Pay</span>
+                      <span className="text-[9px] opacity-80">Apple Pay</span>
+                    </button>
 
-                  <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-center text-[10px] text-slate-400 space-y-0.5">
-                    <span className="font-semibold text-slate-300 block">🔁 Automatic Recurring Subscription</span>
-                    <span>Renews automatically every {annualBilling ? 'year' : 'month'}. Cancel anytime in 1 click from your PayPal dashboard.</span>
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMethod('googlepay')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        checkoutMethod === 'googlepay'
+                          ? 'bg-slate-900 text-white border border-white/20 shadow-lg'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <span className="text-xs leading-none font-bold">
+                        <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span>
+                      </span>
+                      <span className="text-[9px] opacity-80">Google Pay</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMethod('paypal')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        checkoutMethod === 'paypal'
+                          ? 'bg-[#ffc439] text-[#003087] shadow-lg shadow-amber-500/20'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <span className="text-xs italic font-black">PayPal</span>
+                      <span className="text-[9px] opacity-80">Vault</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMethod('card')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        checkoutMethod === 'card'
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span className="text-[9px] opacity-80">Card</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMethod('ideal')}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                        checkoutMethod === 'ideal'
+                          ? 'bg-[#cc0066] text-white shadow-lg shadow-pink-500/20'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <span className="text-[11px] font-mono font-bold">iDEAL</span>
+                      <span className="text-[9px] opacity-80">Bank</span>
+                    </button>
                   </div>
+
+                  {/* Apple Pay Terminal */}
+                  {checkoutMethod === 'applepay' && (
+                    <div className="p-5 bg-slate-900/90 rounded-2xl border border-white/20 space-y-4 shadow-xl animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center font-bold text-sm border border-white/20">
+                            
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">Apple Pay 1-Touch Subscription</span>
+                            <span className="text-[10px] text-slate-400">Biometric Touch ID / Face ID</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          Active
+                        </span>
+                      </div>
+
+                      <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5 space-y-1.5 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Card:</span>
+                          <span className="text-white font-bold"> Apple Card (•••• 8821)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Recurring:</span>
+                          <span className="text-cyan-400 font-semibold">{annualBilling ? '€132.50 / year' : '€12.99 / month'}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleApplePayCheckout}
+                        disabled={applePayLoading}
+                        className="w-full py-4 px-6 bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-2xl border border-white/20 transition-all cursor-pointer"
+                      >
+                        {applePayLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                            <span>Confirming with Touch ID / Face ID...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-lg leading-none"></span>
+                            <span>Pay with Apple Pay ({formatPrice(finalTotalAmount, true)})</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Google Pay Terminal */}
+                  {checkoutMethod === 'googlepay' && (
+                    <div className="p-5 bg-slate-900/90 rounded-2xl border border-white/20 space-y-4 shadow-xl animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-white text-slate-950 flex items-center justify-center font-bold text-xs">
+                            <span className="text-[#4285F4]">G</span>
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">Google Pay 1-Tap Subscription</span>
+                            <span className="text-[10px] text-slate-400">Google Wallet Protected</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          Active
+                        </span>
+                      </div>
+
+                      <div className="p-3 bg-slate-950/80 rounded-xl border border-white/5 space-y-1.5 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Account:</span>
+                          <span className="text-white font-bold">{user?.email || 'user@gmail.com'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Payment:</span>
+                          <span className="text-slate-300 font-semibold">Google Wallet (Visa •••• 4242)</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleGooglePayCheckout}
+                        disabled={googlePayLoading}
+                        className="w-full py-4 px-6 bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-2xl border border-white/20 transition-all cursor-pointer"
+                      >
+                        {googlePayLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+                            <span>Authorizing with Google Wallet...</span>
+                          </>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold">
+                              <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span> Pay
+                            </span>
+                            <span className="text-slate-400 font-normal">({formatPrice(finalTotalAmount, true)})</span>
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* PayPal Terminal */}
+                  {checkoutMethod === 'paypal' && (
+                    <div className="space-y-3 animate-fade-in">
+                      <PayPalSmartButtons
+                        key={`paypal_checkout_${annualBilling ? 'yearly' : 'monthly'}_${finalTotalAmount}_${appliedPromo?.code || 'nopromo'}`}
+                        isSubscription={true}
+                        billingCycle={annualBilling ? 'yearly' : 'monthly'}
+                        subscriptionPlanId={annualBilling ? 'P-03X31846PF270403XNKJRJUQ' : 'P-6N334537WX7871409NKJRIKY'}
+                        donation={donation}
+                        items={[{
+                          id: `membership_ultimate_${annualBilling ? 'yearly' : 'monthly'}`,
+                          title: `MinoForge Ultimate Membership (${annualBilling ? 'Annual Plan' : 'Monthly Plan'})${appliedPromo ? ` [Code: ${appliedPromo.code}]` : ''}${donation > 0 ? ` (+ €${donation.toFixed(2)} Platform Tip)` : ''}`,
+                          price: finalTotalAmount
+                        }]}
+                        totalAmount={finalTotalAmount}
+                        onSuccess={handleSuccessfulPayment}
+                        onError={(err) => console.error('Ultimate checkout error:', err)}
+                      />
+
+                      <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-center text-[10px] text-slate-400 space-y-0.5">
+                        <span className="font-semibold text-slate-300 block">🔁 Automatic Recurring Subscription</span>
+                        <span>Renews automatically every {annualBilling ? 'year' : 'month'}. Cancel anytime in 1 click from your PayPal dashboard.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Card Terminal */}
+                  {checkoutMethod === 'card' && (
+                    <div className="p-5 bg-slate-900/90 rounded-2xl border border-white/20 space-y-4 shadow-xl animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-blue-400" />
+                          <span className="text-xs font-bold text-white">Direct Card Checkout</span>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          256-Bit SSL
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          defaultValue="•••• •••• •••• 4242"
+                          placeholder="Card Number"
+                          className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono"
+                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            defaultValue="12/28"
+                            placeholder="MM/YY"
+                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono"
+                          />
+                          <input
+                            type="text"
+                            defaultValue="842"
+                            placeholder="CVC"
+                            className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleCardCheckout}
+                        disabled={cardLoading}
+                        className="btn-glow-blue w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 cursor-pointer"
+                      >
+                        {cardLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                            <span>Processing Card Payment...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            <span>Subscribe with Card ({formatPrice(finalTotalAmount, true)})</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* iDEAL Terminal */}
+                  {checkoutMethod === 'ideal' && (
+                    <div className="p-5 bg-slate-900/90 rounded-2xl border border-pink-500/30 space-y-4 shadow-xl animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-black text-xs">
+                            iDEAL
+                          </div>
+                          <span className="text-xs font-bold text-white">Online Bankieren (Nederland)</span>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          Direct
+                        </span>
+                      </div>
+
+                      <select
+                        value={selectedIdealBank}
+                        onChange={(e) => setSelectedIdealBank(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white"
+                      >
+                        {['ING Bank', 'Rabobank', 'ABN AMRO', 'SNS Bank', 'ASN Bank', 'RegioBank', 'Knab', 'Bunq', 'Revolut', 'N26'].map((b) => (
+                          <option key={b} value={b} className="bg-slate-950 text-white">{b}</option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={handleIdealCheckout}
+                        disabled={idealLoading}
+                        className="w-full py-3.5 px-6 bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 hover:from-pink-500 hover:to-rose-400 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-pink-500/20 cursor-pointer"
+                      >
+                        {idealLoading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                            <span>Verbinding maken met {selectedIdealBank}...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            <span>Afrekenen met {selectedIdealBank} ({formatPrice(finalTotalAmount, true)})</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               )}
 

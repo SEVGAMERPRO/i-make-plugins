@@ -123,7 +123,7 @@ const SAMPLE_PLUGINS_DATABASE = {
 
 const PluginDetailPage = () => {
   const { id } = useParams();
-  const { addToCart, isInCart, setIsCheckoutOpen } = useCart();
+  const { addToCart, isInCart, setIsCheckoutOpen, openCheckoutWithMethod } = useCart();
   const { formatPrice } = useCurrency();
   const [userLicense, setUserLicense] = useState(null);
   const [copiedLic, setCopiedLic] = useState(false);
@@ -994,7 +994,7 @@ const PluginDetailPage = () => {
                         return;
                       }
                       addToCart(plugin, false);
-                      setIsCheckoutOpen(true);
+                      openCheckoutWithMethod('applepay');
                     }}
                     className="btn-glow-blue btn-shimmer btn-animated w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
                   >
@@ -1002,22 +1002,80 @@ const PluginDetailPage = () => {
                     <span>Instant Checkout ({formatPrice(plugin.price)})</span>
                   </button>
 
-                  <button 
-                    onClick={() => {
-                      if (!user) {
-                        navigate(`/login?redirect=/plugins/${id}`);
-                        return;
-                      }
-                      addToCart(plugin, false);
-                      setIsCheckoutOpen(true);
-                    }}
-                    className="w-full py-3 px-6 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black rounded-2xl shadow-lg shadow-amber-500/10 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
-                  >
-                    <span>Pay with</span>
-                    <span className="font-black text-base tracking-tight italic">
-                      <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
-                    </span>
-                  </button>
+                  {/* 4 Express Fast Pay Options */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Apple Pay Button */}
+                    <button 
+                      onClick={() => {
+                        if (!user) {
+                          navigate(`/login?redirect=/plugins/${id}`);
+                          return;
+                        }
+                        addToCart(plugin, false);
+                        openCheckoutWithMethod('applepay');
+                      }}
+                      className="py-2.5 px-3 bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-black rounded-xl shadow-md border border-white/20 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                    >
+                      <span>Pay with</span>
+                      <span className="font-bold text-sm tracking-tight flex items-center">
+                        <span></span><span>Pay</span>
+                      </span>
+                    </button>
+
+                    {/* Google Pay Button */}
+                    <button 
+                      onClick={() => {
+                        if (!user) {
+                          navigate(`/login?redirect=/plugins/${id}`);
+                          return;
+                        }
+                        addToCart(plugin, false);
+                        openCheckoutWithMethod('googlepay');
+                      }}
+                      className="py-2.5 px-3 bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white font-black rounded-xl shadow-md border border-white/15 transition-all flex items-center justify-center gap-1 text-xs cursor-pointer"
+                    >
+                      <span>Pay with</span>
+                      <span className="font-bold text-xs tracking-tight flex items-center">
+                        <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span>
+                      </span>
+                    </button>
+
+                    {/* PayPal Button */}
+                    <button 
+                      onClick={() => {
+                        if (!user) {
+                          navigate(`/login?redirect=/plugins/${id}`);
+                          return;
+                        }
+                        addToCart(plugin, false);
+                        openCheckoutWithMethod('paypal');
+                      }}
+                      className="py-2.5 px-3 bg-[#ffc439] hover:bg-[#f4b628] active:scale-[0.99] text-[#003087] font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1 text-xs cursor-pointer"
+                    >
+                      <span>Pay with</span>
+                      <span className="font-black text-xs tracking-tight italic">
+                        <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span>
+                      </span>
+                    </button>
+
+                    {/* iDEAL Button */}
+                    <button 
+                      onClick={() => {
+                        if (!user) {
+                          navigate(`/login?redirect=/plugins/${id}`);
+                          return;
+                        }
+                        addToCart(plugin, false);
+                        openCheckoutWithMethod('ideal');
+                      }}
+                      className="py-2.5 px-3 bg-[#cc0066] hover:bg-[#b30059] active:scale-[0.99] text-white font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1 text-xs cursor-pointer"
+                    >
+                      <span>Pay with</span>
+                      <span className="font-black text-[11px] tracking-tight uppercase bg-white text-[#cc0066] px-1 py-0.2 rounded font-mono">
+                        iDEAL
+                      </span>
+                    </button>
+                  </div>
 
                   <button 
                     onClick={() => handlePurchaseOrAddToCart(true)}

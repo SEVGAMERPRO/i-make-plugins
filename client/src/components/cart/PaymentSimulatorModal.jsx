@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart, Tag, Percent, Crown } from 'lucide-react';
+import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart, Tag, Percent, Crown, Smartphone } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -8,11 +8,13 @@ import { useAuth } from '../../context/AuthContext';
 import PayPalSmartButtons from './PayPalSmartButtons';
 
 const PAYMENT_METHODS = [
-  { id: 'ideal', name: 'iDEAL & Bank', icon: Building2, subtitle: 'Direct Dutch Online Banking (ING, Rabo, ABN)' },
-  { id: 'paypal', name: 'PayPal & Cards', icon: Wallet, subtitle: 'Official 1-Click PayPal Gateway' },
-  { id: 'card', name: 'Credit / Debit Card', icon: CreditCard, subtitle: 'Visa, Mastercard, Amex, Apple Pay' },
-  { id: 'crypto', name: 'Web3 Crypto Gateway', icon: QrCode, subtitle: 'Bitcoin, Ethereum, Solana, USDT' },
-  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Creator Earnings Balance' }
+  { id: 'applepay', name: 'Apple Pay', icon: Smartphone, subtitle: '1-Touch Biometric Touch ID / Face ID', badge: 'Pay' },
+  { id: 'googlepay', name: 'Google Pay', icon: Smartphone, subtitle: '1-Tap Google Wallet & Saved Cards', badge: 'GPay' },
+  { id: 'ideal', name: 'iDEAL & Bank', icon: Building2, subtitle: 'Direct Dutch Online Banking (ING, Rabo, ABN)', badge: 'iDEAL' },
+  { id: 'paypal', name: 'PayPal & Cards', icon: Wallet, subtitle: 'Official 1-Click PayPal Gateway', badge: 'PayPal' },
+  { id: 'card', name: 'Credit / Debit Card', icon: CreditCard, subtitle: 'Visa, Mastercard, American Express', badge: 'Cards' },
+  { id: 'crypto', name: 'Web3 Crypto Gateway', icon: QrCode, subtitle: 'Bitcoin, Ethereum, Solana, USDT', badge: 'Crypto' },
+  { id: 'credits', name: 'MinoForge Wallet', icon: Sparkles, subtitle: 'Creator Earnings Balance', badge: 'Wallet' }
 ];
 
 const IDEAL_BANKS = [
@@ -30,9 +32,9 @@ const IDEAL_BANKS = [
 ];
 
 const PaymentSimulatorModal = () => {
-  const { isCheckoutOpen, setIsCheckoutOpen, cartItems, total, clearCart } = useCart();
+  const { isCheckoutOpen, setIsCheckoutOpen, cartItems, total, clearCart, selectedCheckoutMethod } = useCart();
   const { formatPrice, activeCurrency } = useCurrency();
-  const [selectedMethod, setSelectedMethod] = useState('ideal');
+  const [selectedMethod, setSelectedMethod] = useState(selectedCheckoutMethod || 'applepay');
   const [selectedBank, setSelectedBank] = useState('ING Bank');
   const [status, setStatus] = useState('idle'); // 'idle' | 'processing' | 'success'
   const [processingStep, setProcessingStep] = useState(0);
@@ -41,6 +43,16 @@ const PaymentSimulatorModal = () => {
   const [generatedLicenses, setGeneratedLicenses] = useState([]);
   const [donation, setDonation] = useState(0);
   const [customDonationInput, setCustomDonationInput] = useState('');
+
+  // Biometric / 1-Touch Fast Auth States
+  const [applePayBiometricStep, setApplePayBiometricStep] = useState('idle'); // 'idle' | 'scanning' | 'verified'
+  const [googlePayAuthStep, setGooglePayAuthStep] = useState('idle'); // 'idle' | 'authorizing' | 'verified'
+
+  useEffect(() => {
+    if (selectedCheckoutMethod) {
+      setSelectedMethod(selectedCheckoutMethod);
+    }
+  }, [selectedCheckoutMethod]);
 
   // Promo / Creator Code State
   const [promoCodeInput, setPromoCodeInput] = useState('');
@@ -108,6 +120,30 @@ const PaymentSimulatorModal = () => {
     setAppliedPromo(null);
     setPromoCodeInput('');
     setPromoMessage({ type: '', text: '' });
+  };
+
+  const handleApplePaySubmit = (e) => {
+    if (e) e.preventDefault();
+    setApplePayBiometricStep('scanning');
+    setTimeout(() => {
+      setApplePayBiometricStep('verified');
+      setTimeout(() => {
+        setApplePayBiometricStep('idle');
+        handleSimulatePayment();
+      }, 600);
+    }, 1200);
+  };
+
+  const handleGooglePaySubmit = (e) => {
+    if (e) e.preventDefault();
+    setGooglePayAuthStep('authorizing');
+    setTimeout(() => {
+      setGooglePayAuthStep('verified');
+      setTimeout(() => {
+        setGooglePayAuthStep('idle');
+        handleSimulatePayment();
+      }, 600);
+    }, 1200);
   };
 
   if (!isCheckoutOpen) return null;
@@ -395,6 +431,147 @@ const PaymentSimulatorModal = () => {
               </div>
 
               {/* Method Specific Form */}
+              {selectedMethod === 'applepay' && (
+                <div className="p-6 bg-slate-900/90 rounded-2xl border border-white/20 space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center font-black text-sm border border-white/20 shadow-md">
+                        
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-white block">Apple Pay Official Terminal</span>
+                        <span className="text-[10px] text-slate-400">1-Touch Biometric Authentication</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      Face ID / Touch ID Ready
+                    </span>
+                  </div>
+
+                  {/* Apple Wallet Card Preview */}
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Apple Wallet Card:</span>
+                      <span className="text-white font-bold flex items-center gap-1.5">
+                        <span> Apple Card</span>
+                        <span className="text-slate-400 font-mono">(•••• 8821)</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Billing Account:</span>
+                      <span className="text-slate-200 font-medium">{user?.email || 'apple.id@icloud.com'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Merchant:</span>
+                      <span className="text-cyan-400 font-bold">MinoForge Marketplace BV</span>
+                    </div>
+                  </div>
+
+                  {/* Apple Pay Button */}
+                  <button
+                    type="button"
+                    onClick={handleApplePaySubmit}
+                    disabled={status === 'processing'}
+                    className="w-full py-4 px-6 bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl border border-white/20 transition-all cursor-pointer group"
+                  >
+                    {applePayBiometricStep === 'scanning' ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 text-white animate-spin" />
+                        <span>Confirming with Touch ID / Face ID...</span>
+                      </>
+                    ) : applePayBiometricStep === 'verified' ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <span className="text-emerald-400">Biometric Confirmed!</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl leading-none"></span>
+                        <span className="tracking-tight text-base font-bold">Pay</span>
+                        <span className="text-slate-400 font-normal ml-1">({formatPrice(finalPayableTotal, true)})</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {selectedMethod === 'googlepay' && (
+                <div className="p-6 bg-slate-900/90 rounded-2xl border border-white/20 space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-white text-slate-900 flex items-center justify-center font-black text-xs shadow-md">
+                        <span className="text-[#4285F4]">G</span>
+                        <span className="text-[#EA4335]">P</span>
+                        <span className="text-[#FBBC05]">a</span>
+                        <span className="text-[#34A853]">y</span>
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-white block">Google Pay Express Gateway</span>
+                        <span className="text-[10px] text-slate-400">1-Tap Google Wallet &amp; Autofill</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      Google Wallet Active
+                    </span>
+                  </div>
+
+                  {/* Google Wallet Account Preview */}
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Google Account:</span>
+                      <span className="text-white font-bold">{user?.email || 'user@gmail.com'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Linked Payment Card:</span>
+                      <span className="text-slate-200 font-medium flex items-center gap-1">
+                        <CreditCard className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Visa (•••• 4242)</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Security Encryption:</span>
+                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Google Tokenized Protection</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Google Pay Button */}
+                  <button
+                    type="button"
+                    onClick={handleGooglePaySubmit}
+                    disabled={status === 'processing'}
+                    className="w-full py-4 px-6 bg-slate-950 hover:bg-slate-900 active:scale-[0.99] text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-2xl border border-white/25 transition-all cursor-pointer group"
+                  >
+                    {googlePayAuthStep === 'authorizing' ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />
+                        <span>Authorizing with Google Wallet...</span>
+                      </>
+                    ) : googlePayAuthStep === 'verified' ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <span className="text-emerald-400">Google Pay Authorized!</span>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center font-bold text-base">
+                          <span className="text-[#4285F4]">G</span>
+                          <span className="text-[#EA4335]">o</span>
+                          <span className="text-[#FBBC05]">o</span>
+                          <span className="text-[#4285F4]">g</span>
+                          <span className="text-[#34A853]">l</span>
+                          <span className="text-[#EA4335]">e</span>
+                          <span className="ml-1.5 font-bold">Pay</span>
+                        </div>
+                        <span className="text-slate-400 font-normal">({formatPrice(finalPayableTotal, true)})</span>
+                      </div>
+                    )}
+                  </button>
+                </div>
+              )}
+
               {selectedMethod === 'ideal' && (
                 <div className="p-5 bg-slate-900/80 rounded-2xl border border-pink-500/30 space-y-4 shadow-xl shadow-pink-500/5">
                   <div className="flex items-center justify-between">
@@ -603,7 +780,7 @@ const PaymentSimulatorModal = () => {
               )}
 
               {/* Submit Pay Button for iDEAL / Card / Crypto / Credits */}
-              {selectedMethod !== 'paypal' && (
+              {selectedMethod !== 'paypal' && selectedMethod !== 'applepay' && selectedMethod !== 'googlepay' && (
                 <button
                   onClick={handleSimulatePayment}
                   className={`btn-shimmer btn-animated w-full py-4 text-white font-black text-base rounded-2xl flex items-center justify-center gap-2.5 shadow-2xl cursor-pointer ${

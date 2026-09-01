@@ -92,6 +92,14 @@ export const CartProvider = ({ children }) => {
   const discountAmount = appliedCoupon ? (subtotal * (appliedCoupon.percent / 100)) : 0;
   const total = Math.max(0, subtotal - discountAmount);
 
+  const [selectedCheckoutMethod, setSelectedCheckoutMethod] = useState('applepay');
+
+  const openCheckoutWithMethod = (method = 'applepay') => {
+    setSelectedCheckoutMethod(method);
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -108,6 +116,9 @@ export const CartProvider = ({ children }) => {
         setIsCartOpen,
         isCheckoutOpen,
         setIsCheckoutOpen,
+        selectedCheckoutMethod,
+        setSelectedCheckoutMethod,
+        openCheckoutWithMethod,
         addToCart,
         removeFromCart,
         clearCart,

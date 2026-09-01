@@ -8,7 +8,7 @@ const store = require('../store/globalStore');
 // @desc    Process checkout and send transactional emails to both buyer and creator(s)
 router.post('/confirm-purchase', async (req, res) => {
   try {
-    const { buyerEmail, buyerUsername, items = [], totalAmount, transactionId } = req.body;
+    const { buyerEmail, buyerUsername, items = [], totalAmount, transactionId, paymentMethod = 'GATEWAY' } = req.body;
 
     if (!buyerEmail || !items.length) {
       return res.status(400).json({ success: false, message: 'Missing order details.' });
@@ -85,6 +85,7 @@ router.post('/confirm-purchase', async (req, res) => {
                   { name: '💵 Sale Price', value: `**€${itemPrice.toFixed(2)}**`, inline: true },
                   { name: '📈 Your Net Earnings (95%)', value: `**€${creatorEarnings.toFixed(2)}**`, inline: true },
                   { name: '🧾 Order ID', value: `\`${orderId}\``, inline: true },
+                  { name: '💳 Method', value: `\`${paymentMethod}\``, inline: true },
                   { name: '⚡ Event', value: '`order.completed`', inline: true }
                 ],
                 footer: {

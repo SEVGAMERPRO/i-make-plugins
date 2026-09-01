@@ -80,6 +80,16 @@ const Footer = () => {
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <span className="font-semibold">Supported Payments:</span>
             <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-1 bg-black/60 border border-white/20 text-white text-[11px] font-black rounded-lg flex items-center gap-1">
+                <span>Pay</span>
+                <span className="text-[10px] text-slate-400 font-normal">Apple Pay</span>
+              </span>
+              <span className="px-2.5 py-1 bg-slate-900 border border-white/20 text-white text-[11px] font-bold rounded-lg flex items-center gap-1">
+                <span>
+                  <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-normal">Google Pay</span>
+              </span>
               <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[11px] font-black rounded-lg flex items-center gap-1">
                 <span>PayPal</span>
               </span>
