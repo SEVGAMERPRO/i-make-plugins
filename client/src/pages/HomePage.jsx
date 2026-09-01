@@ -5,6 +5,7 @@ import SearchBar from '../components/ui/SearchBar';
 import GameCard from '../components/ui/GameCard';
 import CustomPluginRequestModal from '../components/ui/CustomPluginRequestModal';
 import StarRating from '../components/ui/StarRating';
+import TypewriterHeroHeadline from '../components/ui/TypewriterHeroHeadline';
 import { Zap, Shield, Code, Users, Sparkles, TrendingUp, Download, ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, AlertCircle, Star, MessageSquare, Plus, CheckCircle } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
 
@@ -169,13 +170,8 @@ export default function HomePage() {
             <span>The #1 Game Plugin &amp; Mod Marketplace</span>
           </div>
           
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 sm:mb-6 tracking-tight leading-tight drop-shadow-2xl">
-            Find the best plugins
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
-              for your favorite games
-            </span>
-          </h1>
+          {/* Slick Dynamic Typewriter Hero Headline */}
+          <TypewriterHeroHeadline />
           
           <p className="text-sm sm:text-base md:text-xl text-slate-300 mb-6 sm:mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
             Discover, download, and sell high-performance plugins for Minecraft, FiveM, Rust, and more.
