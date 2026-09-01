@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CreditCard, CheckCircle2, ShieldCheck, Download, Sparkles, Lock, ArrowRight, RefreshCw, Copy, Check, Wallet, QrCode, Key, MessageSquare, ExternalLink, Building2, Heart, Tag, Percent, Crown, Smartphone } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
