@@ -2,5 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /nimda/
+Disallow: /settings
+Disallow: /settings/2fa
+Disallow: /2fa
+Disallow: /security
 
 Sitemap: https://minoforge.com/sitemap.xml
