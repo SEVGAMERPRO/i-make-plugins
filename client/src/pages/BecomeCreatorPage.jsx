@@ -91,8 +91,8 @@ const FEATURES = [
     icon: Sparkles,
     title: 'Innovative features',
     description: 'We have countless features to make your life as a creator easier including our AI Config generator, addons, bundles, coupon codes, sale events, and split payments.',
-    iconColor: 'text-purple-400',
-    bg: 'bg-purple-500/10 border-purple-500/20'
+    iconColor: 'text-cyan-400',
+    bg: 'bg-cyan-500/10 border-cyan-500/20'
   },
   {
     icon: Lock,
@@ -156,7 +156,7 @@ const BecomeCreatorPage = () => {
 
           {/* Left Text */}
           <div className="space-y-5 max-w-xl z-10 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/30 border border-white/20 text-xs font-bold text-cyan-300">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-black/30 border border-white/20 text-xs font-bold text-cyan-300">
               <Lock className="w-3.5 h-3.5" />
               <span>{user ? `Logged in as @${user.username}` : 'Login Required to Publish'}</span>
             </div>
@@ -232,7 +232,7 @@ const BecomeCreatorPage = () => {
             onClick={() => setIsModalOpen(true)}
             className="btn-glow-blue btn-shimmer btn-animated px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-xl inline-flex items-center gap-2 group cursor-pointer"
           >
-            <span>Start Selling Today — Publish a Resource</span>
+            <span>Start Selling Today: Publish a Resource</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
           </button>
         </div>

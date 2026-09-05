@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import NotificationBell from '../ui/NotificationBell';
 import CurrencySwitcher from '../ui/CurrencySwitcher';
+import UserAvatar from '../common/UserAvatar';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -79,8 +80,9 @@ const Navbar = ({ onMenuClick }) => {
   };
 
   const isUltimate = (() => {
+    if (!user) return false;
     try {
-      if (user?.isUltimate || user?.role === 'CREATOR') return true;
+      if (user.isUltimate || user.role === 'CREATOR') return true;
       if (typeof window !== 'undefined' && window.localStorage) {
         if (localStorage.getItem('minoforge_ultimate_active') === 'true') return true;
         const raw = localStorage.getItem('minoforge_user');
@@ -158,7 +160,7 @@ const Navbar = ({ onMenuClick }) => {
           {/* ✨ Become a Creator Button (Exact location circled in user screenshot) */}
           <Link
             to="/become-creator"
-            className="btn-animated hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-cyan-600/20 via-blue-600/20 to-purple-600/20 hover:from-cyan-500/30 hover:via-blue-500/30 hover:to-purple-500/30 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-300 rounded-xl text-xs font-black shadow-lg shadow-cyan-500/10 transition-all cursor-pointer mr-1"
+            className="btn-animated hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-cyan-600/20 via-blue-600/20 to-teal-600/20 hover:from-cyan-500/30 hover:via-blue-500/30 hover:to-teal-500/30 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-300 rounded-xl text-xs font-black shadow-lg shadow-cyan-500/10 transition-all cursor-pointer mr-1"
             title="Join our verified creators and monetize your plugins"
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
@@ -189,7 +191,7 @@ const Navbar = ({ onMenuClick }) => {
           </button>
 
           {/* Top-Bar Button: Switches dynamically from 'Go Ultimate' to 'Your Ultimate' */}
-          {isUltimate ? (
+          {user && isUltimate ? (
             <Link
               to="/ultimate"
               className="btn-shimmer btn-animated hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:via-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/30 border border-amber-300/80 hover:border-amber-200 transition-all cursor-pointer"
@@ -239,11 +241,7 @@ const Navbar = ({ onMenuClick }) => {
                   <div className={`w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-300 overflow-hidden text-xs border ${
                     isUltimate ? 'border-amber-400/80 shadow-md shadow-amber-500/20' : 'border-white/10'
                   }`}>
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{user.username?.charAt(0).toUpperCase()}</span>
-                    )}
+                    <UserAvatar user={user} className="w-full h-full object-cover" />
                   </div>
 
                   {/* Golden Crown on Avatar Top-Left (Exact spot user circled in image 1) */}
@@ -257,7 +255,7 @@ const Navbar = ({ onMenuClick }) => {
                   <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 border border-slate-950 rounded-full" />
                 </div>
                 <span className="text-xs font-bold text-white max-w-[90px] sm:max-w-[120px] truncate hidden xs:inline-block">
-                  {user.username}
+                  {user.username ? user.username.replace(/_/g, ' ') : 'Member'}
                 </span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180 text-cyan-400' : ''}`} />
               </button>
@@ -282,11 +280,7 @@ const Navbar = ({ onMenuClick }) => {
                       {/* Avatar with Glow & Online Status */}
                       <div className="relative flex-shrink-0">
                         <div className={`w-14 h-14 rounded-2xl bg-slate-900 border-2 ${isUltimate ? 'border-amber-400 shadow-lg shadow-amber-500/30' : 'border-cyan-400/40 shadow-lg shadow-cyan-500/20'} p-0.5 overflow-hidden flex items-center justify-center text-cyan-300 font-black text-xl`}>
-                          {user.avatarUrl ? (
-                            <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover rounded-xl" />
-                          ) : (
-                            <span>{user.username?.charAt(0).toUpperCase()}</span>
-                          )}
+                          <UserAvatar user={user} className="w-full h-full object-cover rounded-xl" />
                         </div>
 
                         {/* Ultimate Golden Crown on Big Avatar */}
@@ -306,8 +300,8 @@ const Navbar = ({ onMenuClick }) => {
                         <div className="flex items-center gap-1.5">
                           <h3 className={`font-black text-sm truncate ${isUltimate ? 'text-amber-300' : 'text-white'}`}>
                             {user?.username && user.username.toLowerCase() !== 'user' 
-                              ? user.username 
-                              : (user?.email ? user.email.split('@')[0] : 'Community Member')}
+                              ? user.username.replace(/_/g, ' ') 
+                              : (user?.email ? user.email.split('@')[0].replace(/[._\-+]/g, ' ') : 'Community Member')}
                           </h3>
                           {isUltimate ? (
                             <span className="text-amber-400 text-xs font-black" title="Ultimate Verified VIP">👑</span>

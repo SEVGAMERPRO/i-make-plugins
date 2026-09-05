@@ -9,6 +9,7 @@ const QRCode = require('qrcode');
 const validate = require('../middleware/validate');
 const { auth } = require('../middleware/auth');
 const store = require('../store/globalStore');
+const { formatCleanName, generateUniqueUsername } = require('../utils/nameFormatter');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -206,13 +207,12 @@ router.post('/verify-code', async (req, res) => {
       });
 
       if (!user) {
-        const baseUsername = username || cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+        const baseUsername = formatCleanName(username, cleanEmail);
         let finalUsername = baseUsername;
         try {
-          let counter = 1;
-          while (await prisma.user.findUnique({ where: { username: finalUsername } })) {
-            finalUsername = `${baseUsername}_${counter++}`;
-          }
+          finalUsername = await generateUniqueUsername(baseUsername, async (name) => {
+            return Boolean(await prisma.user.findUnique({ where: { username: name } }));
+          });
         } catch (uErr) {}
 
         const randomPassword = Math.random().toString(36).slice(-10);
@@ -233,7 +233,7 @@ router.post('/verify-code', async (req, res) => {
       // Fallback in-memory user to ensure user login NEVER fails
       user = {
         id: `usr_${Date.now()}`,
-        username: username || cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_'),
+        username: formatCleanName(username, cleanEmail),
         email: cleanEmail,
         role: cleanEmail === 'severinkaptein8@gmail.com' ? 'ADMIN' : 'USER',
         avatarUrl: null
@@ -281,7 +281,7 @@ router.post(
     body('username')
       .isString().withMessage('Username must be a string')
       .isLength({ min: 3, max: 30 }).withMessage('Username must be 3-30 characters long')
-      .matches(/^[a-zA-Z0-9_]+$/).withMessage('Username can only contain letters, numbers, and underscores'),
+      .matches(/^[a-zA-Z0-9 _-]+$/).withMessage('Username can contain letters, numbers, and spaces'),
     body('email').isEmail().withMessage('Please provide a valid email'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   ],
@@ -444,14 +444,13 @@ router.post('/google', async (req, res, next) => {
       });
 
       if (!user) {
-        let baseUsername = (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 18);
-        if (baseUsername.length < 3) baseUsername = `user_${Math.floor(Math.random() * 10000)}`;
-        
+        const baseUsername = formatCleanName(name, email);
         let username = baseUsername;
-        let counter = 1;
-        while (await prisma.user.findUnique({ where: { username } })) {
-          username = `${baseUsername.slice(0, 14)}_${counter++}`;
-        }
+        try {
+          username = await generateUniqueUsername(baseUsername, async (u) => {
+            return Boolean(await prisma.user.findUnique({ where: { username: u } }));
+          });
+        } catch (uErr) {}
 
         const randomPassword = Math.random().toString(36).slice(-10);
         const salt = await bcrypt.genSalt(10);
@@ -465,17 +464,19 @@ router.post('/google', async (req, res, next) => {
             avatarUrl: picture || null,
           }
         });
-      } else if (!user.avatarUrl && picture) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { avatarUrl: picture }
-        });
+      } else if (picture && user.avatarUrl !== picture) {
+        try {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { avatarUrl: picture }
+          });
+        } catch (updateErr) {}
       }
     } catch (dbErr) {
       console.warn('[Google Auth] Database unreachable, creating local session for Google user:', email);
       user = {
         id: `google-user-${sub || Date.now()}`,
-        username: (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 16) || 'google_user',
+        username: formatCleanName(name, email),
         email: email.toLowerCase(),
         role: 'USER',
         avatarUrl: picture || null

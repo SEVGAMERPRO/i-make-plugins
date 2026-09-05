@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import PluginCard from '../components/ui/PluginCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import UserAvatar from '../components/common/UserAvatar';
 
 const UserProfilePage = () => {
-  const { username } = useParams();
+  const rawUsername = useParams().username;
+  const username = decodeURIComponent(rawUsername || '');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [plugins, setPlugins] = useState([]);
@@ -46,15 +48,11 @@ const UserProfilePage = () => {
         {/* User Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
           <div className="w-24 h-24 bg-[#BBDEFB] text-[#1976D2] rounded-full flex items-center justify-center font-bold text-4xl shadow-sm overflow-hidden flex-shrink-0">
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-            ) : (
-              user.username.charAt(0).toUpperCase()
-            )}
+            <UserAvatar user={user} className="w-full h-full object-cover" />
           </div>
           
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">{user.username}</h1>
+            <h1 className="text-3xl font-bold text-[#1A1A2E] mb-2">{user.username ? user.username.replace(/_/g, ' ') : 'Member'}</h1>
             <p className="text-gray-600 mb-4 max-w-2xl">{user.bio}</p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm">
               <div className="flex flex-col">

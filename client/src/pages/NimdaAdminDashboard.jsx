@@ -1105,7 +1105,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                               </span>
                             </td>
                             <td className="p-3.5 font-bold text-white font-sans">{log.username || log.actor || 'Visitor'}</td>
-                            <td className="p-3.5 text-slate-300">{log.email || '—'}</td>
+                            <td className="p-3.5 text-slate-300">{log.email || 'N/A'}</td>
                             <td className="p-3.5 text-slate-400">{log.ip || '127.0.0.1'}</td>
                             <td className="p-3.5 text-cyan-300 font-bold">{log.path || '/'}</td>
                             <td className="p-3.5 font-sans text-slate-300">{log.details}</td>
@@ -1393,6 +1393,90 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Setting Section: Trustpilot Integration & AFS Automated Review Invitations */}
+              <div className="p-6 bg-slate-900/80 rounded-3xl border border-[#00B67A]/30 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#00B67A]/20 border border-[#00B67A]/40 flex items-center justify-center text-[#00B67A]">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2l2.9 6.88 7.37.64-5.58 4.8 1.66 7.23L12 17.73l-6.35 3.82 1.66-7.23L1.73 9.52l7.37-.64L12 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <span>Trustpilot Integration &amp; Automated Invitations (AFS)</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">Post-purchase review invites automatically dispatched via Trustpilot AFS.</p>
+                    </div>
+                  </div>
+
+                  <span className="px-3 py-1 bg-[#00B67A]/20 text-[#00B67A] text-xs font-black rounded-lg border border-[#00B67A]/40 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#00B67A] animate-pulse" />
+                    <span>AFS ACTIVE</span>
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                      Trustpilot AFS BCC Email
+                    </label>
+                    <input
+                      type="text"
+                      value={config.trustpilot?.afsEmail || 'minoforge.com+5420f42a0b@invite.trustpilot.com'}
+                      onChange={(e) => setConfig({
+                        ...config,
+                        trustpilot: { ...config.trustpilot, afsEmail: e.target.value }
+                      })}
+                      placeholder="e.g. minoforge.com+xxx@invite.trustpilot.com"
+                      className="w-full p-3 bg-slate-950 border border-white/10 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#00B67A]"
+                    />
+                    <span className="text-[10px] text-slate-500 mt-1 block">All completed customer orders include this BCC header.</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                      Trustpilot Business Unit ID (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={config.trustpilot?.businessUnitId || ''}
+                      onChange={(e) => setConfig({
+                        ...config,
+                        trustpilot: { ...config.trustpilot, businessUnitId: e.target.value }
+                      })}
+                      placeholder="e.g. 65a1234567890abcdef12345 (from TrustBoxes)"
+                      className="w-full p-3 bg-slate-950 border border-white/10 rounded-xl text-xs text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#00B67A]"
+                    />
+                    <span className="text-[10px] text-slate-500 mt-1 block">Found in Trustpilot Business &gt; Share &amp; promote &gt; TrustBoxes.</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <span>Public Profile:</span>
+                    <a
+                      href="https://www.trustpilot.com/review/minoforge.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 hover:text-emerald-300 font-bold underline"
+                    >
+                      trustpilot.com/review/minoforge.com
+                    </a>
+                  </div>
+
+                  <a
+                    href="https://www.trustpilot.com/evaluate/minoforge.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 border border-white/10"
+                  >
+                    <span>Test Review Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
 
               {/* Save Button */}
@@ -2449,7 +2533,7 @@ const NimdaAdminDashboard = ({ onLogout }) => {
                 <div className="p-4 bg-cyan-950/20 border border-cyan-500/20 rounded-2xl flex items-start gap-3">
                   <Sparkles className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
                   <div className="text-xs space-y-1">
-                    <strong className="text-cyan-300 block">Server YAML and Lua Generator Supercharged</strong>
+                    <strong className="text-cyan-300 block">Server YAML and Lua Generator Active</strong>
                     <p className="text-slate-400">
                       The AI Config Generator utilizes deep grammar validation to generate syntax-perfect `config.yml`, `plugin.yml`, and `fxmanifest.lua` files.
                     </p>

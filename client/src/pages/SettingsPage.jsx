@@ -5,11 +5,12 @@ import {
   Key, Copy, Check, Download, AlertTriangle, ChevronRight, CheckCircle2, 
   ExternalLink, Bot, Zap, Globe, Mail, Eye, EyeOff, Save, Search, RefreshCw,
   Code, Terminal, Webhook, Plus, Trash2, Send, Activity, FileCode, Play, Radio,
-  Crown, Sliders, Flame
+  Crown, Sliders, Flame, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
+import UserAvatar from '../components/common/UserAvatar';
 import axios from 'axios';
 
 const SettingsPage = () => {
@@ -29,8 +30,9 @@ const SettingsPage = () => {
   const username = user?.username || 'MinoUser';
 
   const isUltimate = (() => {
+    if (!user) return false;
     try {
-      if (user?.isUltimate || user?.role === 'CREATOR') return true;
+      if (user.isUltimate || user.role === 'CREATOR') return true;
       if (typeof window !== 'undefined' && window.localStorage) {
         if (localStorage.getItem('minoforge_ultimate_active') === 'true') return true;
         const raw = localStorage.getItem('minoforge_user');
@@ -122,29 +124,6 @@ const SettingsPage = () => {
     }
   });
 
-  // Fetch 2FA status and Developer Keys on mount
-  useEffect(() => {
-    axios.get(`/api/auth/2fa/status/${encodeURIComponent(email)}`)
-      .then(res => {
-        if (res.data) {
-          setTwoFactorEnabled(res.data.enabled);
-          setEnabledAt(res.data.enabledAt);
-          setRemainingBackupCodes(res.data.remainingBackupCodes);
-        }
-      })
-      .catch(() => {
-        const saved = localStorage.getItem(`minoforge_2fa_${email}`);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setTwoFactorEnabled(parsed.enabled);
-          setEnabledAt(parsed.enabledAt);
-        }
-      });
-
-    // Fetch Developer Keys & Webhooks
-    fetchDeveloperData();
-  }, [email]);
-
   const fetchDeveloperData = async () => {
     setKeysLoading(true);
     try {
@@ -170,6 +149,29 @@ const SettingsPage = () => {
       setKeysLoading(false);
     }
   };
+
+  // Fetch 2FA status and Developer Keys on mount
+  useEffect(() => {
+    axios.get(`/api/auth/2fa/status/${encodeURIComponent(email)}`)
+      .then(res => {
+        if (res.data) {
+          setTwoFactorEnabled(res.data.enabled);
+          setEnabledAt(res.data.enabledAt);
+          setRemainingBackupCodes(res.data.remainingBackupCodes);
+        }
+      })
+      .catch(() => {
+        const saved = localStorage.getItem(`minoforge_2fa_${email}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setTwoFactorEnabled(parsed.enabled);
+          setEnabledAt(parsed.enabledAt);
+        }
+      });
+
+    // Fetch Developer Keys & Webhooks
+    fetchDeveloperData();
+  }, [email]);
 
   const handleGenerateKey = async (e) => {
     if (e) e.preventDefault();
@@ -757,7 +759,7 @@ MinoForge Security Engine • https://minoforge.com
                     onClick={() => navigate('/upgrade')}
                     className="btn-glow-blue btn-shimmer btn-animated w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-base rounded-2xl shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>Go Ultimate — Unlock All Perks</span>
+                    <span>Go Ultimate: Unlock All Perks</span>
                     <Sparkles className="w-5 h-5" />
                   </button>
 
@@ -837,11 +839,7 @@ MinoForge Security Engine • https://minoforge.com
                         <div className={`w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center font-black text-sm text-white overflow-hidden border-2 ${
                           ultimateSettings.goldenCrownRing ? 'border-amber-400 shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/30' : 'border-white/10'
                         }`}>
-                          {user?.avatarUrl ? (
-                            <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            <span>{username.charAt(0).toUpperCase()}</span>
-                          )}
+                          <UserAvatar user={{ ...user, username: displayName || username }} className="w-full h-full object-cover" />
                         </div>
                         {ultimateSettings.goldenCrownRing && (
                           <div className="absolute -top-3 -left-2 text-base filter drop-shadow-[0_2px_4px_rgba(245,158,11,0.9)] animate-bounce">
@@ -851,7 +849,7 @@ MinoForge Security Engine • https://minoforge.com
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5 font-bold text-xs text-white">
-                          <span>{displayName || username}</span>
+                          <span>{(displayName || username || 'Member').replace(/_/g, ' ')}</span>
                           {ultimateSettings.goldenCrownRing && <span className="text-amber-400 text-xs">👑</span>}
                         </div>
                         <span className="text-[11px] text-amber-400 font-semibold">{ultimateSettings.customProfileFlair}</span>
@@ -1391,7 +1389,10 @@ MinoForge Security Engine • https://minoforge.com
                 <div className="p-4 rounded-xl bg-[#1E1F22] border-l-4 border-emerald-500 space-y-2 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center">M</span>
-                    <strong className="text-emerald-400 font-black">💰 Plugin Sold! — Ultra Vaults &amp; Bank System</strong>
+                    <div className="flex items-center gap-1.5">
+                      <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                      <strong className="text-emerald-400 font-black">Plugin Sold: Ultra Vaults &amp; Bank System</strong>
+                    </div>
                   </div>
                   <p className="text-slate-300 text-[11px]">
                     A customer has just purchased **Ultra Vaults &amp; Bank System** on MinoForge Marketplace!
@@ -1585,10 +1586,10 @@ MinoForge Security Engine • https://minoforge.com
               <div className="relative rounded-2xl bg-slate-950 border border-white/10 overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/90 border-b border-white/10 text-xs text-slate-400">
                   <span className="font-mono text-cyan-300">
-                    {activeSnippetTab === 'nodejs' && 'bot.js — Node.js & Discord.js v14'}
-                    {activeSnippetTab === 'python' && 'bot.py — Python discord.py & aiohttp'}
-                    {activeSnippetTab === 'curl' && 'Terminal — cURL Request'}
-                    {activeSnippetTab === 'webhook' && 'payload.json — Discord Webhook Payload'}
+                    {activeSnippetTab === 'nodejs' && 'bot.js - Node.js & Discord.js v14'}
+                    {activeSnippetTab === 'python' && 'bot.py - Python discord.py & aiohttp'}
+                    {activeSnippetTab === 'curl' && 'Terminal - cURL Request'}
+                    {activeSnippetTab === 'webhook' && 'payload.json - Discord Webhook Payload'}
                   </span>
 
                   <button
@@ -1674,14 +1675,14 @@ curl -X POST "https://minoforge.com/api/developer/webhook/test" \\
   "avatar_url": "https://minoforge.com/favicon.png",
   "embeds": [
     {
-      "title": "💰 Plugin Sold! — Ultra Vaults",
+      "title": "Plugin Sold: Ultra Vaults",
       "description": "A player has purchased your plugin on MinoForge Marketplace!",
       "color": 1096065,
       "fields": [
-        { "name": "📦 Resource", "value": "Ultra Vaults", "inline": true },
-        { "name": "👤 Customer", "value": "Steve_Gamer", "inline": true },
-        { "name": "💵 Sale Price", "value": "€14.99", "inline": true },
-        { "name": "📈 Your Net Earnings (95%)", "value": "€14.24", "inline": true }
+        { "name": "Resource", "value": "Ultra Vaults", "inline": true },
+        { "name": "Customer", "value": "Steve_Gamer", "inline": true },
+        { "name": "Sale Price", "value": "€14.99", "inline": true },
+        { "name": "Your Net Earnings (95%)", "value": "€14.24", "inline": true }
       ],
       "timestamp": "2026-08-29T20:30:00.000Z"
     }
@@ -1778,14 +1779,14 @@ curl -X POST "https://minoforge.com/api/developer/webhook/test" \\
   "avatar_url": "https://minoforge.com/favicon.png",
   "embeds": [
     {
-      "title": "💰 Plugin Sold! — Ultra Vaults",
+      "title": "Plugin Sold: Ultra Vaults",
       "description": "A player has purchased your plugin on MinoForge Marketplace!",
       "color": 1096065,
       "fields": [
-        { "name": "📦 Resource", "value": "Ultra Vaults", "inline": true },
-        { "name": "👤 Customer", "value": "Steve_Gamer", "inline": true },
-        { "name": "💵 Sale Price", "value": "€14.99", "inline": true },
-        { "name": "📈 Your Net Earnings (95%)", "value": "€14.24", "inline": true }
+        { "name": "Resource", "value": "Ultra Vaults", "inline": true },
+        { "name": "Customer", "value": "Steve_Gamer", "inline": true },
+        { "name": "Sale Price", "value": "€14.99", "inline": true },
+        { "name": "Your Net Earnings (95%)", "value": "€14.24", "inline": true }
       ],
       "timestamp": "2026-08-29T20:30:00.000Z"
     }

@@ -206,7 +206,7 @@ const AiConfigPage = () => {
         {/* Quick Inspiration Tags */}
         <div className="space-y-2">
           <span className="text-xs font-black uppercase tracking-wider text-slate-400 block px-1">
-            ⚡ Quick Plugin Presets &amp; Concepts (Click to try)
+            Quick Plugin Presets &amp; Concepts (Click to try)
           </span>
           <div className="flex flex-wrap gap-2">
             {INSPIRATION_TAGS.map((tag, idx) => {

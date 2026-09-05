@@ -2,28 +2,28 @@ import React, { useState, useEffect } from 'react';
 
 const HERO_PHRASES = [
   {
-    prefix: "Find the best plugins",
-    suffix: "for your favorite games",
-    gradient: "from-blue-400 via-cyan-300 to-indigo-300"
+    prefix: "The Game Plugin Marketplace",
+    suffix: "for Minecraft, FiveM, Rust & Discord",
+    gradient: "from-blue-400 via-cyan-300 to-sky-300"
   },
   {
-    prefix: "Supercharge your server",
-    suffix: "with verified game addons",
+    prefix: "Verified Server Plugins & Scripts",
+    suffix: "instant delivery, clean bytecode",
     gradient: "from-cyan-400 via-teal-300 to-emerald-300"
   },
   {
-    prefix: "Discover custom scripts",
-    suffix: "built by top developers",
-    gradient: "from-blue-400 via-indigo-300 to-purple-300"
+    prefix: "Custom Game Development",
+    suffix: "built to order for your community",
+    gradient: "from-blue-400 via-indigo-300 to-cyan-300"
   },
   {
-    prefix: "Empower your community",
-    suffix: "with next-gen game tools",
-    gradient: "from-amber-400 via-orange-300 to-yellow-300"
+    prefix: "Level Up Your Game Server",
+    suffix: "with tested, high-performance tools",
+    gradient: "from-amber-400 via-yellow-300 to-amber-200"
   },
   {
-    prefix: "Monetize your code",
-    suffix: "and start selling today",
+    prefix: "Publish Your Plugins & Scripts",
+    suffix: "and earn revenue with 0% platform fees",
     gradient: "from-emerald-400 via-teal-300 to-cyan-300"
   }
 ];
@@ -83,7 +83,7 @@ const TypewriterHeroHeadline = () => {
           setDisplayedSuffix(targetSuffix.slice(0, displayedSuffix.length + 1));
         }, 40 + Math.random() * 15);
       } else {
-        // Finished typing full phrase: pause and celebrate
+        // Finished typing full phrase: pause
         setIsPaused(true);
       }
       return () => clearTimeout(timeout);
@@ -96,10 +96,6 @@ const TypewriterHeroHeadline = () => {
         {/* Top Prefix Line */}
         <span className="inline-block transition-opacity duration-200">
           {displayedPrefix}
-          {/* Cursor shows on line 1 only when suffix is empty and prefix is actively typed/deleted */}
-          {displayedSuffix.length === 0 && (
-            <span className="typewriter-cursor" aria-hidden="true" />
-          )}
         </span>
 
         <br />
@@ -107,10 +103,6 @@ const TypewriterHeroHeadline = () => {
         {/* Gradient Suffix Line */}
         <span className={`bg-gradient-to-r ${currentPhrase.gradient} bg-clip-text text-transparent inline-block transition-all duration-300`}>
           {displayedSuffix || (displayedPrefix.length === currentPhrase.prefix.length ? '\u00A0' : '')}
-          {/* Cursor shows on line 2 whenever suffix has text or line 1 is done */}
-          {displayedSuffix.length > 0 && (
-            <span className="typewriter-cursor" aria-hidden="true" />
-          )}
         </span>
       </h1>
     </div>

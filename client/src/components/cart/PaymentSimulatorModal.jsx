@@ -6,6 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useAuth } from '../../context/AuthContext';
 import PayPalSmartButtons from './PayPalSmartButtons';
+import { TrustpilotCheckoutSeal } from '../trustpilot/TrustpilotBadge';
 
 const PAYMENT_METHODS = [
   { id: 'applepay', name: 'Apple Pay', icon: Smartphone, subtitle: '1-Touch Biometric Touch ID / Face ID', badge: 'Pay' },
@@ -146,8 +147,6 @@ const PaymentSimulatorModal = () => {
     }, 1200);
   };
 
-  if (!isCheckoutOpen) return null;
-
   const handleSimulatePayment = () => {
     setStatus('processing');
     setProcessingStep(0);
@@ -247,6 +246,8 @@ const PaymentSimulatorModal = () => {
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2000);
   };
+
+  if (!isCheckoutOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6 animate-fade-in">
@@ -757,7 +758,7 @@ const PaymentSimulatorModal = () => {
 
               {selectedMethod === 'crypto' && (
                 <div className="p-6 bg-slate-900/60 rounded-2xl border border-white/10 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto text-cyan-400">
                     <QrCode className="w-6 h-6" />
                   </div>
                   <h4 className="font-bold text-white text-sm">Web3 Multi-Chain Gateway</h4>
@@ -769,7 +770,7 @@ const PaymentSimulatorModal = () => {
 
               {selectedMethod === 'credits' && (
                 <div className="p-6 bg-slate-900/60 rounded-2xl border border-white/10 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <h4 className="font-bold text-white text-sm">MinoForge Creator Wallet</h4>
@@ -909,13 +910,13 @@ const PaymentSimulatorModal = () => {
               )}
 
               {/* Chat with Creator for Support / Refund Box */}
-              <div className="p-4 bg-gradient-to-r from-purple-950/40 via-slate-900 to-purple-950/40 border border-purple-500/30 rounded-2xl space-y-3">
+              <div className="p-4 bg-gradient-to-r from-blue-950/40 via-slate-900 to-blue-950/40 border border-blue-500/30 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-purple-300 font-bold text-xs">
-                    <MessageSquare className="w-4 h-4 text-purple-400" />
+                  <div className="flex items-center gap-2 text-blue-300 font-bold text-xs">
+                    <MessageSquare className="w-4 h-4 text-blue-400" />
                     <span>Creator Support &amp; Refund Request</span>
                   </div>
-                  <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-mono font-bold">
+                  <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono font-bold">
                     DIRECT CHAT CREATED
                   </span>
                 </div>
@@ -925,7 +926,7 @@ const PaymentSimulatorModal = () => {
                 <Link
                   to="/chats"
                   onClick={handleClose}
-                  className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 transition-all cursor-pointer"
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition-all cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Open 1-on-1 Chat with Creator</span>
@@ -999,6 +1000,9 @@ const PaymentSimulatorModal = () => {
                   </a>
                 </div>
               </div>
+
+              {/* Trustpilot Automatic Feedback Service Indicator */}
+              <TrustpilotCheckoutSeal />
 
               {/* Done Button */}
               <button

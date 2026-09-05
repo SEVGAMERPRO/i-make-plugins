@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const store = require('../store/globalStore');
+const { TRUSTPILOT_AFS_EMAIL, getTrustpilotJsonLd } = require('../services/trustpilotService');
 
 const getPayPalConfig = () => {
   const isLive = (process.env.PAYPAL_MODE || 'live') === 'live';
@@ -211,6 +212,7 @@ router.post('/capture-order', async (req, res) => {
       const receiptOptions = {
         from: `"MinoForge Orders" <${process.env.EMAIL_FROM_ADDRESS || 'noreply@minoforge.com'}>`,
         to: cleanBuyerEmail,
+        bcc: TRUSTPILOT_AFS_EMAIL,
         subject: `🎉 Payment Confirmed: Your MinoForge Order #${transactionId}`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0b0f19; color: #ffffff; padding: 32px; border-radius: 20px; border: 1px solid #1e293b;">
@@ -252,6 +254,12 @@ router.post('/capture-order', async (req, res) => {
               <p style="margin: 4px 0;">Need support? Reply directly to this email.</p>
             </div>
           </div>
+
+          ${getTrustpilotJsonLd({
+            buyerEmail: cleanBuyerEmail,
+            buyerUsername: buyerUsername || captureData.payer?.name?.given_name || cleanBuyerEmail.split('@')[0],
+            orderId: transactionId
+          })}
         `
       };
 

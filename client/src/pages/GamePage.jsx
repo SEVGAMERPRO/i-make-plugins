@@ -9,7 +9,7 @@ const GAME_DATA = {
   'minecraft': { name: 'Minecraft', image: '/images/categories/minecraft.png', colorClass: 'from-emerald-600 to-green-800', description: 'Server plugins for Paper, Spigot, Purpur, and Velocity.' },
   'roblox': { name: 'Roblox', image: '/images/categories/roblox.png', colorClass: 'from-red-600 to-rose-800', description: 'Scripts, frameworks, and UI assets for Roblox Studio.' },
   'fivem': { name: 'FiveM', image: '/images/categories/fivem.png', colorClass: 'from-orange-600 to-amber-800', description: 'Custom scripts, vehicles, and MLOs for FiveM servers.' },
-  'discord': { name: 'Discord', image: '/images/categories/discord.png', colorClass: 'from-indigo-600 to-purple-900', description: 'Verification bots, ticket systems, and community tools.' },
+  'discord': { name: 'Discord', image: '/images/categories/discord.png', colorClass: 'from-blue-600 to-indigo-900', description: 'Verification bots, ticket systems, and community tools.' },
   'websites': { name: 'Websites', image: '/images/categories/websites.png', colorClass: 'from-cyan-600 to-blue-800', description: 'Custom server websites, store templates, and web portals.' },
 };
 
@@ -100,7 +100,7 @@ const GamePage = () => {
               to="/become-creator"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/30 transition-all"
             >
-              <Upload className="w-4 h-4" /> Start Selling for {gameInfo.name} — Become a Creator
+              <Upload className="w-4 h-4" /> Start Selling for {gameInfo.name} | Become a Creator
             </Link>
           </div>
         )}

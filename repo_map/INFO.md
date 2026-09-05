@@ -1,0 +1,125 @@
+# MinoForge — Platform Knowledge Base & Master Operations Guide
+
+<p align="center">
+  <a href="https://minoforge.com"><img src="https://minoforge.com/logo.png" alt="MinoForge Logo" width="240"/></a>
+</p>
+
+<p align="center">
+  <strong>The Official Comprehensive Platform Operations, Safety & Category Handbook.</strong><br/>
+  <em>Published by MinoForge-Official Company • Official Portal: <a href="https://minoforge.com">https://minoforge.com</a></em>
+</p>
+
+---
+
+## ⚡ 1. The Main Things to Know at a Glance
+
+> **What is MinoForge?** MinoForge is the official next-generation game server plugin marketplace and developer ecosystem for **Minecraft, FiveM, Discord, Roblox, and Game Web Technologies**. It provides 85%-90% creator revenue splits, instant PayPal checkout, permanent download libraries, built-in AI server config tools, and 72-hour buyer dispute protection under MinoShield.
+
+### 🖥️ Master Platform Interface & Navigation UI
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🔥 MINOFORGE  │ ⛏️ Minecraft  │ 🚗 FiveM  │ 🤖 Discord  │ 🧱 Roblox  │ 🌐 Web  │ 🤖 AI Tools │ 💎 Ultimate │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  🔍 Search 10,000+ verified plugins, scripts, MLOs, bots & configs...               [⚡ Search Catalog] │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  📊 Platform Telemetry: 10,000+ Downloads  │  500+ Verified Creators  │  99.8% MinoShield Satisfaction │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎮 2. Game Categories & Ecosystem Hubs
+
+```
+┌─────────────────────────────┬─────────────────────────────┬─────────────────────────────┐
+│ ⛏️ MINECRAFT ECOSYSTEM      │ 🚗 FIVEM GTA V ROLEPLAY     │ 🤖 DISCORD AUTOMATION       │
+│ Route: /games/minecraft     │ Route: /games/fivem         │ Route: /games/discord       │
+├─────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ • PaperMC, Purpur & Spigot  │ • QBCore Framework Scripts  │ • Button Ticket Panels      │
+│ • Folia Multi-Threading     │ • ESX Legacy Framework      │ • Automated Moderation Bots │
+│ • Velocity & Bungee Proxies │ • Standalone Native Scripts │ • Member Verification & Auth│
+│ • Economy, RPG & Leveling   │ • Custom Vehicle Handlings  │ • Virtual Currency & Levels │
+│ • Anti-Cheats & Anti-Grief  │ • MLO Interiors & Maps      │ • Webhook Event Forwarders  │
+│ • GUI Menus & Scoreboards   │ • Dynamic Heists & Robberies│ • Web Dashboard Sync        │
+├─────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ 🧱 ROBLOX EXPERIENCE DEV    │ 🌐 WEB APPLICATIONS         │ 🎛️ AI SERVER REPAIR         │
+│ Route: /games/roblox        │ Route: /games/websites      │ Route: /ai-config & /crash  │
+├─────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ • Luau Modular Controllers  │ • Turnkey Donation Webstores│ • Instant Syntax Generators │
+│ • Knit Framework Modules    │ • Real-Time Ban Portals     │ • Paper & Purpur Tuners     │
+│ • Inventory & Trade Systems │ • Server Status Monitors    │ • FiveM oxmysql Tuners      │
+│ • DataStore2 Persistence    │ • Staff Application Systems │ • Stack Trace Log Analyzers │
+│ • Custom Weapons & Combat   │ • Discord Web Integrations  │ • Memory Leak Diagnosticians│
+└─────────────────────────────┴─────────────────────────────┴─────────────────────────────┘
+```
+
+---
+
+## 💎 3. Platform Features: Standard (Free) vs. Ultimate Plan
+
+### Standard Free Tier Features
+- **Full Catalog Access:** Unrestricted searching and downloading of free and commercial plugins.
+- **Instant One-Click PayPal Checkout:** Secure automated payment processing with immediate file access.
+- **Perpetual Digital Asset Library:** Lifetime access to download purchased files and update packages.
+- **MinoShield 72-Hour Buyer Protection:** Refund coverage for verified technical defects.
+- **AI Config Generator & Crash Analyzer:** Free browser tools to generate configurations and debug error logs.
+- **85% Creator Payouts:** Zero upfront listing fees with bi-weekly or monthly automated PayPal payouts.
+
+### Ultimate Studio Plan ($19.99/mo)
+- **90% Creator Revenue Share:** Highest take-home split in the game server industry.
+- **Guaranteed Quarterly Featured Slot:** 7 days of prominent placement in the top Homepage Carousel.
+- **Priority Algorithmic Search Boost:** Elevated ranking in search results and category landing pages.
+- **Golden Verified Badge:** Trust emblem displayed across developer profile and all product cards.
+- **White-Label Custom Domain:** Map `store.yourstudio.com` with custom branding.
+- **RESTful Publishing API:** Deploy plugin updates directly from GitHub Actions / CI pipelines.
+- **Instant AI Compute Queue:** Bypass wait times on AI Config Generator and Crash Analyzer.
+
+---
+
+## 🔄 4. How It Works: Step-by-Step UI Workflows
+
+### 🛒 How Buying Works
+1. **Discover:** Browse categories or use the search bar to locate plugins.
+2. **Instant Checkout:** Complete payment with PayPal in a single click.
+3. **Instant Access:** Receive download links and license keys immediately in your personal dashboard.
+
+### 🚀 How Becoming a Creator & Uploading Works
+1. **Register & Apply:** Visit `/creators`, complete the onboarding form, and connect your PayPal account.
+2. **Package Software:** Create a `.zip` archive containing your plugin binary, documentation, and `manifest.json`.
+3. **Publish & Earn:** Set your price, upload 16:9 preview screenshots, and receive automated payouts.
+
+### 🛡️ How MinoShield Protection Works
+1. **Automated Scanning:** All binaries are decompiled and checked for malware and backdoors prior to release.
+2. **72-Hour Resolution Window:** If an issue arises, creators have 72 hours to deliver a working fix.
+3. **Arbitrated Refunds:** If unresolved after 72 hours, staff mediators process a prompt refund.
+
+---
+
+## 📑 5. Complete Directory of All 18 Platform Routes
+
+1. **`/` (Home Portal):** The primary front page featuring the dynamic hero search, trending products, staff highlights, and live telemetry metrics.
+2. **`/plugins` (Master Catalog):** The comprehensive marketplace search and filtering engine across all supported categories.
+3. **`/games/minecraft` (Minecraft Hub):** Dedicated portal for PaperMC, Purpur, Spigot, Folia, Velocity, and BungeeCord plugins.
+4. **`/games/fivem` (FiveM District):** Central hub for QBCore, ESX Legacy, standalone scripts, MLOs, and vehicle assets.
+5. **`/games/roblox` (Roblox Universe):** Marketplace for Luau game frameworks, inventory mechanics, UI kits, and DataStore modules.
+6. **`/games/discord` (Discord Zone):** Automation tools, button ticket bots, auto-moderation suites, and dashboard systems.
+7. **`/games/websites` (Web Portal):** Turnkey player webstores, ban lookup sites, and community management dashboards.
+8. **`/pricing` (Plans & Ultimate):** Clear comparison between the 85% Free Tier and the 90% Ultimate Studio Plan.
+9. **`/creators` (Creator Academy):** Developer application center, onboarding instructions, and packaging standards.
+10. **`/bounties` (Community Bounty Board):** Freelance commission exchange with secure escrow-backed fund holding.
+11. **`/ai-config` (AI Config Generator):** Interactive browser tool to synthesize production-ready server and plugin configuration files.
+12. **`/crash-analyzer` (Server Crash Analyzer):** Diagnostic utility that digests console stack traces and isolates root-cause errors.
+13. **`/custom-plugin` (Custom Commission Studio):** Direct inquiry portal for enterprise networks requiring bespoke software engineering.
+14. **`/minoshield` (Safe-Trade Center):** Trust, security, malware scanning, and 72-hour refund arbitration charter.
+15. **`/network` (Partner Network):** Showcase of verified affiliate game networks and server hosting providers.
+16. **`/discord` (Community Gateway):** Direct gateway to the official MinoForge Discord server.
+17. **`/terms` (Terms of Service):** Complete merchant and buyer covenants, license terms, and governance policies.
+18. **`/privacy` (Privacy Policy):** Transparent user data handling and security disclosures.
+
+---
+
+<p align="center">
+  <strong>MinoForge — Built by Developers, for Developers. Empowering Gaming Communities Worldwide.</strong><br/>
+  <em>© MinoForge-Official Company. All Rights Reserved.</em><br/>
+  <a href="https://minoforge.com">https://minoforge.com</a>
+</p>

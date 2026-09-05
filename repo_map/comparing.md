@@ -1,0 +1,147 @@
+# MinoForge — Plan & Tier Comparison: Free Tier vs. Ultimate Studio Plan
+
+<p align="center">
+  <a href="https://minoforge.com"><img src="https://minoforge.com/logo.png" alt="MinoForge Logo" width="240"/></a>
+</p>
+
+<p align="center">
+  <strong>The Definitive Feature Matrix, Economic ROI Analysis & Studio Scaling Guide.</strong><br/>
+  <em>Official Pricing Portal: <a href="https://minoforge.com/pricing">https://minoforge.com/pricing</a></em>
+</p>
+
+---
+
+## ⚡ 1. Visual Tier Comparison Card UI (Net Zoals op de Website)
+
+As displayed on our live web portal at [minoforge.com/pricing](https://minoforge.com/pricing), MinoForge offers two streamlined tiers engineered to support developers at every stage of their journey:
+
+```
+┌─────────────────────────────────────────┬─────────────────────────────────────────┐
+│           STANDARD FREE TIER            │          ULTIMATE STUDIO PLAN           │
+│      "For Indie Creators & Buyers"      │       "For High-Growth Studios"         │
+├─────────────────────────────────────────┼─────────────────────────────────────────┤
+│ Price: $0 / month (100% Free Forever)   │ Price: $19.99 / month (or $199/year)    │
+│                                         │                                         │
+│  ✓ 85% Creator Revenue Split            │  ★ 90% Creator Revenue Split (+5% More) │
+│  ✓ Unlimited Product Listings           │  ★ Guaranteed Quarterly Featured Slot   │
+│  ✓ Full Marketplace Catalog Access      │  ★ Priority Search Ranking Multiplier   │
+│  ✓ One-Click PayPal Checkout            │  ★ Golden Verified Creator Trust Badge  │
+│  ✓ Permanent Digital Asset Library      │  ★ Advanced Analytics & Churn Telemetry │
+│  ✓ MinoShield 72h Buyer Protection      │  ★ White-Label Domain (yourbrand.com)   │
+│  ✓ AI Config Generator (Standard)       │  ★ RESTful Automated Release API        │
+│  ✓ Server Crash Analyzer (Standard)     │  ★ Concurrent Batch Asset Uploader      │
+│  ✓ Community Bounty Board Access        │  ★ 24h SLA Support & Direct Engineer DM │
+│  ✓ Community Discord Support Desk       │  ★ Instant Priority AI Compute Queue    │
+└─────────────────────────────────────────┴─────────────────────────────────────────┘
+```
+
+---
+
+## 📊 2. Master Side-by-Side Comparison Matrix
+
+| Dimension / Capability | Standard Free Tier | Ultimate Studio Tier |
+| :--- | :---: | :---: |
+| **Monthly Subscription Fee** | **$0.00 / month** | **$19.99 / month** |
+| **Creator Revenue Split** | **85%** | **90%** |
+| **Listing Setup Fees** | $0 (None) | $0 (None) |
+| **Product Upload Capacity** | Unlimited Products | Unlimited Products |
+| **Buyer Marketplace Access** | Unrestricted Browsing | Unrestricted Browsing |
+| **Search Algorithmic Placement** | Standard Weighting | **Priority Algorithmic Boost** |
+| **Homepage Hero Spotlight** | Community Selection Only | **Guaranteed Quarterly Slot** |
+| **Creator Profile Badging** | Standard Creator Profile | **Golden Verified Creator Badge** |
+| **Custom Domain Integration** | Not Supported | **Full Custom Domain Mapping** |
+| **Branded Storefront Theme** | MinoForge Default | **White-Label Custom Colors/Logo** |
+| **RESTful Publishing API** | Not Included | **Full API Token Access** |
+| **Multi-Asset Batch Uploader** | Sequential Manual Upload | **Concurrent Drag-and-Drop** |
+| **Advanced Telemetry Analytics** | Revenue & Download Count | **Funnels, Geos, Churn, Sources** |
+| **Cryptographic Download Audits** | Basic Counter | **IP Hash & Token Log Audits** |
+| **Customer Support SLA** | Community Ticket Desk | **Guaranteed 24-Hour SLA** |
+| **Direct Staff Communication** | Discord Ticket Queue | **Dedicated Slack / Discord DM** |
+| **AI Config Generator Compute** | Standard Queue | **High-Priority Instant Compute** |
+| **Server Crash Analyzer Compute** | Standard Queue | **High-Priority Instant Compute** |
+| **Early Beta Feature Access** | Public Release Schedule | **2-Week Advance Access** |
+| **Escrow Dispute Mediation** | Standard Coverage | **Priority Case Review** |
+
+---
+
+## 💰 3. Financial ROI Model: Why Ultimate Pays for Itself
+
+At just **$19.99/month**, the Ultimate Plan is self-funding for any creator generating $400 or more in monthly gross sales purely through the 5% revenue split increase. All additional features (featured spots, custom domain, API, badge) represent pure profit acceleration.
+
+| Monthly Gross Sales | Free Tier Take-Home (85%) | Ultimate Take-Home (90%) | Net Gain After $19.99 Plan Fee | Annual Surplus Profit |
+| :--- | :--- | :--- | :--- | :--- |
+| **$500 / month** | $425.00 | $450.00 | **+$5.01 / mo** | **+$60.12 / yr** |
+| **$1,000 / month** | $850.00 | $900.00 | **+$30.01 / mo** | **+$360.12 / yr** |
+| **$2,500 / month** | $2,125.00 | $2,250.00 | **+$105.01 / mo** | **+$1,260.12 / yr** |
+| **$5,000 / month** | $4,250.00 | $4,500.00 | **+$230.01 / mo** | **+$2,760.12 / yr** |
+| **$10,000 / month** | $8,500.00 | $9,000.00 | **+$480.01 / mo** | **+$5,760.12 / yr** |
+| **$25,000 / month** | $21,250.00 | $22,500.00 | **+$1,230.01 / mo** | **+$14,760.12 / yr** |
+
+---
+
+## 🚀 4. Detailed Breakdown of Ultimate Features
+
+### 4.1 The 90% Revenue Split Advantage
+While industry competitors routinely retain 25% to 50% of creator earnings, MinoForge distributes **90% directly to Ultimate creators**. Payouts are reconciled via PayPal bi-weekly or monthly.
+
+### 4.2 Guaranteed Quarterly Homepage Carousel Spotlight
+Every quarter, Ultimate subscribers can nominate any plugin in their catalog to occupy the prime **Homepage Featured Carousel** for a full 7-day showcase cycle. This delivers thousands of high-intent impressions directly from server administrators browsing for new tools.
+
+### 4.3 Algorithmic Search Ranking Multiplier
+The MinoForge catalog engine factors creator status into search indexing. Verified Ultimate plugins receive a priority visibility weighting, ensuring your products appear higher in search results and category landing pages.
+
+### 4.4 Golden Verified Creator Trust Emblem
+Buyer trust directly dictates conversion rates. Ultimate creators display a distinctive **Golden Verified Badge** across their profile and every product listing, signaling professional commitment and quality assurance.
+
+### 4.5 Advanced Analytics & Telemetry Intelligence
+Access institutional-grade reporting:
+- **Conversion Funnels:** Track exact drop-off rates between product views, cart additions, and checkouts.
+- **Geographic Heatmaps:** Identify top purchasing countries to optimize localization.
+- **Referral Source Attribution:** Discover which Discord servers, YouTube videos, or Reddit threads generate your highest-paying customers.
+- **Subscription Health:** Monitor MRR, active subscribers, and monthly churn rates.
+
+### 4.6 White-Label Storefront & Custom Domain Mapping
+Transform your MinoForge presence into an independent branded portal:
+- Map your own custom domain (e.g., `store.yourstudio.com`) via CNAME records.
+- Upload your custom studio logo, favicon, and brand color palette.
+- Provide customers with a unified, professional brand experience.
+
+### 4.7 RESTful Publishing API & CI/CD Pipeline Integration
+Automate your release engineering. Push new version `.jar` files and changelogs directly from GitHub Actions, GitLab CI, or local build scripts via secure REST API tokens.
+
+### 4.8 Concurrent Batch Uploader for Large Studios
+Studios managing dozens of resources can upload updates across multiple listings simultaneously through an intuitive drag-and-drop batch uploader.
+
+### 4.9 Priority 24-Hour SLA Dedicated Support Desk
+Ultimate subscribers receive priority routing in the MinoForge support desk with a guaranteed 24-hour service level agreement, plus access to direct live chat with senior staff.
+
+### 4.10 Instant Compute Queue for AI Tools
+Bypass standard generation queues for the AI Config Generator and Server Crash Analyzer, receiving instant results even during peak platform usage hours.
+
+---
+
+## 🎯 5. Which Plan Is Right for You?
+
+- **Choose the Free Tier if:** You are releasing your first plugin, testing community interest, or generating under $400/month in sales.
+- **Choose the Ultimate Studio Plan if:** You operate an active software studio, generate over $400/month in sales, release frequent updates, or want to build an independent brand presence.
+
+---
+
+## ❓ 6. Frequently Asked Questions About Plans & Billing
+
+**Q: Can I upgrade to Ultimate at any time?**
+A: Yes. You can upgrade instantly from your Creator Dashboard. Your 90% revenue split takes effect immediately on all subsequent transactions.
+
+**Q: Can I cancel Ultimate whenever I want?**
+A: Yes. You can cancel your subscription at any time. You will retain Ultimate benefits through the end of your prepaid billing period, after which your account seamlessly transitions back to the 85% Free Tier without losing any published listings.
+
+**Q: Does upgrading to Ultimate affect my existing customer licenses?**
+A: Not at all. All existing customer purchases, version histories, and download links remain completely uninterrupted.
+
+---
+
+<p align="center">
+  <strong>MinoForge — Built by Developers, for Developers. Empowering Gaming Communities Worldwide.</strong><br/>
+  <em>© MinoForge-Official Company. All Rights Reserved.</em><br/>
+  <a href="https://minoforge.com/pricing">https://minoforge.com/pricing</a>
+</p>

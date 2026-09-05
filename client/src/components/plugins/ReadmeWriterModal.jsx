@@ -55,11 +55,11 @@ const ReadmeWriterModal = ({ isOpen, onClose, pluginTitle = 'My Plugin', game = 
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 p-0.5 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-600 p-0.5 flex items-center justify-center">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-white">AI README &amp; Documentation Writer</h3>
+              <h3 className="text-lg font-black text-white">README &amp; Documentation Generator</h3>
               <p className="text-xs text-slate-400">Generate professional markdown, installation tables, and permissions for your plugin.</p>
             </div>
           </div>
@@ -108,7 +108,7 @@ const ReadmeWriterModal = ({ isOpen, onClose, pluginTitle = 'My Plugin', game = 
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+          className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black text-xs rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
         >
           {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           <span>{loading ? 'Writing Formatted Markdown & Tables...' : 'Generate Full Documentation'}</span>

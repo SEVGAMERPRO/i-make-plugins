@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import UserAvatar from '../components/common/UserAvatar';
 
 const CROWN_STYLES = [
   { id: 'imperial_gold', name: 'Imperial Gold', icon: '👑', color: 'text-amber-400', desc: 'Classic golden royal crown with radiant aura' },
@@ -15,13 +16,17 @@ const CROWN_STYLES = [
 ];
 
 const YourUltimatePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loading } = useAuth();
   const { formatPrice } = useCurrency();
   const [crownStyle, setCrownStyle] = useState(() => localStorage.getItem('minoforge_crown_style') || 'imperial_gold');
   const [showCrown, setShowCrown] = useState(() => localStorage.getItem('minoforge_show_crown') !== 'false');
   const [rgbGlow, setRgbGlow] = useState(() => localStorage.getItem('minoforge_rgb_glow') === 'true');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [adCredits] = useState(() => parseFloat(localStorage.getItem('minoforge_ad_credits') || '5.00'));
+
+  if (!loading && !user) {
+    return <Navigate to="/upgrade" replace />;
+  }
 
   const handleSaveSettings = () => {
     localStorage.setItem('minoforge_crown_style', crownStyle);
@@ -47,12 +52,8 @@ const YourUltimatePage = () => {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               <div className="relative">
-                <div className="w-20 h-20 rounded-3xl bg-slate-950 border-2 border-amber-400 p-1 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-500/30">
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover rounded-2xl" />
-                  ) : (
-                    <span className="text-3xl font-black">{user?.username?.[0] || 'U'}</span>
-                  )}
+                <div className="w-20 h-20 rounded-3xl bg-slate-950 border-2 border-amber-400 p-1 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-500/30 overflow-hidden">
+                  <UserAvatar user={user} className="w-full h-full object-cover rounded-2xl" />
                 </div>
                 <div className="absolute -top-2 -left-2 p-1.5 bg-amber-500 text-slate-950 rounded-full shadow-lg">
                   <Crown className="w-4 h-4" />
@@ -120,11 +121,7 @@ const YourUltimatePage = () => {
               <div className="p-6 bg-slate-950 rounded-2xl border border-white/5 flex items-center justify-center gap-6">
                 <div className="relative">
                   <div className={`w-20 h-20 rounded-2xl bg-slate-900 border-2 ${rgbGlow ? 'border-amber-400 shadow-2xl shadow-amber-400/50 animate-pulse' : 'border-amber-400/60'} flex items-center justify-center overflow-hidden`}>
-                    {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-3xl font-black text-amber-400">{user?.username?.[0] || 'U'}</span>
-                    )}
+                    <UserAvatar user={user} className="w-full h-full object-cover" />
                   </div>
                   {showCrown && (
                     <div className="absolute -top-3 -left-3 text-2xl filter drop-shadow-[0_2px_8px_rgba(245,158,11,0.8)]">

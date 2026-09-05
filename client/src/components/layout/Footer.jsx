@@ -2,10 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, ShieldCheck, AlertTriangle } from 'lucide-react';
 import CurrencySwitcher from '../ui/CurrencySwitcher';
+import { TrustpilotBadge, TrustpilotFooterBar } from '../trustpilot/TrustpilotBadge';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 border-t border-white/10 text-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+    <>
+      {/* Official Live Trustpilot Stars Strip at the bottom */}
+      <TrustpilotFooterBar />
+
+      <footer className="bg-slate-950 border-t border-white/10 text-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-8">
           
@@ -22,10 +27,13 @@ const Footer = () => {
             <p className="text-xs text-slate-400 leading-relaxed">
               The premier marketplace for gaming plugins, server tools, scripts, and custom development.
             </p>
-            <Link to="/minoshield" className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/20 transition-all">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>MinoShield 100% Protected</span>
-            </Link>
+            <div className="flex flex-col sm:flex-row md:flex-col items-start gap-2.5">
+              <Link to="/minoshield" className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/20 transition-all">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>MinoShield 100% Protected</span>
+              </Link>
+              <TrustpilotBadge />
+            </div>
           </div>
 
           {/* Categories */}
@@ -59,6 +67,7 @@ const Footer = () => {
               <li><Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
               <li><Link to="/network" className="hover:text-blue-400 transition-colors">Network Portal</Link></li>
+              <li><a href="https://www.trustpilot.com/review/minoforge.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-300 text-emerald-400 font-semibold transition-colors flex items-center gap-1">★ Trustpilot Reviews</a></li>
               <li><span className="text-slate-400 font-medium">Official domain: <span className="text-cyan-400 font-bold">minoforge.com</span></span></li>
             </ul>
           </div>
@@ -114,6 +123,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+  </>
   );
 };
 

@@ -56,13 +56,13 @@ const CrashAnalyzerPage = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="space-y-2 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 rounded-full text-xs font-bold text-red-300 border border-red-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 rounded-xl text-xs font-bold text-red-300 border border-red-500/30">
               <Bug className="w-3.5 h-3.5" />
               <span>Pre-Submission Sanity Check #1</span>
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight">AI Plugin Error &amp; Crash Analyzer</h1>
+            <h1 className="text-3xl font-black text-white tracking-tight">Plugin Error &amp; Crash Diagnostic Analyzer</h1>
             <p className="text-xs text-slate-400 max-w-xl">
-              Test your plugin logs, Paper stack traces, or FiveM errors before submitting to admins for approval. Powered by Google Gemini Pro diagnostics.
+              Test your plugin logs, Paper stack traces, or FiveM errors before submitting to admins for approval. Automated crash and stack trace diagnostics.
             </p>
           </div>
 

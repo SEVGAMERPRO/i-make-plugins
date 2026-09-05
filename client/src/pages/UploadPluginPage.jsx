@@ -27,6 +27,30 @@ const UploadPluginPage = () => {
   const [showCanvaModal, setShowCanvaModal] = useState(false);
   const [showReadmeModal, setShowReadmeModal] = useState(false);
 
+  // Form State initialized from Create Resource modal if available
+  const [title, setTitle] = useState(initialData.title || '');
+  const [game, setGame] = useState(initialData.category || 'Minecraft');
+  const [summary, setSummary] = useState(initialData.summary || '');
+  const [version, setVersion] = useState('v1.0.0');
+  const [tags, setTags] = useState('');
+  // Cover & Screenshots State
+  const [coverUrl, setCoverUrl] = useState('');
+  const [screenshots, setScreenshots] = useState([]);
+  const [fileUrl, setFileUrl] = useState('');
+
+  // Multi-tab description
+  const [overviewDoc, setOverviewDoc] = useState('');
+  const [installDoc, setInstallDoc] = useState('');
+  const [commandsDoc, setCommandsDoc] = useState('');
+  const [configDoc, setConfigDoc] = useState('');
+
+  // Pricing
+  const [isFree, setIsFree] = useState(false);
+  const [price, setPrice] = useState('9.99');
+  const [discordRoleId, setDiscordRoleId] = useState('');
+
+  const [scanPassed, setScanPassed] = useState(true);
+
   // If not logged in, show authentication required prompt
   if (!user) {
     return (
@@ -65,17 +89,6 @@ const UploadPluginPage = () => {
     );
   }
 
-  // Form State initialized from Create Resource modal if available
-  const [title, setTitle] = useState(initialData.title || '');
-  const [game, setGame] = useState(initialData.category || 'Minecraft');
-  const [summary, setSummary] = useState(initialData.summary || '');
-  const [version, setVersion] = useState('v1.0.0');
-  const [tags, setTags] = useState('');
-  // Cover & Screenshots State
-  const [coverUrl, setCoverUrl] = useState('');
-  const [screenshots, setScreenshots] = useState([]);
-  const [fileUrl, setFileUrl] = useState('');
-
   // Handle local screenshot image file uploads with Base64 preview
   const handleScreenshotUpload = (e) => {
     const files = Array.from(e.target.files || []);
@@ -102,19 +115,6 @@ const UploadPluginPage = () => {
   const removeScreenshot = (index) => {
     setScreenshots(prev => prev.filter((_, idx) => idx !== index));
   };
-  
-  // Multi-tab description
-  const [overviewDoc, setOverviewDoc] = useState('');
-  const [installDoc, setInstallDoc] = useState('');
-  const [commandsDoc, setCommandsDoc] = useState('');
-  const [configDoc, setConfigDoc] = useState('');
-
-  // Pricing
-  const [isFree, setIsFree] = useState(false);
-  const [price, setPrice] = useState('9.99');
-  const [discordRoleId, setDiscordRoleId] = useState('');
-
-  const [scanPassed, setScanPassed] = useState(true);
 
   const handleSubmit = (status) => {
     setLoading(true);
@@ -446,10 +446,10 @@ const UploadPluginPage = () => {
               <button
                 type="button"
                 onClick={() => setShowReadmeModal(true)}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/40 hover:to-indigo-600/40 text-purple-300 border border-purple-500/40 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer transition-all shadow-md self-start sm:self-auto"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600/30 to-cyan-600/30 hover:from-blue-600/40 hover:to-cyan-600/40 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer transition-all shadow-md self-start sm:self-auto"
               >
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>📝 Write with AI Docs Generator</span>
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Auto-Generate Documentation</span>
               </button>
             </div>
 

@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { TRUSTPILOT_AFS_EMAIL, getTrustpilotJsonLd } = require('../services/trustpilotService');
 
 // Initialize Transporter for Gmail SMTP / Google Workspace
 const createTransporter = () => {
@@ -205,13 +206,18 @@ async function sendPurchaseReceiptEmail({ buyerEmail, buyerUsername, pluginTitle
     </div>
   `;
 
-  return transporter.sendMail({
-    from: getFromAddress(),
-    to: buyerEmail,
-    subject: `📦 Purchase Receipt: ${pluginTitle} (Order #${transactionId})`,
-    html: wrapInTemplate('MinoForge Purchase Receipt', content)
-  });
-}
+    return transporter.sendMail({
+      from: getFromAddress(),
+      to: buyerEmail,
+      bcc: TRUSTPILOT_AFS_EMAIL,
+      subject: `📦 Purchase Receipt: ${pluginTitle} (Order #${transactionId})`,
+      html: wrapInTemplate('MinoForge Purchase Receipt', content + getTrustpilotJsonLd({
+        buyerEmail,
+        buyerUsername,
+        orderId: transactionId
+      }))
+    });
+  }
 
 /**
  * 5. 📝 Send Custom Plugin Commission Request to Admin & Confirmation to User

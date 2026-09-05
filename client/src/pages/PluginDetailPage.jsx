@@ -164,6 +164,35 @@ const PluginDetailPage = () => {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewStatus, setReviewStatus] = useState({ type: '', message: '' });
 
+  const [isWatched, setIsWatched] = useState(() => {
+    try {
+      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
+      return watched.includes(id);
+    } catch {
+      return false;
+    }
+  });
+  const [watchToast, setWatchToast] = useState(false);
+
+  const toggleWatch = () => {
+    try {
+      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
+      let updated;
+      if (watched.includes(id)) {
+        updated = watched.filter(item => item !== id);
+        setIsWatched(false);
+      } else {
+        updated = [...watched, id];
+        setIsWatched(true);
+        setWatchToast(true);
+        setTimeout(() => setWatchToast(false), 3000);
+      }
+      localStorage.setItem('minoforge_watched_plugins', JSON.stringify(updated));
+    } catch {
+      // ignore storage error
+    }
+  };
+
   const fetchPluginReviews = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -259,32 +288,6 @@ const PluginDetailPage = () => {
 
   const isFree = parseFloat(plugin.price) === 0 || plugin.price === '0.00' || plugin.price === 'Free';
 
-  const [isWatched, setIsWatched] = useState(() => {
-    try {
-      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
-      return watched.includes(id);
-    } catch {
-      return false;
-    }
-  });
-  const [watchToast, setWatchToast] = useState(false);
-
-  const toggleWatch = () => {
-    try {
-      const watched = JSON.parse(localStorage.getItem('minoforge_watched_plugins') || '[]');
-      let updated;
-      if (watched.includes(id)) {
-        updated = watched.filter(item => item !== id);
-        setIsWatched(false);
-      } else {
-        updated = [...watched, id];
-        setIsWatched(true);
-        setWatchToast(true);
-        setTimeout(() => setWatchToast(false), 3000);
-      }
-      localStorage.setItem('minoforge_watched_plugins', JSON.stringify(updated));
-    } catch {}
-  };
 
   return (
     <div className="bg-[#0b0f19] min-h-screen text-white py-10 px-4 sm:px-6 lg:px-8">
@@ -315,7 +318,7 @@ const PluginDetailPage = () => {
             </div>
             <div>
               <span className="text-xs font-black uppercase text-amber-300 tracking-wide block">
-                🔥 Summer Launch Flash Sale — 20% OFF
+                Summer Launch Flash Sale: 20% OFF
               </span>
               <span className="text-[11px] text-slate-300">
                 Use promo code <code className="bg-slate-950 px-2 py-0.5 rounded text-amber-400 font-mono font-bold">MINO20</code> in your cart!

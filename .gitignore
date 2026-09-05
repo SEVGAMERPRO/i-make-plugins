@@ -1,34 +1,234 @@
-# Dependencies
+# ==============================================================================
+#  MinoForge — Enterprise-Grade Repository Security & Artifact Filter
+#  Author: MinoForge-Official Company
+#  Target: Zero secret leakage, zero credential contamination, zero clutter
+# ==============================================================================
+
+# ==============================================================================
+# 1. ENVIRONMENT VARIABLES & CREDENTIAL LEAK PREVENTION (CRITICAL)
+# ==============================================================================
+# Wildcard and specific block for all environment definition files
+.env
+.env*
+*.env
+*.env.local
+*.env.development
+*.env.test
+*.env.staging
+*.env.production
+*.env.deploy
+*.env.backup
+*.env.bak
+*.env.example.local
+.envrc
+.env.vault
+
+# Service tokens, OAuth, private credentials
+*credentials*.json
+*service-account*.json
+firebase-adminsdk*.json
+gcloud-key*.json
+client_secrets*.json
+id_rsa*
+id_ecdsa*
+id_ed25519*
+*.pem
+*.key
+*.pkcs12
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+*.p8
+*.pub.key
+*.secret
+.secret
+secrets/
+.secrets/
+*.sops.yaml
+*.sops.yml
+
+# Package manager authentication and tokens
+.npmrc
+.yarnrc
+.yarnrc.yml
+auth.json
+.dockercfg
+.docker/config.json
+
+# ==============================================================================
+# 2. RUNTIME DEPENDENCIES & PACKAGE STORAGE
+# ==============================================================================
 node_modules/
+jspm_packages/
+web_modules/
 .pnp
 .pnp.js
+.pnp.cjs
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
 
-# Build output
+# ==============================================================================
+# 3. BUILD ARTIFACTS, COMPILED CODE & DISTRIBUTIONS
+# ==============================================================================
+dist/
+build/
+out/
+bin/
+obj/
+release/
 server/dist/
+# client/dist/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.output/
 
-# Environment
-.env
-.env.local
-.env.production
-.env.*.local
-server/.env
-client/.env
+# ==============================================================================
+# 4. TESTING, COVERAGE & CODE QUALITY REPORTS
+# ==============================================================================
+coverage/
+.nyc_output/
+.lcov
+*.lcov
+reports/
+test-results/
+.eslintcache
+.stylelintcache
+.prettiercache
+.tsbuildinfo
 
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
+# ==============================================================================
+# 5. DIAGNOSTICS, LOGS & PROCESS CRASH TRACES
+# ==============================================================================
+logs/
+log/
 *.log
+*.log.*
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+core.*
+hs_err_pid*
+*.stackdump
 
-# Prisma
-server/prisma/migrations/
+# ==============================================================================
+# 6. DATABASE STORAGE, DUMPS & GENERATED MIGRATION LOCKS
+# ==============================================================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sql.gz
+*.sql.tar.gz
+*.dump
+server/prisma/migrations/**/migration.sql
+prisma/migration_lock.toml
 
-# Temp
+# ==============================================================================
+# 7. TEMPORARY FILES, CACHE & SYSTEM SCRATCHPADS
+# ==============================================================================
 tmp/
 temp/
+.tmp/
+.temp/
+.cache/
+.parcel-cache/
+.turbo/
+.rollup.cache/
+.swc/
+*.swp
+*.swo
+*~
+*.bak
+*.old
+
+# ==============================================================================
+# 8. OPERATING SYSTEM ARTIFACTS & METADATA
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ==============================================================================
+# 9. IDE, EDITOR & LOCAL WORKSPACE CONFIGURATIONS
+# ==============================================================================
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+.c9/
+
+# ==============================================================================
+# 10. LARGE BINARIES & COMPRESSED ASSETS (PREVENT REPO BLOAT)
+# ==============================================================================
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.iso
+*.dmg
+*.exe
+*.msi
+*.jar
+*.war
+
+# ==============================================================================
+# 11. PROCESS IDENTIFIERS & LOCKS
+# ==============================================================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ==============================================================================
+# END OF .gitignore — MinoForge-Official Company
+# ==============================================================================

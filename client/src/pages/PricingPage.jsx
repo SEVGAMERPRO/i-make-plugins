@@ -36,18 +36,18 @@ const TIERS = [
     buttonVariant: 'gradient',
     highlighted: true,
     features: [
-      '🔥 Only 5% Marketplace Platform Fee (Keep 95%)',
-      '📢 €5.00 Free Monthly Sponsored Showcase Credits',
-      '⚡ Express Staff Approvals & Fast-Track Queue (< 2 hours)',
-      '🚀 Algorithmic Discovery Boost & Search Ranking Priority',
-      '📦 500MB Expanded Package Upload Capacity (vs 200MB)',
-      '🖼️ 15 HD Gallery Slots & 10 Expansion Addons',
-      '🤖 Unlimited Gemini AI Config & Code Optimizer',
-      '🛡️ Priority MinoShield™ Deep Bytecode Malware Inspection',
-      '👑 Glowing Golden Crown Icon & Animated Profile Banner',
-      '🎨 Custom RGB Username Glow & Site Theme Accents',
-      '🔑 Automated Discord Customer Role Sync & DRM Licensing',
-      '💬 Dedicated 1-on-1 Staff Concierge Developer Support',
+      'Only 5% Marketplace Platform Fee (Keep 95%)',
+      '€5.00 Free Monthly Sponsored Showcase Credits',
+      'Express Staff Approvals & Fast-Track Queue (< 2 hours)',
+      'Algorithmic Discovery Boost & Search Ranking Priority',
+      '500MB Expanded Package Upload Capacity (vs 200MB)',
+      '15 HD Gallery Slots & 10 Expansion Addons',
+      'Unlimited Gemini AI Config & Code Optimizer',
+      'Priority MinoShield™ Deep Bytecode Malware Inspection',
+      'Glowing Golden Crown Icon & Animated Profile Banner',
+      'Custom RGB Username Glow & Site Theme Accents',
+      'Automated Discord Customer Role Sync & DRM Licensing',
+      'Dedicated 1-on-1 Staff Concierge Developer Support',
     ]
   }
 ];
@@ -57,7 +57,7 @@ const SECTIONS = [
     title: 'Marketplace & Sales Distribution',
     rows: [
       { name: 'Platform Processing Fee', free: '10%', ultimate: 'Only 5% (Keep 95%)' },
-      { name: 'Monthly Sponsored Showcase Credits', free: '—', ultimate: '€5.00 / mo included' },
+      { name: 'Monthly Sponsored Showcase Credits', free: 'None', ultimate: '€5.00 / mo included' },
       { name: 'Resource Binary Upload Capacity', free: '200 MB', ultimate: '500 MB' },
       { name: 'Media Gallery Showcase Slots', free: '5 slots', ultimate: '15 HD slots' },
       { name: 'Add-on Expansion Packages per Resource', free: '5 packages', ultimate: '10 packages' },
@@ -128,7 +128,7 @@ export default function PricingPage() {
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 to-blue-500/20 rounded-full text-xs font-bold text-amber-300 border border-amber-500/30 shadow-lg shadow-amber-500/10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 to-blue-500/20 rounded-xl text-xs font-bold text-amber-300 border border-amber-500/30 shadow-lg shadow-amber-500/10">
             <Crown className="w-4 h-4 text-amber-400" />
             <span>MinoForge Creator Subscriptions</span>
           </div>
@@ -158,7 +158,7 @@ export default function PricingPage() {
             </button>
             <span className={`flex items-center gap-1.5 ${annualBilling ? 'text-white' : 'text-slate-500'}`}>
               <span>Yearly</span>
-              <span className="text-[10px] uppercase font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] uppercase font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">
                 Save 15%
               </span>
             </span>
@@ -182,7 +182,7 @@ export default function PricingPage() {
               >
                 {/* Popular Ribbon */}
                 {tier.highlighted && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black uppercase tracking-wider rounded-full shadow-lg flex items-center gap-1">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1">
                     <Rocket className="w-3.5 h-3.5" />
                     <span>{tier.badge}</span>
                   </div>

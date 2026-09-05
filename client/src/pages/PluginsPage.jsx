@@ -243,7 +243,7 @@ const PluginsPage = () => {
                       to="/become-creator"
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all"
                     >
-                      <Sparkles className="w-4 h-4" /> Become a Creator — Publish a Resource
+                      <Sparkles className="w-4 h-4" /> Become a Creator: Publish a Resource
                     </Link>
                   </div>
                 </div>

@@ -91,4 +91,21 @@ router.post('/plugin/:pluginId', auth, (req, res) => {
   }
 });
 
+// @route   GET /api/reviews/trustpilot
+// @desc    Get Trustpilot integration details and status
+router.get('/trustpilot', (req, res) => {
+  const config = store.getConfig()?.trustpilot || {};
+  res.json({
+    success: true,
+    enabled: config.enabled !== false,
+    domain: 'minoforge.com',
+    afsEmail: config.afsEmail || 'minoforge.com+5420f42a0b@invite.trustpilot.com',
+    reviewUrl: config.reviewUrl || 'https://www.trustpilot.com/review/minoforge.com',
+    evaluateUrl: config.evaluateUrl || 'https://www.trustpilot.com/evaluate/minoforge.com',
+    businessUnitId: config.businessUnitId || '',
+    templateId: config.templateId || '5419b6a8b0d04a076446a9ad',
+    status: 'ACTIVE_AUTOMATIC_INVITATIONS'
+  });
+});
+
 module.exports = router;

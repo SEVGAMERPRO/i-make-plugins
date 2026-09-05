@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, Package, Search, MessageSquare, Settings, User, X, Briefcase, Sparkles, Plus, ShieldCheck, LogIn, UserPlus, LogOut, DollarSign } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CurrencySwitcher from '../ui/CurrencySwitcher';
+import UserAvatar from '../common/UserAvatar';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
@@ -13,8 +14,9 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const isUltimate = (() => {
+    if (!user) return false;
     try {
-      if (user?.isUltimate || user?.role === 'CREATOR') return true;
+      if (user.isUltimate || user.role === 'CREATOR') return true;
       if (typeof window !== 'undefined' && window.localStorage) {
         if (localStorage.getItem('minoforge_ultimate_active') === 'true') return true;
         const raw = localStorage.getItem('minoforge_user');
@@ -90,11 +92,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   <div className={`w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center font-bold text-blue-400 overflow-hidden text-xs border ${
                     isUltimate ? 'border-amber-400 shadow-md shadow-amber-500/30' : 'border-white/10'
                   }`}>
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{user.username?.charAt(0).toUpperCase()}</span>
-                    )}
+                    <UserAvatar user={user} className="w-full h-full object-cover" />
                   </div>
 
                   {isUltimate && (
@@ -105,7 +103,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </div>
                 <div className="overflow-hidden">
                   <p className="font-bold text-white text-xs truncate flex items-center gap-1">
-                    <span>{user.username}</span>
+                    <span>{user.username ? user.username.replace(/_/g, ' ') : 'Member'}</span>
                     {isUltimate && <span className="text-amber-400 text-xs">👑</span>}
                   </p>
                   <span className="text-[10px] text-amber-400 font-semibold block truncate">
@@ -129,7 +127,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
           {/* Navigation Links */}
           <nav className="space-y-1.5">
-            {isUltimate ? (
+            {user && isUltimate ? (
               <Link to="/ultimate" onClick={onClose} className="flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/40 text-amber-300 transition-all mb-2 shadow-lg shadow-amber-500/10 active:scale-95">
                 <span>👑</span> Your Ultimate Hub
               </Link>

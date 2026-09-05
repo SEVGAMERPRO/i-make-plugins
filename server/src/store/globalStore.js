@@ -23,6 +23,14 @@ let systemConfig = {
     enabled: true,
     suspensionGracePeriodDays: 20,
     action: 'WARN_AND_COUNTDOWN'
+  },
+  trustpilot: {
+    enabled: true,
+    afsEmail: 'minoforge.com+5420f42a0b@invite.trustpilot.com',
+    reviewUrl: 'https://www.trustpilot.com/review/minoforge.com',
+    evaluateUrl: 'https://www.trustpilot.com/evaluate/minoforge.com',
+    businessUnitId: '',
+    templateId: '5419b6a8b0d04a076446a9ad'
   }
 };
 

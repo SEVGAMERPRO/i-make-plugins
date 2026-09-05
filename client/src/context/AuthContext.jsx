@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Session expired', error);
             localStorage.removeItem('token');
             localStorage.removeItem('minoforge_user');
+            localStorage.removeItem('minoforge_ultimate_active');
             setUser(null);
           }
         }
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('token');
       localStorage.removeItem('minoforge_user');
+      localStorage.removeItem('minoforge_ultimate_active');
     };
     window.addEventListener('unauthorized', handleUnauthorized);
     return () => window.removeEventListener('unauthorized', handleUnauthorized);
@@ -111,6 +113,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('minoforge_user');
+    localStorage.removeItem('minoforge_ultimate_active');
     setUser(null);
   };
 

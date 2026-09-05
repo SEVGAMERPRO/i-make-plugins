@@ -20,7 +20,7 @@ const NotFoundPage = () => {
         
         {/* Glowing 404 Visual Icon */}
         <div className="relative inline-block">
-          <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/30 via-purple-600/20 to-red-600/30 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/30 via-indigo-600/20 to-red-600/30 rounded-2xl blur-2xl pointer-events-none" />
           <div className="relative w-28 h-28 mx-auto rounded-3xl bg-slate-900/90 border-2 border-red-500/30 flex items-center justify-center text-red-400 shadow-2xl shadow-red-500/10">
             <AlertOctagon className="w-14 h-14 animate-pulse text-red-400" />
           </div>
@@ -28,7 +28,7 @@ const NotFoundPage = () => {
 
         {/* Status code and title */}
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-xs font-bold border border-red-500/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-400 rounded-xl text-xs font-bold border border-red-500/20">
             <span>HTTP 404 ERROR</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">

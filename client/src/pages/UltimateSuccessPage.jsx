@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
+import UserAvatar from '../components/common/UserAvatar';
 
 const UltimateSuccessPage = () => {
   const { user } = useAuth();
@@ -367,11 +368,7 @@ const UltimateSuccessPage = () => {
 
               <div className="py-6 text-center space-y-3">
                 <div className="w-20 h-20 rounded-full bg-slate-900 border-2 border-amber-400/60 mx-auto flex items-center justify-center overflow-hidden shadow-xl shadow-amber-500/20 relative">
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-2xl font-black text-amber-400 uppercase">{user?.username?.[0] || 'U'}</span>
-                  )}
+                  <UserAvatar user={user} className="w-full h-full object-cover" />
                   <div className="absolute bottom-0 right-0 p-1 bg-amber-500 text-slate-950 rounded-full">
                     <Crown className="w-3 h-3" />
                   </div>

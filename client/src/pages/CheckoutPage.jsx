@@ -11,6 +11,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PayPalSmartButtons from '../components/cart/PayPalSmartButtons';
 import GoogleRecaptcha from '../components/common/GoogleRecaptcha';
+import { TrustpilotCheckoutSeal } from '../components/trustpilot/TrustpilotBadge';
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -270,7 +271,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-xl border border-emerald-500/30">
             <Lock className="w-3.5 h-3.5" />
             <span>256-Bit SSL Encrypted Enterprise Checkout</span>
           </div>
@@ -290,7 +291,7 @@ export default function CheckoutPage() {
 
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
                 <div className="space-y-1.5">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-wider rounded-full border border-amber-500/30">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-wider rounded-xl border border-amber-500/30">
                     <Crown className="w-3.5 h-3.5 text-amber-400" />
                     <span>Ultimate Creator Tier</span>
                   </div>
@@ -988,6 +989,11 @@ export default function CheckoutPage() {
 
                 </div>
               )}
+
+              {/* Trustpilot Verified Purchase Guarantee */}
+              <div className="pt-2">
+                <TrustpilotCheckoutSeal />
+              </div>
 
               <div className="pt-2 text-center text-[11px] text-slate-500 space-y-1">
                 <p className="flex items-center justify-center gap-1.5">
