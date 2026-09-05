@@ -30,7 +30,9 @@ let systemConfig = {
     reviewUrl: 'https://www.trustpilot.com/review/minoforge.com',
     evaluateUrl: 'https://www.trustpilot.com/evaluate/minoforge.com',
     businessUnitId: '',
-    templateId: '5419b6a8b0d04a076446a9ad'
+    templateId: '5419b6a8b0d04a076446a9ad',
+    score: 0,
+    reviewsCount: 0
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink, CheckCircle, ShieldCheck, Star, Plus, MessageSquare, AlertCircle } from 'lucide-react';
-import { TrustpilotStar, TrustpilotFiveStars } from './TrustpilotBadge';
+import { TrustpilotStar, TrustpilotFiveStars, useTrustpilotStats } from './TrustpilotBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -13,7 +13,7 @@ export const TrustpilotReviewsSection = () => {
   const navigate = useNavigate();
   const trustBoxRef = useRef(null);
 
-  const [tpConfig, setTpConfig] = useState(null);
+  const tpStats = useTrustpilotStats();
   const [realReviews, setRealReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -43,26 +43,16 @@ export const TrustpilotReviewsSection = () => {
     }
   };
 
-  const fetchConfig = async () => {
-    try {
-      const res = await axios.get('/api/reviews/trustpilot');
-      if (res.data?.success) {
-        setTpConfig(res.data);
-      }
-    } catch {}
-  };
-
   useEffect(() => {
     fetchReviews();
-    fetchConfig();
   }, []);
 
   // Initialize official Trustpilot widget if Business Unit ID is present
   useEffect(() => {
-    if (tpConfig?.businessUnitId && trustBoxRef.current && window.Trustpilot) {
+    if (tpStats?.businessUnitId && trustBoxRef.current && window.Trustpilot) {
       window.Trustpilot.loadFromElement(trustBoxRef.current, true);
     }
-  }, [tpConfig]);
+  }, [tpStats]);
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -105,8 +95,12 @@ export const TrustpilotReviewsSection = () => {
     }
   };
 
-  const reviewUrl = tpConfig?.reviewUrl || TRUSTPILOT_REVIEW_URL;
-  const evaluateUrl = tpConfig?.evaluateUrl || TRUSTPILOT_EVALUATE_URL;
+  const reviewUrl = tpStats?.reviewUrl || TRUSTPILOT_REVIEW_URL;
+  const evaluateUrl = tpStats?.evaluateUrl || TRUSTPILOT_EVALUATE_URL;
+
+  // Real review counts: either from Trustpilot stats or platform verified reviews
+  const displayReviewCount = tpStats.reviewsCount > 0 ? tpStats.reviewsCount : totalReviews;
+  const displayScore = tpStats.reviewsCount > 0 ? tpStats.score : (totalReviews > 0 ? avgRating : 0);
 
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-[#0b0f19] via-slate-950 to-[#0b0f19] border-t border-white/5 relative overflow-hidden">
@@ -137,20 +131,20 @@ export const TrustpilotReviewsSection = () => {
           {/* Rating Snapshot & CTA Buttons */}
           <div className="flex flex-wrap items-center gap-3 bg-slate-900/90 border border-[#00B67A]/25 p-4 rounded-2xl shadow-xl shadow-[#00B67A]/5">
             <div className="text-center sm:text-left pr-3 border-r border-white/10">
-              {totalReviews > 0 ? (
+              {displayReviewCount > 0 ? (
                 <>
                   <div className="text-2xl font-black text-white font-mono flex items-center gap-2">
-                    <span>{avgRating.toFixed(1)}</span>
+                    <span>{displayScore.toFixed(1)}</span>
                     <span className="text-xs text-slate-400 font-normal">/ 5.0</span>
                     <span className="text-[10px] font-black text-slate-950 bg-[#00B67A] px-1.5 py-0.5 rounded">
                       VERIFIED
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-1">
-                    <TrustpilotFiveStars size="sm" />
+                    <TrustpilotFiveStars rating={displayScore} size="sm" />
                   </div>
                   <span className="text-[11px] text-slate-400 block mt-1">
-                    {totalReviews} {totalReviews === 1 ? 'real review' : 'real reviews'}
+                    {displayReviewCount} {displayReviewCount === 1 ? 'real review' : 'real reviews'}
                   </span>
                 </>
               ) : (
@@ -159,8 +153,11 @@ export const TrustpilotReviewsSection = () => {
                     <TrustpilotStar className="w-4 h-4 text-[#00B67A]" />
                     <span>Trustpilot Active</span>
                   </div>
+                  <div className="mt-1 flex items-center gap-1">
+                    <TrustpilotFiveStars rating={0} size="sm" />
+                  </div>
                   <span className="text-[11px] text-slate-400 block mt-0.5">
-                    Be the first to review us
+                    0 reviews • Be the first to review us
                   </span>
                 </>
               )}
@@ -197,14 +194,14 @@ export const TrustpilotReviewsSection = () => {
         </div>
 
         {/* Official TrustBox Widget (rendered if businessUnitId is configured) */}
-        {tpConfig?.businessUnitId && (
+        {tpStats?.businessUnitId && (
           <div className="mb-8 p-4 rounded-2xl bg-slate-900/60 border border-[#00B67A]/20 overflow-hidden">
             <div
               ref={trustBoxRef}
               className="trustpilot-widget"
               data-locale="en-US"
-              data-template-id={tpConfig.templateId || "5419b6a8b0d04a076446a9ad"}
-              data-businessunit-id={tpConfig.businessUnitId}
+              data-template-id={tpStats.templateId || "5419b6a8b0d04a076446a9ad"}
+              data-businessunit-id={tpStats.businessUnitId}
               data-style-height="52px"
               data-style-width="100%"
               data-theme="dark"

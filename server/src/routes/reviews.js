@@ -92,9 +92,12 @@ router.post('/plugin/:pluginId', auth, (req, res) => {
 });
 
 // @route   GET /api/reviews/trustpilot
-// @desc    Get Trustpilot integration details and status
+// @desc    Get live Trustpilot integration details and stats
 router.get('/trustpilot', (req, res) => {
   const config = store.getConfig()?.trustpilot || {};
+  const score = Number(config.score || 0);
+  const reviewsCount = Number(config.reviewsCount || 0);
+
   res.json({
     success: true,
     enabled: config.enabled !== false,
@@ -102,10 +105,38 @@ router.get('/trustpilot', (req, res) => {
     afsEmail: config.afsEmail || 'minoforge.com+5420f42a0b@invite.trustpilot.com',
     reviewUrl: config.reviewUrl || 'https://www.trustpilot.com/review/minoforge.com',
     evaluateUrl: config.evaluateUrl || 'https://www.trustpilot.com/evaluate/minoforge.com',
-    businessUnitId: config.businessUnitId || '',
+    businessUnitId: config.businessUnitId || process.env.TRUSTPILOT_BUSINESS_UNIT_ID || '',
     templateId: config.templateId || '5419b6a8b0d04a076446a9ad',
-    status: 'ACTIVE_AUTOMATIC_INVITATIONS'
+    score: score,
+    reviewsCount: reviewsCount,
+    stars: Math.round(score),
+    status: reviewsCount > 0 ? 'ACTIVE_WITH_REVIEWS' : 'AWAITING_FIRST_REVIEW'
   });
+});
+
+// @route   POST /api/reviews/trustpilot
+// @desc    Update live Trustpilot configuration & synced stats
+router.post('/trustpilot', auth, (req, res) => {
+  try {
+    if (req.user?.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Admin permissions required' });
+    }
+    const { businessUnitId, templateId, score, reviewsCount, enabled } = req.body;
+    const current = store.getConfig()?.trustpilot || {};
+    const updated = store.updateConfig({
+      trustpilot: {
+        ...current,
+        ...(businessUnitId !== undefined && { businessUnitId: businessUnitId.trim() }),
+        ...(templateId !== undefined && { templateId: templateId.trim() }),
+        ...(score !== undefined && { score: Math.max(0, Math.min(5, parseFloat(score) || 0)) }),
+        ...(reviewsCount !== undefined && { reviewsCount: Math.max(0, parseInt(reviewsCount, 10) || 0) }),
+        ...(enabled !== undefined && { enabled: Boolean(enabled) })
+      }
+    });
+    res.json({ success: true, trustpilot: updated.trustpilot });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Failed to update Trustpilot settings' });
+  }
 });
 
 module.exports = router;
